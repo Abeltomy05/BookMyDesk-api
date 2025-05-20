@@ -1,14 +1,19 @@
 import 'reflect-metadata';
 import express from 'express';
+import passport from "passport";
 import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from "cookie-parser";
 import { connectDB } from './lib/db';
 import {AuthRoutes} from './frameworks/routes/auth.route'; 
+import './frameworks/passport/google.strategy'
+
 
 dotenv.config();
 
 const app= express();
+
+app.use(passport.initialize());
 
 app.use(cookieParser());
 app.use(express.json());

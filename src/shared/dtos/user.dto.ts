@@ -27,6 +27,14 @@ export interface VendorDTO{
     role: "vendor";
 }
 
+export interface GoogleAuthDTO {
+  email: string;
+  username: string;
+  avatar?: string;
+  googleId: string;
+  role: 'client' | 'vendor';
+}
+
 export type UserDTO = AdminDTO | ClientDTO | VendorDTO;
 
 export interface LoginUserDTO {

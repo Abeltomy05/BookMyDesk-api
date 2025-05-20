@@ -1,6 +1,8 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
+import { ParsedQs } from "qs";
 import { BaseRoute } from "./base.route";
 import { authController } from "../di/resolver";
+import passport from "passport";
 
 
 export class AuthRoutes extends BaseRoute{
@@ -21,6 +23,49 @@ export class AuthRoutes extends BaseRoute{
          this.router.post("/login", (req: Request, res: Response) => {
             authController.login(req, res);
          });
+
+         this.router.get("/google",(req,res,next) => {
+             const roleParam = req.query.role;
+             let role: string | undefined;
+
+             if (typeof roleParam === 'string') {
+                  role = roleParam;
+               } else if (Array.isArray(roleParam)) {
+                   role = roleParam.find(item => typeof item === "string") as string | undefined;
+               } else if (typeof roleParam === "object" && roleParam !== null) {
+                   role = undefined;
+               }else {
+                  role = undefined;
+               }
+
+             passport.authenticate('google', { 
+               scope: ['profile', 'email'],
+               state: role, 
+            })(req, res, next);
+         });
+
+         this.router.get('/google/callback', (req: Request, res: Response, next: NextFunction) => {
+            passport.authenticate('google', (err: any, user: any, info: any) => {
+               if (err) return next(err);
+
+               if (!user) return res.redirect('/login');
+
+               const roleFromState = req.query.state as string;
+
+               if (user && roleFromState) {
+                  (user as any).role = roleFromState;
+               }
+
+               req.user = user;
+               next();
+            })(req, res, next);
+            }, (req, res) => {
+            authController.authWithGoogle(req, res);
+            });
+
+         this.router.get('/me', (req: Request, res: Response) => {
+            authController.getMe(req, res);
+         })   
 
         //*========================================================
         //*               🗡️ OTP ENDPOINTS 🗡️

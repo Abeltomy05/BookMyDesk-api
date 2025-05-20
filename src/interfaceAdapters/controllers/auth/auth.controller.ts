@@ -10,11 +10,13 @@ import { resetPasswordValidationSchema } from "./validations/reset-password.vali
 import { IVerifyOtpUseCase } from "../../../entities/usecaseInterfaces/auth/verify-otp-usecase.interface";
 import { IForgotPasswordUseCase } from "../../../entities/usecaseInterfaces/auth/forgot-pasword-usecase.interface";
 import { IResetPasswordUseCase } from "../../../entities/usecaseInterfaces/auth/reset-password.interface";
-import { LoginUserDTO } from "../../../shared/dtos/user.dto";
+import { GoogleAuthDTO, LoginUserDTO } from "../../../shared/dtos/user.dto";
 import { loginSchema } from "./validations/user-login.validation";
 import { ILoginUserUseCase } from "../../../entities/usecaseInterfaces/auth/login-usecase.interface";
 import { IGenerateTokenUseCase } from "../../../entities/usecaseInterfaces/auth/generate-token.interface";
 import { Schema, Types } from "mongoose";
+import { IGoogleUseCase } from "../../../entities/usecaseInterfaces/auth/google-auth-usecase.interface";
+import { IGetMeUseCase } from "../../../entities/usecaseInterfaces/auth/get-me-usecase.interface";
 
 
 @injectable()
@@ -34,6 +36,10 @@ export class AuthController implements IAuthController {
           private _loginUserUseCase: ILoginUserUseCase,
           @inject("IGenerateTokenUseCase")
           private _generateTokenUseCase: IGenerateTokenUseCase,
+          @inject("IGoogleUseCase")
+          private _googleUseCase: IGoogleUseCase,
+          @inject("IGetMeUseCase")
+          private _getMeUseCase: IGetMeUseCase
      ){}
 
      async register(req: Request, res: Response): Promise<void> {
@@ -77,6 +83,10 @@ export class AuthController implements IAuthController {
                return;
           }
           const user = await this._loginUserUseCase.execute(validatedData);
+          if (!user._id || !user.email || !user.role) {
+				throw new Error("User ID, email, or role is missing");
+			};
+
           if (!user) {
                res.status(401).json({
                     success: false,
@@ -139,6 +149,80 @@ export class AuthController implements IAuthController {
                }
           }
      }
+
+     async authWithGoogle(req:Request,res:Response):Promise<void>{
+          try {
+               const profile = req.user as GoogleAuthDTO;
+               const user = await this._googleUseCase .execute(profile);
+               if (!user._id || !user.email || !user.role) {
+				throw new Error("User ID, email, or role is missing");
+			};
+
+               const tokens = await this._generateTokenUseCase.execute(
+				user._id as Schema.Types.ObjectId,
+				user.email,
+				user.role
+			);
+
+               const accessTokenName = `${user.role}_access_token`;
+			const refreshTokenName = `${user.role}_refresh_token`;
+
+               res.cookie(accessTokenName, tokens.accessToken, {
+               httpOnly: true,
+               secure: process.env.NODE_ENV === "production",
+               sameSite: "strict",
+               maxAge: 15 * 60 * 1000, // 15 minutes
+               });
+
+               res.cookie(refreshTokenName, tokens.refreshToken, {
+               httpOnly: true,
+               secure: process.env.NODE_ENV === "production",
+               sameSite: "strict",
+               maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+               });
+
+               const redirectURL = `${process.env.FRONTEND_URL}/auth-check/${user.role}`;
+               res.redirect(redirectURL);
+          } catch (error) {
+              if (error instanceof Error) {
+                    console.error("Error in login:", error.message);
+
+                    res.status(500).json({
+                         success: false,
+                         message: "An unexpected error occurred during login. Please try again later.",
+                         error: process.env.NODE_ENV === "development" ? error.message : undefined
+                    });
+               } else {
+                    console.error("Unknown error in login:", error);
+
+                    res.status(500).json({
+                         success: false,
+                         message: "An unexpected error occurred.",
+                    });
+               } 
+          }
+     }
+
+    async getMe(req: Request, res: Response): Promise<void> {
+          try {
+          const token = req.cookies?.client_access_token || req.cookies?.vendor_access_token;
+          if (!token) {
+               res.status(401).json({ success: false, message: "Unauthorized" });
+               return;
+          }
+  
+          const user = await this._getMeUseCase.execute(token);
+          console.log(user)
+           if (!user) {
+               res.status(404).json({ success: false, message: "User not found" });
+               return;
+           }
+
+          res.json({ success: true, data: user });
+          } catch (err) {
+          res.status(500).json({ success: false, message: "Something went wrong" });
+          }
+     } 
 
      async sendOtp(req:Request, res:Response):Promise<void>{
           try {

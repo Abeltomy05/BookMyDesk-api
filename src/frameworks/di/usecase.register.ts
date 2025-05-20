@@ -18,6 +18,8 @@ import { ForgotPasswordUseCase } from "../../useCases/auth/forgot-password.useca
 import { ResetPasswordUseCase } from "../../useCases/auth/reset-password.usecase";
 import { LoginUserUseCase } from "../../useCases/auth/login-user.usecase";
 import { GenerateTokenUseCase } from "../../useCases/auth/generate-token.usecase";
+import { GoogleUseCase } from "../../useCases/auth/google-auth.usecase";
+import { GetMe } from "../../useCases/auth/get-me.usecase";
 
 export class UseCaseRegistry{
     static registerUseCases(): void{
@@ -43,7 +45,12 @@ export class UseCaseRegistry{
         container.register("IGenerateTokenUseCase",{
             useClass: GenerateTokenUseCase
         })
-
+        container.register("IGoogleUseCase",{
+            useClass: GoogleUseCase
+        })
+       container.register("IGetMeUseCase",{
+        useClass:GetMe
+       })
 
         //* ====== Register Bcrypts ====== *//
         container.register<IBcrypt>("IPasswordBcrypt",{
