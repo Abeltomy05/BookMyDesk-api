@@ -5,6 +5,7 @@ import { authController } from "../di/resolver";
 import passport from "passport";
 
 
+
 export class AuthRoutes extends BaseRoute{
      constructor() {
       super();
@@ -16,7 +17,7 @@ export class AuthRoutes extends BaseRoute{
         //*               🗡️ AUTHENTICATION ROUTES 🗡️
         //*========================================================
 
-        this.router.post("/signup", (req: Request, res: Response) => {
+        this.router.post("/signup",(req: Request, res: Response) => {
             authController.register(req, res);
          });
 

@@ -8,4 +8,5 @@ export interface IVendorEntity extends IUserEntity{
   banner?: string;
   description?: string;
   status: VendorStatus;
+  idProof?: string; 
 }

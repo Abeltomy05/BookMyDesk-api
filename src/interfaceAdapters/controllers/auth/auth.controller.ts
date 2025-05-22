@@ -10,7 +10,7 @@ import { resetPasswordValidationSchema } from "./validations/reset-password.vali
 import { IVerifyOtpUseCase } from "../../../entities/usecaseInterfaces/auth/verify-otp-usecase.interface";
 import { IForgotPasswordUseCase } from "../../../entities/usecaseInterfaces/auth/forgot-pasword-usecase.interface";
 import { IResetPasswordUseCase } from "../../../entities/usecaseInterfaces/auth/reset-password.interface";
-import { GoogleAuthDTO, LoginUserDTO } from "../../../shared/dtos/user.dto";
+import { GoogleAuthDTO, LoginUserDTO, VendorDTO } from "../../../shared/dtos/user.dto";
 import { loginSchema } from "./validations/user-login.validation";
 import { ILoginUserUseCase } from "../../../entities/usecaseInterfaces/auth/login-usecase.interface";
 import { IGenerateTokenUseCase } from "../../../entities/usecaseInterfaces/auth/generate-token.interface";
@@ -42,7 +42,7 @@ export class AuthController implements IAuthController {
           private _getMeUseCase: IGetMeUseCase
      ){}
 
-     async register(req: Request, res: Response): Promise<void> {
+   async register(req: Request, res: Response): Promise<void> {
           try {
             const { role } = req.body as { role: keyof typeof userSchemas };
             const schema = userSchemas[role];
@@ -106,7 +106,8 @@ export class AuthController implements IAuthController {
                res.status(400).json({
                     success:false,
                     message:"Your vendor account has not yet been approved by the admin."
-               })
+               });
+               return;
             }
 
             res.cookie(accessTokenName, tokens.accessToken, {

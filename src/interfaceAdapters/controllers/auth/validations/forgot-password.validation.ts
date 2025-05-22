@@ -6,4 +6,4 @@ export const forgotPasswordValidationSchema = z.object({
       role: z.enum(["client", "admin", "vendor"], {
 		message: "Invalid role",
 	})
-})
+});

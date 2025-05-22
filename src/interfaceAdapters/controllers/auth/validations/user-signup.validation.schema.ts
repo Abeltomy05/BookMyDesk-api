@@ -3,6 +3,7 @@ import { strongEmailRegex } from "../../../../shared/validations/email.validatio
 import { nameSchema } from "../../../../shared/validations/name.validation";
 import { passwordSchema } from "../../../../shared/validations/password.validation";
 import { phoneNumberSchema } from "../../../../shared/validations/phone.validation";
+import { idProofSchema } from "../../../../shared/validations/idProof.validation";
 
 const adminSchema = z.object({
 	email: strongEmailRegex,
@@ -24,8 +25,9 @@ const vendorSchema = z.object({
     phone: phoneNumberSchema,
     password: passwordSchema,
     role: z.literal("vendor"),
-    companyName: z.string().min(3).max(50),
-    companyAddress: z.string().min(3).max(100),
+    companyName: z.string().max(50),
+    companyAddress: z.string().max(100),
+	idProof: idProofSchema,
 })
 
 export const userSchemas = {

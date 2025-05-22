@@ -36,7 +36,7 @@ export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
             try {
 			await this._redisTokenRepository.storeResetToken(
 				email,
-                resetToken
+        resetToken
 			);
 		} catch (error) {
 			console.error("Failed to store reset token in Redis:", error);

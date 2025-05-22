@@ -20,6 +20,7 @@ import { LoginUserUseCase } from "../../useCases/auth/login-user.usecase";
 import { GenerateTokenUseCase } from "../../useCases/auth/generate-token.usecase";
 import { GoogleUseCase } from "../../useCases/auth/google-auth.usecase";
 import { GetMe } from "../../useCases/auth/get-me.usecase";
+import { IJwtService } from "../../entities/serviceInterfaces/jwt-service.interface";
 
 export class UseCaseRegistry{
     static registerUseCases(): void{
@@ -76,8 +77,9 @@ export class UseCaseRegistry{
             useClass: OtpService
          })
 
-        container.register("IJwtService",{
+        container.register<IJwtService>("IJwtService",{
             useClass: JwtService
         }) 
+
     }
 }

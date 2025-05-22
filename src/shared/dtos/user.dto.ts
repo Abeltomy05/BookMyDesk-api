@@ -1,3 +1,4 @@
+
 export interface AdminDTO{
     username?: string;
     email: string;
@@ -24,6 +25,7 @@ export interface VendorDTO{
     googleId?: string;
     companyName: string,
     companyAddress:string,
+    idProof?: string,
     role: "vendor";
 }
 
