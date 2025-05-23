@@ -15,6 +15,8 @@ export class EmailService implements IEmailService {
 				user: process.env.EMAIL_USER,
 				pass: process.env.EMAIL_PASS,
 			},
+      // debug: process.env.NODE_ENV === 'development',
+      // logger: process.env.NODE_ENV === 'development'
 		});
 	}
 

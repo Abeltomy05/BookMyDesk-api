@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import express from 'express';
+import morgan from 'morgan';
 import passport from "passport";
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -9,6 +10,7 @@ import {AuthRoutes} from './frameworks/routes/auth.route';
 import './frameworks/passport/google.strategy'
 import { ClientRoutes } from './frameworks/routes/client.route';
 import { VendorRoutes } from './frameworks/routes/vendor.route';
+import { AdminRoutes } from './frameworks/routes/admin.route';
 
 
 dotenv.config();
@@ -16,6 +18,7 @@ dotenv.config();
 const app= express();
 
 app.use(passport.initialize());
+app.use(morgan("dev"))
 
 app.use(cookieParser());
 app.use(express.json());
@@ -31,6 +34,7 @@ app.use(cors({
 app.use('/api/auth', new AuthRoutes().router);
 app.use('/api/_c', new ClientRoutes().router);
 app.use('/api/_v', new VendorRoutes().router);
+app.use('/api/_a', new AdminRoutes().router);
 
 
 const PORT = process.env.PORT || 3000;

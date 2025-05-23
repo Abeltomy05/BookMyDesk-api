@@ -7,6 +7,8 @@ import { IUserExistenceService } from "../../entities/serviceInterfaces/user-exi
 import { IBcrypt } from "../../frameworks/security/bcrypt.interface";
 import { IClientRepository } from "../../entities/repositoryInterfaces/users/client-repository.interface";
 import { IVendorRepository } from "../../entities/repositoryInterfaces/users/vendor-repository.interface";
+import { IAdminEntity } from "../../entities/models/admin.entity";
+import { IAdminRepository } from "../../entities/repositoryInterfaces/users/admin-repository.interface";
 
 @injectable()
 export class RegisterUserUseCase implements IRegisterUserUseCase {
@@ -20,10 +22,12 @@ export class RegisterUserUseCase implements IRegisterUserUseCase {
     private _clientRepository: IClientRepository,
     @inject("IVendorRepository")
     private _vendorRepository: IVendorRepository,
+    @inject("IAdminRepository")
+    private _adminRepository: IAdminRepository,
   ){}
 
   
-     async execute(user: UserDTO): Promise<IVendorEntity | IClientEntity | null> {
+     async execute(user: UserDTO): Promise<IVendorEntity | IClientEntity | IAdminEntity | null> {
     const { role, email, password } = user;
 
     const isEmailExisting = await this._userExistenceService.emailExists(email);
@@ -40,7 +44,9 @@ export class RegisterUserUseCase implements IRegisterUserUseCase {
       repository = this._clientRepository;
     } else if (role === "vendor") {
       repository = this._vendorRepository;
-    } else {
+    }else if (role === "admin") {
+      repository = this._adminRepository
+     } else {
       throw new Error("Invalid role");
     }
 

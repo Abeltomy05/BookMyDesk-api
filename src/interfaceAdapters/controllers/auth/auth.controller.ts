@@ -21,6 +21,7 @@ import { CustomRequest } from "../../middlewares/auth.middleware";
 import { IBlackListTokenUseCase } from "../../../entities/usecaseInterfaces/auth/blacklist-token-usecase.interface";
 import { IRevokeRefreshTokenUseCase } from "../../../entities/usecaseInterfaces/auth/revoke-refreshtoken-usecase.interface";
 import { StatusCodes } from "http-status-codes";
+import { ZodError } from "zod";
 
 
 @injectable()
@@ -75,8 +76,25 @@ export class AuthController implements IAuthController {
 				message: "User registered successfully",
 			});
           } catch (error) {
-            
+            if (error instanceof ZodError) {
+               res.status(422).json({
+               success: false,
+               message: "Validation error",
+               errors: error.flatten().fieldErrors, 
+               });
+          } else if (error instanceof Error && error.message) {
+               res.status(400).json({
+               success: false,
+               message: error.message,
+               });
+          } else {
+               console.error("Unexpected error during registration:", error);
+               res.status(500).json({
+               success: false,
+               message: "Internal server error. Please try again later.",
+               });
           }
+                    }
      }
 
      async login(req: Request, res: Response): Promise<void> {
