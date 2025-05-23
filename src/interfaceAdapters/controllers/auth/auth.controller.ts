@@ -17,6 +17,10 @@ import { IGenerateTokenUseCase } from "../../../entities/usecaseInterfaces/auth/
 import { Schema, Types } from "mongoose";
 import { IGoogleUseCase } from "../../../entities/usecaseInterfaces/auth/google-auth-usecase.interface";
 import { IGetMeUseCase } from "../../../entities/usecaseInterfaces/auth/get-me-usecase.interface";
+import { CustomRequest } from "../../middlewares/auth.middleware";
+import { IBlackListTokenUseCase } from "../../../entities/usecaseInterfaces/auth/blacklist-token-usecase.interface";
+import { IRevokeRefreshTokenUseCase } from "../../../entities/usecaseInterfaces/auth/revoke-refreshtoken-usecase.interface";
+import { StatusCodes } from "http-status-codes";
 
 
 @injectable()
@@ -39,7 +43,11 @@ export class AuthController implements IAuthController {
           @inject("IGoogleUseCase")
           private _googleUseCase: IGoogleUseCase,
           @inject("IGetMeUseCase")
-          private _getMeUseCase: IGetMeUseCase
+          private _getMeUseCase: IGetMeUseCase,
+          @inject("IBlackListTokenUseCase")
+          private _blackListTokenUseCase: IBlackListTokenUseCase,
+          @inject("IRevokeRefreshTokenUseCase")
+          private _revokeRefreshTokenUseCase: IRevokeRefreshTokenUseCase
      ){}
 
    async register(req: Request, res: Response): Promise<void> {
@@ -185,22 +193,13 @@ export class AuthController implements IAuthController {
                const redirectURL = `${process.env.FRONTEND_URL}/auth-check/${user.role}`;
                res.redirect(redirectURL);
           } catch (error) {
-              if (error instanceof Error) {
-                    console.error("Error in login:", error.message);
+                console.error("Error in login:", error instanceof Error ? error.message : error);
 
-                    res.status(500).json({
-                         success: false,
-                         message: "An unexpected error occurred during login. Please try again later.",
-                         error: process.env.NODE_ENV === "development" ? error.message : undefined
-                    });
-               } else {
-                    console.error("Unknown error in login:", error);
+                const errorMessage = error instanceof Error ? error.message : "Unknown error";
+                const role = req.query.state;
 
-                    res.status(500).json({
-                         success: false,
-                         message: "An unexpected error occurred.",
-                    });
-               } 
+                const redirectErrorURL = `${process.env.FRONTEND_URL}${role === "client" ? "/login" : `/${role}/login`}?error=${encodeURIComponent(errorMessage)}`;
+                res.redirect(redirectErrorURL);
           }
      }
 
@@ -277,7 +276,7 @@ export class AuthController implements IAuthController {
 				});
 				return;
 			}
-			await this._forgotPasswordUseCase.execute(validatedData);
+			await this._forgotPasswordUseCase.execute(validatedData.email);
 
 			res.status(200).json({
 				success: true,
@@ -298,10 +297,11 @@ export class AuthController implements IAuthController {
 				});
 			}
 
-			await this._resetPasswordUseCase.execute(validatedData);
+			const role = await this._resetPasswordUseCase.execute(validatedData);
 			res.status(200).json({
 				success: true,
 				message: "Password reset successfully",
+                    data: role,
 			});
 		} catch (error) {
                console.error("Error resetting password:", error);
@@ -311,4 +311,41 @@ export class AuthController implements IAuthController {
                });
 		}
 	}
+
+     async logout(req: Request, res: Response): Promise<void> {
+          try{
+             await this._blackListTokenUseCase.execute((req as CustomRequest).user.access_token);
+
+             await this._revokeRefreshTokenUseCase.execute((req as CustomRequest).user.refresh_token);
+
+             const user = (req as CustomRequest).user;
+		   const accessTokenName = `${user.role}_access_token`;
+		   const refreshTokenName = `${user.role}_refresh_token`;
+
+             res.clearCookie(accessTokenName, {
+               httpOnly: true,
+               secure: process.env.NODE_ENV === "production",
+               sameSite: "strict",
+               path: "/", 
+               });
+
+             res.clearCookie(refreshTokenName, {
+               httpOnly: true,
+               secure: process.env.NODE_ENV === "production",
+               sameSite: "strict",
+               path: "/",
+               });
+
+               res.status(StatusCodes.OK).json({
+			success: true,
+			message: "Logout successful",
+		});
+          }catch(error){
+             console.error("Logout error:", error); 
+               res.status(500).json({
+                    success: false,
+                    message: "Failed to logout",
+               });
+          }
+     }
 }  

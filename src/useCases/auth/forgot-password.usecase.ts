@@ -5,6 +5,8 @@ import { IClientRepository } from "../../entities/repositoryInterfaces/users/cli
 import { IVendorRepository } from "../../entities/repositoryInterfaces/users/vendor-repository.interface";
 import { IForgotPasswordUseCase } from "../../entities/usecaseInterfaces/auth/forgot-pasword-usecase.interface";
 import { IJwtService } from "../../entities/serviceInterfaces/jwt-service.interface";
+import { IVendorEntity } from "../../entities/models/vendor.entity";
+import { IClientEntity } from "../../entities/models/client.entity";
 
 @injectable()
 export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
@@ -21,33 +23,35 @@ export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
             private _tokenService: IJwtService,        
     ){}
      
-    async execute({email,role}:{email:string,role:string}): Promise<void> {
-       let repository;
-         if(role==="client") repository = this._clientRepository;
-         else if(role==="vendor") repository = this._vendorRepository;
-         else throw new Error("Invalid role");
+    async execute(email:string): Promise<void> {
+          let user: IClientEntity | IVendorEntity | null = null;
+          let role: 'client' | 'vendor' = 'client';
 
-         const user = await repository.findOne({email});
-            if (!user) {
-                throw new Error("User not found");
-            }
+          user = await this._clientRepository.findOne({ email });
+
+          if (!user) {
+             user = await this._vendorRepository.findOne({ email });
+             role = "vendor";
+          }
+
+          if (!user) {
+              throw new Error("User not found");
+          } 
 
           const resetToken = this._tokenService.generateResetToken(email);
             try {
-			await this._redisTokenRepository.storeResetToken(
-				email,
-        resetToken
-			);
-		} catch (error) {
-			console.error("Failed to store reset token in Redis:", error);
-			throw new Error("Failed to store reset token");
-		}
-        const rolePrefix = role !== "client" ? `/${role}` : "";
+			       await this._redisTokenRepository.storeResetToken(email,resetToken);
+		        } catch (error) {
+		        	console.error("Failed to store reset token in Redis:", error);
+		         	throw new Error("Failed to store reset token");
+		       }
+        // const rolePrefix = role !== "client" ? `/${role}` : "";
 		const resetUrl = new URL(
-			`${rolePrefix}/reset-password/${resetToken}`,
+			`/reset-password/${resetToken}`,
 			process.env.CORS_ORIGIN
 		).toString();
 
+    console.log(email,role);
 		await this._emailService.sendResetEmail(
 			email,
 			"BookMyDesk - Reset your password",

@@ -21,6 +21,8 @@ import { GenerateTokenUseCase } from "../../useCases/auth/generate-token.usecase
 import { GoogleUseCase } from "../../useCases/auth/google-auth.usecase";
 import { GetMe } from "../../useCases/auth/get-me.usecase";
 import { IJwtService } from "../../entities/serviceInterfaces/jwt-service.interface";
+import { RevokeRefreshTokenUseCase } from "../../useCases/auth/revoke-refresh-token.usecase";
+import { BlackListTokenUseCase } from "../../useCases/auth/blacklist-token.usecase";
 
 export class UseCaseRegistry{
     static registerUseCases(): void{
@@ -52,6 +54,13 @@ export class UseCaseRegistry{
        container.register("IGetMeUseCase",{
         useClass:GetMe
        })
+       container.register("IRevokeRefreshTokenUseCase",{
+        useClass: RevokeRefreshTokenUseCase
+       })
+       container.register("IBlackListTokenUseCase",{
+        useClass: BlackListTokenUseCase
+       })
+       
 
         //* ====== Register Bcrypts ====== *//
         container.register<IBcrypt>("IPasswordBcrypt",{

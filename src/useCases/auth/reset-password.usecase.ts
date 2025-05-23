@@ -6,6 +6,8 @@ import { IVendorRepository } from "../../entities/repositoryInterfaces/users/ven
 import { IRedisTokenRepository } from "../../entities/repositoryInterfaces/redis/redis-token-repository.interface";
 import { IBcrypt } from "../../frameworks/security/bcrypt.interface";
 import { IResetPasswordUseCase } from "../../entities/usecaseInterfaces/auth/reset-password.interface";
+import { IClientEntity } from "../../entities/models/client.entity";
+import { IVendorEntity } from "../../entities/models/vendor.entity";
 
 
 @injectable()
@@ -23,27 +25,29 @@ export class ResetPasswordUseCase implements IResetPasswordUseCase {
         private _passwordBcrypt: IBcrypt,
     ){}
 
-    async execute({ password, token, role }: { password: string; token:string; role: string }): Promise<void> {
+    async execute({ password, token}: { password: string; token:string;}): Promise<string> {
          const payload = this._tokenService.verifyResetToken(token);
         if (!payload || !payload.email) {
             throw new Error("Invalid or expired token");
         }
 
         const email = payload.email;
-		let repository;
+         let user: IClientEntity | IVendorEntity | null = null;
+         let repository: IClientRepository | IVendorRepository = this._clientRepository;
+         let role: 'client' | 'vendor' = 'client';
+         
+		 user = await this._clientRepository.findOne({ email });
+         repository = this._clientRepository;
 
-        if (role === "client") {
-            repository = this._clientRepository;
-        }else if (role === "vendor") {
+         if (!user) {
+            user = await this._vendorRepository.findOne({ email });
             repository = this._vendorRepository;
-        }else{
-            throw new Error("Invalid role");
-        }
+            role = "vendor";
+         }
 
-        const user = await  repository.findOne({email});
-        if (!user) {
+          if (!user) {
             throw new Error("User not found");
-        }
+          }
 
         const tokenIsValid = await this._redisTokenRepository.verifyResetToken(token, email);
         if (!tokenIsValid) {
@@ -54,5 +58,7 @@ export class ResetPasswordUseCase implements IResetPasswordUseCase {
 
         await repository.update({email},{password: hashedPassword});
         await this._redisTokenRepository.deleteResetToken(token);
+
+        return role;
     }
 }

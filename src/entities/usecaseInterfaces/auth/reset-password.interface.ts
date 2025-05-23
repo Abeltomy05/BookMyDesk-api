@@ -1,3 +1,3 @@
 export interface IResetPasswordUseCase {
-    execute({password, token, role}:{password:string, token:string, role:string}): Promise<void>;
+    execute({password, token}:{password:string, token:string}): Promise<string>;
 }

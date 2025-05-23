@@ -7,6 +7,8 @@ import cookieParser from "cookie-parser";
 import { connectDB } from './lib/db';
 import {AuthRoutes} from './frameworks/routes/auth.route'; 
 import './frameworks/passport/google.strategy'
+import { ClientRoutes } from './frameworks/routes/client.route';
+import { VendorRoutes } from './frameworks/routes/vendor.route';
 
 
 dotenv.config();
@@ -27,6 +29,8 @@ app.use(cors({
 }));
 
 app.use('/api/auth', new AuthRoutes().router);
+app.use('/api/_c', new ClientRoutes().router);
+app.use('/api/_v', new VendorRoutes().router);
 
 
 const PORT = process.env.PORT || 3000;

@@ -17,32 +17,32 @@ export class GoogleUseCase implements IGoogleUseCase{
   ) {}
 
     async execute(data: GoogleAuthDTO):Promise<Partial<IVendorModel | IClientModel>>{
-        const {role,email} = data
-        let repository;
-        if(role === "client"){
-            repository = this._clientRepository; 
-        }else if(role === "vendor"){
-            repository = this._vendorRepository;
-        }else{
-            throw new Error("Invalid role");
-        }
+         const { role, email, username, googleId, avatar } = data;
+        
+         const existingClient = await this._clientRepository.findOne({ email });
+         const existingVendor = await this._vendorRepository.findOne({ email });
 
-        const existingUser = await repository.findOne({email});
+         if (existingClient && role === 'vendor' || existingVendor && role === 'client') {
+                throw new Error('This email is already registered.');
+            }
+
+         const isClient = role === 'client';
+         const repository = isClient ? this._clientRepository : this._vendorRepository;
+         const existingUser = isClient ? existingClient : existingVendor;
 
          if (existingUser) {
-            if (!existingUser.googleId) {
-            existingUser.googleId = data.googleId;
-            await repository.update(email, data.googleId);
-            }
-            return existingUser;
-        }
+          if (!existingUser.googleId) {
+            await repository.update({ email }, { googleId });
+          }
+         return existingUser;
+         }
 
          const userPayload = {
-            email: email,
-            username: data.username,
-            googleId: data.googleId,
-            avatar: data.avatar,
-            role: data.role,
+            email,
+            username,
+            googleId,
+            avatar,
+            role
             };
 
      return repository.save(userPayload);

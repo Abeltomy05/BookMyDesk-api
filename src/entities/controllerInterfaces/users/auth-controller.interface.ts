@@ -8,5 +8,6 @@ export interface IAuthController {
     resetPassword(req: Request, res: Response): Promise<void>;
     login(req: Request, res: Response): Promise<void>;
     authWithGoogle(req:Request,res:Response):Promise<void>;
-    getMe(req: Request, res: Response): Promise<void> 
+    getMe(req: Request, res: Response): Promise<void>;
+    logout(req: Request, res: Response): Promise<void>
 }

@@ -1,3 +1,3 @@
 export interface IForgotPasswordUseCase {
-    execute({email,role}:{email:string,role:string}): Promise<void>;
+    execute(email:string): Promise<void>;
 }
