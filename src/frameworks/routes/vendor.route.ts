@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { BaseRoute } from "./base.route";
 import { authController } from "../di/resolver";
-import { CustomRequest, verifyAuth } from "../../interfaceAdapters/middlewares/auth.middleware";
+import { CustomRequest, decodeToken, verifyAuth } from "../../interfaceAdapters/middlewares/auth.middleware";
 
 export class VendorRoutes extends BaseRoute{
     constructor(){
@@ -12,5 +12,9 @@ export class VendorRoutes extends BaseRoute{
         this.router.post('/vendor/logout',verifyAuth,(req: Request, res: Response) => {
             authController.logout(req, res);
          })
+
+        this.router.post("/vendor/refresh-token",decodeToken,(req: Request, res: Response) => {
+                    authController.handleTokenRefresh(req, res);
+      }); 
     }
 }

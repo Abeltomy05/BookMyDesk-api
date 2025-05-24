@@ -62,6 +62,7 @@ export class JwtService implements IJwtService {
     verifyRefreshToken(token: string): JwtPayload | null {
         try {
             const payload = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET!) as JwtPayload;
+            console.log("Refresh Token Payload:", payload);
             return payload;
         } catch (error) {
             console.error("Refresh token verification failed:", error);

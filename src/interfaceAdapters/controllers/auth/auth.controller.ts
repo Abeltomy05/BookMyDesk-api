@@ -22,6 +22,7 @@ import { IBlackListTokenUseCase } from "../../../entities/usecaseInterfaces/auth
 import { IRevokeRefreshTokenUseCase } from "../../../entities/usecaseInterfaces/auth/revoke-refreshtoken-usecase.interface";
 import { StatusCodes } from "http-status-codes";
 import { ZodError } from "zod";
+import { IRefreshTokenUseCase } from "../../../entities/usecaseInterfaces/auth/refresh-token-usecase.interface";
 
 
 @injectable()
@@ -48,7 +49,9 @@ export class AuthController implements IAuthController {
           @inject("IBlackListTokenUseCase")
           private _blackListTokenUseCase: IBlackListTokenUseCase,
           @inject("IRevokeRefreshTokenUseCase")
-          private _revokeRefreshTokenUseCase: IRevokeRefreshTokenUseCase
+          private _revokeRefreshTokenUseCase: IRevokeRefreshTokenUseCase,
+          @inject("IRefreshTokenUseCase")
+          private _refreshTokenUseCase: IRefreshTokenUseCase
      ){}
 
    async register(req: Request, res: Response): Promise<void> {
@@ -366,4 +369,42 @@ export class AuthController implements IAuthController {
                });
           }
      }
+
+     async handleTokenRefresh(req: Request, res: Response): Promise<void> {
+		try {
+			const refreshToken = (req as CustomRequest).user.refresh_token;
+			const newTokens = this._refreshTokenUseCase.execute(refreshToken);
+			const accessTokenName = `${newTokens.role}_access_token`;
+
+			res.cookie(accessTokenName, newTokens.accessToken, {
+			httpOnly: true,
+			secure: process.env.NODE_ENV === "production",
+			sameSite: "strict",
+			path: "/",
+		     });
+			res.status(StatusCodes.OK).json({
+				success: true,
+				message: "Token refreshed successfully",
+			});
+		} catch (error) {
+               const role = (req as CustomRequest).user.role;
+
+			res.clearCookie(`${role}_access_token`, {
+			httpOnly: true,
+			secure: process.env.NODE_ENV === "production",
+			sameSite: "strict",
+			path: "/",
+               });
+
+               res.clearCookie(`${role}_refresh_token`, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === "production",
+                    sameSite: "strict",
+                    path: "/",
+               });
+			res.status(StatusCodes.UNAUTHORIZED).json({
+				message: "Invalid refresh token",
+			});
+		}
+	}
 }  

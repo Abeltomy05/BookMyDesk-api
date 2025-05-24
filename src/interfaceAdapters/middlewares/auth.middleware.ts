@@ -92,3 +92,41 @@ const isBlacklisted = async (token: string): Promise<boolean> => {
 		return false;
 	}
 };
+
+
+export const decodeToken = async (req: Request,res: Response,next: NextFunction) => {
+	try {
+		const token = extractToken(req);
+
+		if (!token) {
+			res.status(StatusCodes.UNAUTHORIZED).json({
+				message: "Unauthorized Access",
+			});
+			return;
+		}
+		if (await isBlacklisted(token.access_token)) {
+			res.status(StatusCodes.FORBIDDEN).json({
+				message: "Token is blacklisted",
+			});
+			return;
+		}
+
+		const user = tokenService.decodeAccessToken(token?.access_token);
+		// console.log(`Decoded`, user);
+		(req as CustomRequest).user = {
+			userId: user?.userId,
+			email: user?.email,
+			role: user?.role,
+			access_token: token.access_token,
+			refresh_token: token.refresh_token,
+		};
+		next();
+	} catch (error:any) {
+		console.error("Error decoding token:", error);
+
+		res.status(StatusCodes.UNAUTHORIZED).json({
+			message: "Invalid or expired token",
+			error: error?.message || "An unknown error occurred",
+		});
+	}
+};
