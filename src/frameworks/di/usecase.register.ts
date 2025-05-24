@@ -24,6 +24,8 @@ import { IJwtService } from "../../entities/serviceInterfaces/jwt-service.interf
 import { RevokeRefreshTokenUseCase } from "../../useCases/auth/revoke-refresh-token.usecase";
 import { BlackListTokenUseCase } from "../../useCases/auth/blacklist-token.usecase";
 import { RefreshTokenUseCase } from "../../useCases/auth/refresh-token.usecase";
+import { GetAllUsersUseCase } from "../../useCases/users/get-all-users.usecase";
+import { UpdateUserStatusUseCase } from "../../useCases/users/update-user-status.usecase";
 
 export class UseCaseRegistry{
     static registerUseCases(): void{
@@ -64,7 +66,14 @@ export class UseCaseRegistry{
        container.register("IRefreshTokenUseCase",{
         useClass: RefreshTokenUseCase
        })
-       
+       container.register("IGetAllUsersUseCase",{
+        useClass: GetAllUsersUseCase
+       })
+       container.register("IUpdateUserStatusUseCase",{
+        useClass: UpdateUserStatusUseCase
+       })
+
+
 
         //* ====== Register Bcrypts ====== *//
         container.register<IBcrypt>("IPasswordBcrypt",{
@@ -76,6 +85,8 @@ export class UseCaseRegistry{
         })
 
         
+
+
 
          //* ====== Register Services ====== *//
          container.register<IUserExistenceService>("IUserExistenceService",{
