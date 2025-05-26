@@ -27,6 +27,7 @@ import { RefreshTokenUseCase } from "../../useCases/auth/refresh-token.usecase";
 import { GetAllUsersUseCase } from "../../useCases/users/get-all-users.usecase";
 import { UpdateUserStatusUseCase } from "../../useCases/users/update-user-status.usecase";
 
+
 export class UseCaseRegistry{
     static registerUseCases(): void{
         //* ====== Register UseCases ====== *//

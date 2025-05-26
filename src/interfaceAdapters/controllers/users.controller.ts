@@ -16,11 +16,18 @@ export class UsersController implements IUsersController{
 
     async getAllUsers(req: Request, res: Response): Promise<void> {
         try {
-           const { page = 1, limit = 10, search = "", role } = req.query; 
-           console.log("Fetching all users with params:", { page, limit, search, role });
+           const { page = 1, limit = 10, search = "", role, excludeStatus  } = req.query; 
+           console.log("Fetching all users with params:", { page, limit, search, role, excludeStatus });
            const pageNumber = Math.max(Number(page), 1);
            const pageSize = Math.max(Number(limit), 1);
            const searchTerm = typeof search === "string" ? search : "";
+
+            let excludeStatusArr: string[] = [];
+            if (typeof excludeStatus === "string") {
+            excludeStatusArr = [excludeStatus];
+            } else if (Array.isArray(excludeStatus)) {
+            excludeStatusArr = excludeStatus.map(String);
+            }
 
            const roleStr = role === "vendor" ? "vendor" : "client";
 
@@ -28,10 +35,11 @@ export class UsersController implements IUsersController{
 			roleStr,
 			pageNumber,
 			pageSize,
-			searchTerm
+			searchTerm,
+            excludeStatusArr
 		   );
 
-           
+           console.log("Fetched users:",  users );
            res.status(200).json({
 			success: true,
 			users,
@@ -39,7 +47,12 @@ export class UsersController implements IUsersController{
 			currentPage: pageNumber,
 		 });
         } catch (error) {
-            
+             console.error("Error fetching users:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch users. Please try again later.",
+            error: error instanceof Error ? error.message : String(error),
+        });
         }
     }
 
@@ -58,4 +71,6 @@ export class UsersController implements IUsersController{
             res.status(500).json({ success: false, message: "Failed to update user status" });
         }
     }
+
+
 }

@@ -12,9 +12,9 @@ export class BaseRepository<T> {
         return this.model.find(filter);
     }
 
-    async findAll(filter: FilterQuery<T> = {}, skip = 0, limit = 10) {
+    async findAll(filter: FilterQuery<T> = {}, skip = 0, limit = 10, sort: Record<string, 1 | -1> = {}) {
     const [items, total] = await Promise.all([
-      this.model.find(filter).skip(skip).limit(limit).lean() as Promise<T[]>,
+      this.model.find(filter).sort(sort).skip(skip).limit(limit).lean() as Promise<T[]>,
       this.model.countDocuments(filter),
     ]);
     return { items, total };

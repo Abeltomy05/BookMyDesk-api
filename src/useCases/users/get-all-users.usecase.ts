@@ -14,7 +14,7 @@ export class GetAllUsersUseCase implements IGetAllUsersUseCase {
        private _vendorRepository: IVendorRepository
     ) {}
 
-    async execute(userType:"client"|"vendor",page:number,limit:number,search:string): Promise<{users:(Omit<IClientEntity,"password"> | Omit<IVendorEntity,"password">)[],totalPages: number}> {
+    async execute(userType:"client"|"vendor",page:number,limit:number,search:string,excludeStatus: string[] = []): Promise<{users:(Omit<IClientEntity,"password"> | Omit<IVendorEntity,"password">)[],totalPages: number}> {
         const skip = (page - 1) * limit;
         let filter: any = {};
 
@@ -28,6 +28,10 @@ export class GetAllUsersUseCase implements IGetAllUsersUseCase {
 				filter.$or.push({ companyName: { $regex: search, $options: "i" } });
 			}
 		}
+
+        if (excludeStatus.length > 0) {
+        filter.status = { $nin: excludeStatus };
+        }
 
         let repo = userType === "client" ? this._clientRepository : this._vendorRepository;
 

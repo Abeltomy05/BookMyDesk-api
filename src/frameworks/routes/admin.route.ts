@@ -24,5 +24,6 @@ export class AdminRoutes extends BaseRoute{
          this.router.post("/admin/update-user-status",verifyAuth,(req: Request, res: Response) => {
             usersController.updateUserStatus(req, res);
         });
+
     }
 }

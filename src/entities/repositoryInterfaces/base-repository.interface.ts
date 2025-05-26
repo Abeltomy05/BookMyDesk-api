@@ -3,7 +3,8 @@ export interface IBaseRepository<T> {
   findAll(
     filter: any,
     skip: number,
-    limit: number
+    limit: number,
+    sort?: Record<string, 1 | -1>
   ): Promise<{ items: T[]; total: number }>;
   findOne(filter: any): Promise<T | null>;
   save(data: Partial<T>): Promise<T>;
