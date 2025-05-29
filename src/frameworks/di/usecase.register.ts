@@ -26,6 +26,7 @@ import { BlackListTokenUseCase } from "../../useCases/auth/blacklist-token.useca
 import { RefreshTokenUseCase } from "../../useCases/auth/refresh-token.usecase";
 import { GetAllUsersUseCase } from "../../useCases/users/get-all-users.usecase";
 import { UpdateUserStatusUseCase } from "../../useCases/users/update-user-status.usecase";
+import { GetUserCountUseCase } from "../../useCases/users/get-user-count.usecase";
 
 
 export class UseCaseRegistry{
@@ -72,6 +73,9 @@ export class UseCaseRegistry{
        })
        container.register("IUpdateUserStatusUseCase",{
         useClass: UpdateUserStatusUseCase
+       })
+       container.register("IGetUserCountUseCase",{
+        useClass: GetUserCountUseCase
        })
 
 

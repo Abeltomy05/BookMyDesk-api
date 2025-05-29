@@ -75,6 +75,8 @@ export const verifyAuth = async(req:Request,res:Response,next:NextFunction)=>{
 
 const extractToken = (req: Request): { access_token: string; refresh_token: string } | null => {
 	const userType = req.path.split("/")[1];
+	console.log("🔍 Extracting tokens for userType:", userType);
+	console.log("Cookies:", req.cookies);
    
 	if (!userType) return null;
 
@@ -86,10 +88,10 @@ const extractToken = (req: Request): { access_token: string; refresh_token: stri
 
 const isBlacklisted = async (token: string): Promise<boolean> => {
 	try {
-		if (typeof token !== "string") {
-		console.error("🚨 Invalid token passed to Redis. Expected string but got:", typeof token, token);
-		return true;
-	   }
+	// 	if (typeof token !== "string") {
+	// 	console.error("🚨 Invalid token passed to Redis. Expected string but got:", typeof token, token);
+	// 	return true;
+	//    }
 		const result = await redisClient.get(token);
 		return result !== null;
 	} catch (error) {

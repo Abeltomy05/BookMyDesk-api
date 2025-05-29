@@ -4,6 +4,7 @@ import { IGetAllUsersUseCase } from "../../entities/usecaseInterfaces/users/get-
 import { IUsersController } from "../../entities/controllerInterfaces/users/users-controller.interface";
 import { StatusCodes } from "http-status-codes";
 import { IUpdateUserStatusUseCase } from "../../entities/usecaseInterfaces/users/update-user-status-usecase.interface";
+import { IGetUserCountUseCase } from "../../entities/usecaseInterfaces/users/get-user-count-usecase.interface";
 
 @injectable()
 export class UsersController implements IUsersController{
@@ -12,6 +13,8 @@ export class UsersController implements IUsersController{
        private _getAllUsersUseCase: IGetAllUsersUseCase,
        @inject("IUpdateUserStatusUseCase") 
        private _updateUserStatusUseCase: IUpdateUserStatusUseCase,
+       @inject("IGetUserCountUseCase")
+       private _getUserCountUseCase: IGetUserCountUseCase
     ){}
 
     async getAllUsers(req: Request, res: Response): Promise<void> {
@@ -39,7 +42,7 @@ export class UsersController implements IUsersController{
             excludeStatusArr
 		   );
 
-           console.log("Fetched users:",  users );
+    
            res.status(200).json({
 			success: true,
 			users,
@@ -58,9 +61,9 @@ export class UsersController implements IUsersController{
 
     async updateUserStatus(req: Request, res: Response): Promise<void> {
         try {
-            const { userType, userId, status } = req.body;
+            const { userType, userId, status, reason } = req.body;
             console.log("Updating user status:", { userType, userId, status });
-            await this._updateUserStatusUseCase.execute(userType, userId, status);
+            await this._updateUserStatusUseCase.execute(userType, userId, status, reason);
 
             res.status(StatusCodes.OK).json({ 
                 success: true,
@@ -72,5 +75,24 @@ export class UsersController implements IUsersController{
         }
     }
 
-
+   async getUserCount(req: Request, res: Response): Promise<void> {
+    try{
+      const {clients, vendors} = await this._getUserCountUseCase.execute();
+      console.log("Fetched user counts:", { clients, vendors });
+      res.status(StatusCodes.OK).json({
+        success: true,
+        message: "User count fetched successfully",
+        data:{
+            clients,
+            vendors
+        }
+      });
+    }catch(error:any){
+        console.error("Error fetching user count:", error);
+        res.status(500).json({
+            success: false,
+            message: error.message || "Failed to fetch user count",
+        });
+    }
+   }
 }

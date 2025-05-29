@@ -3,6 +3,7 @@ import { IClientRepository } from "../../entities/repositoryInterfaces/users/cli
 import { IVendorRepository } from "../../entities/repositoryInterfaces/users/vendor-repository.interface";
 import { IUpdateUserStatusUseCase } from "../../entities/usecaseInterfaces/users/update-user-status-usecase.interface";
 import { Types } from "mongoose";
+import { IEmailService } from "../../entities/serviceInterfaces/email-service.interface";
 
 @injectable()
 export class UpdateUserStatusUseCase implements IUpdateUserStatusUseCase {
@@ -10,9 +11,11 @@ export class UpdateUserStatusUseCase implements IUpdateUserStatusUseCase {
 		@inject("IClientRepository")
 		private _clientRepository: IClientRepository,
 		@inject("IVendorRepository")
-		private _vendorRepository: IVendorRepository
+		private _vendorRepository: IVendorRepository,
+		@inject("IEmailService")
+	    private _emailService: IEmailService, 
 	) {}
-	async execute(userType: string, userId: any, status: string): Promise<void> {
+	async execute(userType: string, userId: any, status: string, reason?: string): Promise<void> {
 		let repo;
 
 		if (userType === "client") {
@@ -28,9 +31,11 @@ export class UpdateUserStatusUseCase implements IUpdateUserStatusUseCase {
 			throw new Error("User not found");
 		}
 
-		await repo.update(
-        { _id: userId },
-        { status }
-        );
+		await repo.update({ _id: userId },{ status });
+
+		 if (userType === "vendor" && status === "rejected" && reason) {
+			console.log(`Sending rejection email to vendor: ${user.email}`);
+         await this._emailService.sendVendorRejectionEmail(user.email, reason);
+        }
 	}
 }

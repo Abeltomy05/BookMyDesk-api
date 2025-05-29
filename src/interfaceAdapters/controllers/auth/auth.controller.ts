@@ -139,6 +139,16 @@ export class AuthController implements IAuthController {
                return;
             }
 
+          if( userWithoutPassword.status === "rejected" && 
+              userWithoutPassword.role === "vendor"
+            ){
+               res.status(400).json({
+                    success:false,
+                    message:"Your vendor account has  been rejected by the admin. Check your email for more details."
+               });
+               return;
+            }  
+
             res.cookie(accessTokenName, tokens.accessToken, {
                httpOnly: true,
                secure: process.env.NODE_ENV === "production",
@@ -372,11 +382,18 @@ export class AuthController implements IAuthController {
 
      async handleTokenRefresh(req: Request, res: Response): Promise<void> {
 		try {
-			const refreshToken = (req as CustomRequest).user.refresh_token;
-			const newTokens = this._refreshTokenUseCase.execute(refreshToken);
-			const accessTokenName = `${newTokens.role}_access_token`;
+			const refreshCookies  = req.cookies;
+               console.log("Refresh Cookies:", refreshCookies);
+               const refreshTokenKey = Object.keys(refreshCookies).find((key) =>
+				key.endsWith("_refresh_token")
+			);
+               if (!refreshTokenKey) {
+				throw new Error("No refresh token found");
+			}
+               const refreshToken = refreshCookies[refreshTokenKey];
+			const { role, accessToken } = this._refreshTokenUseCase.execute(refreshToken);
 
-			res.cookie(accessTokenName, newTokens.accessToken, {
+			res.cookie(`${role}_access_token`, accessToken, {
 			httpOnly: true,
 			secure: process.env.NODE_ENV === "production",
 			sameSite: "strict",
@@ -387,22 +404,14 @@ export class AuthController implements IAuthController {
 				message: "Token refreshed successfully",
 			});
 		} catch (error) {
-               const role = (req as CustomRequest).user.role;
+               console.error("Refresh token failed:", error);
 
-			res.clearCookie(`${role}_access_token`, {
-			httpOnly: true,
-			secure: process.env.NODE_ENV === "production",
-			sameSite: "strict",
-			path: "/",
-               });
+			["client", "vendor", "admin"].forEach((role) => {
+				res.clearCookie(`${role}_access_token`);
+				res.clearCookie(`${role}_refresh_token`);
+			});
 
-               res.clearCookie(`${role}_refresh_token`, {
-                    httpOnly: true,
-                    secure: process.env.NODE_ENV === "production",
-                    sameSite: "strict",
-                    path: "/",
-               });
-			res.status(StatusCodes.UNAUTHORIZED).json({
+               res.status(StatusCodes.UNAUTHORIZED).json({
 				message: "Invalid refresh token",
 			});
 		}

@@ -38,7 +38,7 @@ export class BaseRepository<T> {
     await this.model.deleteMany(filter);
   }
 
-  async countDocuments(filter: FilterQuery<T>) {
+  async countDocuments(filter: FilterQuery<T> = {}) {
     return this.model.countDocuments(filter);
   }
 }

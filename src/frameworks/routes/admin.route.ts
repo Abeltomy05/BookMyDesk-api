@@ -13,7 +13,7 @@ export class AdminRoutes extends BaseRoute{
             authController.logout(req, res);
          })
 
-         this.router.post("/admin/refresh-token",decodeToken,(req: Request, res: Response) => {
+         this.router.post("/admin/refresh-token",(req: Request, res: Response) => {
             authController.handleTokenRefresh(req, res);
         });
 
@@ -23,6 +23,9 @@ export class AdminRoutes extends BaseRoute{
 
          this.router.post("/admin/update-user-status",verifyAuth,(req: Request, res: Response) => {
             usersController.updateUserStatus(req, res);
+        });
+        this.router.get("/admin/get-user-count",verifyAuth,(req: Request, res: Response) => {
+            usersController.getUserCount(req, res);
         });
 
     }
