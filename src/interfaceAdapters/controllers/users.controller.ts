@@ -5,6 +5,9 @@ import { IUsersController } from "../../entities/controllerInterfaces/users/user
 import { StatusCodes } from "http-status-codes";
 import { IUpdateUserStatusUseCase } from "../../entities/usecaseInterfaces/users/update-user-status-usecase.interface";
 import { IGetUserCountUseCase } from "../../entities/usecaseInterfaces/users/get-user-count-usecase.interface";
+import { CustomRequest } from "../middlewares/auth.middleware";
+import { IUpdateUserProfileUseCase } from "../../entities/usecaseInterfaces/users/update-user-profile.interface";
+import { IUpdateUserPasswordUseCase } from "../../entities/usecaseInterfaces/users/update-password.interface";
 
 @injectable()
 export class UsersController implements IUsersController{
@@ -14,7 +17,11 @@ export class UsersController implements IUsersController{
        @inject("IUpdateUserStatusUseCase") 
        private _updateUserStatusUseCase: IUpdateUserStatusUseCase,
        @inject("IGetUserCountUseCase")
-       private _getUserCountUseCase: IGetUserCountUseCase
+       private _getUserCountUseCase: IGetUserCountUseCase,
+       @inject("IUpdateUserProfileUseCase")
+       private _updateUserProfileUseCase: IUpdateUserProfileUseCase,
+       @inject("IUpdateUserPasswordUseCase")
+       private _updateUserPasswordUseCase: IUpdateUserPasswordUseCase
     ){}
 
     async getAllUsers(req: Request, res: Response): Promise<void> {
@@ -92,6 +99,47 @@ export class UsersController implements IUsersController{
         res.status(500).json({
             success: false,
             message: error.message || "Failed to fetch user count",
+        });
+    }
+   }
+
+   async updateUserProfile(req: Request, res: Response): Promise<void> {
+     try {
+         const {userId,role} = (req as CustomRequest).user; 
+         const data = req.body;
+
+         const updatedData  = await this._updateUserProfileUseCase.execute(userId,role, data);
+         res.status(StatusCodes.OK).json({
+            success: true,
+            message: "User profile updated successfully",
+            data: updatedData,
+         })
+     } catch (error: any) {
+        console.error("Error updating user profile:", error);
+        res.status(500).json({
+            success: false,
+            message: error.message || "Failed to update user profile",
+        });
+        
+     }
+   }
+
+   async updateUserPassword(req: Request, res: Response): Promise<void> {
+    try {
+        const { userId, role } = (req as CustomRequest).user;
+        const { currentPassword, newPassword } = req.body;
+
+        const response = await this._updateUserPasswordUseCase.execute(userId, role, currentPassword, newPassword);
+        res.status(StatusCodes.OK).json({
+            success: true,
+            message: "User password updated successfully",
+            data: response,
+        })
+    } catch (error: any) {
+        console.error("Error updating user password:", error);
+        res.status(500).json({
+            success: false,
+            message: error.message || "Failed to update user password",
         });
     }
    }
