@@ -27,6 +27,7 @@ import { RefreshTokenUseCase } from "../../useCases/auth/refresh-token.usecase";
 import { GetAllUsersUseCase } from "../../useCases/users/get-all-users.usecase";
 import { UpdateUserStatusUseCase } from "../../useCases/users/update-user-status.usecase";
 import { GetUserCountUseCase } from "../../useCases/users/get-user-count.usecase";
+import { UploadIdProofUseCase } from "../../useCases/vendor/upload-IdProof.usecase";
 
 
 export class UseCaseRegistry{
@@ -76,6 +77,9 @@ export class UseCaseRegistry{
        })
        container.register("IGetUserCountUseCase",{
         useClass: GetUserCountUseCase
+       })
+       container.register("IUploadIdProofUseCase",{
+        useClass: UploadIdProofUseCase
        })
 
 

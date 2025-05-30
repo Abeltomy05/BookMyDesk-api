@@ -23,6 +23,7 @@ import { IRevokeRefreshTokenUseCase } from "../../../entities/usecaseInterfaces/
 import { StatusCodes } from "http-status-codes";
 import { ZodError } from "zod";
 import { IRefreshTokenUseCase } from "../../../entities/usecaseInterfaces/auth/refresh-token-usecase.interface";
+import { IVendorModel } from "../../../frameworks/database/mongo/models/vendor.model";
 
 
 @injectable()
@@ -193,11 +194,25 @@ export class AuthController implements IAuthController {
      async authWithGoogle(req:Request,res:Response):Promise<void>{
           try {
                const profile = req.user as GoogleAuthDTO;
-               const user = await this._googleUseCase .execute(profile);
+               const user = await this._googleUseCase.execute(profile);
                if (!user._id || !user.email || !user.role) {
 				throw new Error("User ID, email, or role is missing");
 			};
 
+               if (user.role === "vendor") {
+               const status = (user as IVendorModel).status;
+               const idProof = (user as IVendorModel).idProof;
+               console.log("Vendor login check:", { status, idProof });
+               if ((status === "pending" || status === "rejected") && idProof) {
+               const redirectErrorURL = `${process.env.FRONTEND_URL}/vendor/login?error=${encodeURIComponent(
+                    user.status === "pending"
+                    ? "Your vendor account is pending admin approval."
+                    : "Your vendor account has been rejected.Please check your email for more details."
+               )}`;
+               return res.redirect(redirectErrorURL);
+               }
+            } 
+ 
                const tokens = await this._generateTokenUseCase.execute(
 				user._id as Schema.Types.ObjectId,
 				user.email,
