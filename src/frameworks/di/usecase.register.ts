@@ -30,6 +30,7 @@ import { GetUserCountUseCase } from "../../useCases/users/get-user-count.usecase
 import { UploadIdProofUseCase } from "../../useCases/vendor/upload-IdProof.usecase";
 import { UpdateUserProfileUseCase } from "../../useCases/users/update-user-profile.usecase";
 import { UpdateUserPasswordUseCase } from "../../useCases/users/update-password.usecase";
+import { GetUserDataUseCase } from "../../useCases/users/get-user-data.usecase";
 
 
 export class UseCaseRegistry{
@@ -88,6 +89,9 @@ export class UseCaseRegistry{
        })
        container.register("IUpdateUserPasswordUseCase",{
         useClass: UpdateUserPasswordUseCase
+       })
+       container.register("IGetUserDataUseCase",{
+        useClass: GetUserDataUseCase
        })
 
 

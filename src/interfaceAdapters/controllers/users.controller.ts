@@ -8,6 +8,8 @@ import { IGetUserCountUseCase } from "../../entities/usecaseInterfaces/users/get
 import { CustomRequest } from "../middlewares/auth.middleware";
 import { IUpdateUserProfileUseCase } from "../../entities/usecaseInterfaces/users/update-user-profile.interface";
 import { IUpdateUserPasswordUseCase } from "../../entities/usecaseInterfaces/users/update-password.interface";
+import { IGetUserDataUseCase } from "../../entities/usecaseInterfaces/users/get-user-data-usecase.interface";
+import { userSchemas } from "./auth/validations/user-signup.validation.schema";
 
 @injectable()
 export class UsersController implements IUsersController{
@@ -21,7 +23,9 @@ export class UsersController implements IUsersController{
        @inject("IUpdateUserProfileUseCase")
        private _updateUserProfileUseCase: IUpdateUserProfileUseCase,
        @inject("IUpdateUserPasswordUseCase")
-       private _updateUserPasswordUseCase: IUpdateUserPasswordUseCase
+       private _updateUserPasswordUseCase: IUpdateUserPasswordUseCase,
+       @inject("IGetUserDataUseCase")
+       private _getUserDataUseCase: IGetUserDataUseCase,
     ){}
 
     async getAllUsers(req: Request, res: Response): Promise<void> {
@@ -66,6 +70,26 @@ export class UsersController implements IUsersController{
         }
     }
 
+    async getUserData(req: Request, res: Response): Promise<void> {
+        try {
+            const { userId, role } = (req as CustomRequest).user;
+            console.log("Fetching user data for:", { userId, role });
+            const userData = await this._getUserDataUseCase.execute(userId, role);
+
+            res.status(StatusCodes.OK).json({
+                success: true,
+                message: "User data fetched successfully",
+                data: userData,
+            });
+        } catch (error) {
+            console.error("Error fetching user data:", error);
+            res.status(500).json({ 
+                success: false, 
+                message: "Failed to fetch user data" 
+            });
+        }
+    }
+
     async updateUserStatus(req: Request, res: Response): Promise<void> {
         try {
             const { userType, userId, status, reason } = req.body;
@@ -107,7 +131,7 @@ export class UsersController implements IUsersController{
      try {
          const {userId,role} = (req as CustomRequest).user; 
          const data = req.body;
-
+ 
          const updatedData  = await this._updateUserProfileUseCase.execute(userId,role, data);
          res.status(StatusCodes.OK).json({
             success: true,

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { BaseRoute } from "./base.route";
-import { authController,vendorController } from "../di/resolver";
+import { authController,usersController,vendorController } from "../di/resolver";
 import { CustomRequest, decodeToken, verifyAuth } from "../../interfaceAdapters/middlewares/auth.middleware";
 
 export class VendorRoutes extends BaseRoute{
@@ -19,6 +19,18 @@ export class VendorRoutes extends BaseRoute{
 
       this.router.post("/vendor/upload-id-proof",verifyAuth, (req: Request, res: Response) => {
              vendorController.uploadIdProof(req, res);
+        });
+
+      this.router.get("/vendor/get-user-data", verifyAuth, (req: Request, res: Response) => {
+        usersController.getUserData(req, res);
+      });   
+     
+     this.router.put("/vendor/update-profile",verifyAuth, (req: Request, res: Response) => {
+                  usersController.updateUserProfile(req, res);
+     });  
+
+     this.router.put("/vendor/update-password", verifyAuth, (req: Request, res: Response) => {
+            usersController.updateUserPassword(req, res);
         });
     }
 }

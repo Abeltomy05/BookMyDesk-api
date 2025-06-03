@@ -17,6 +17,10 @@ export class ClientRoutes extends BaseRoute{
             authController.handleTokenRefresh(req, res);
          });
 
+         this.router.get("/client/get-user-data", verifyAuth, (req: Request, res: Response) => {
+            usersController.getUserData(req, res);
+        });
+
         this.router.put("/client/update-profile",verifyAuth, (req: Request, res: Response) => {
             usersController.updateUserProfile(req, res);
         });
