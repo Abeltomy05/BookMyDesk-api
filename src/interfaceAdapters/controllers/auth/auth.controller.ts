@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { IAuthController } from "../../../entities/controllerInterfaces/users/auth-controller.interface";
+import { IAuthController } from "../../../entities/controllerInterfaces/auth/auth-controller.interface";
 import { userSchemas } from "./validations/user-signup.validation.schema";
 import { inject, injectable } from "tsyringe";
 import { IRegisterUserUseCase } from "../../../entities/usecaseInterfaces/auth/register-usecase.interface";

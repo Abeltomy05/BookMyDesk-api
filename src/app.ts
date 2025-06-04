@@ -5,7 +5,7 @@ import passport from "passport";
 import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from "cookie-parser";
-import { connectDB } from './lib/db';
+import { connectDB } from './frameworks/database/db';
 import {AuthRoutes} from './frameworks/routes/auth.route'; 
 import './frameworks/passport/google.strategy'
 import { ClientRoutes } from './frameworks/routes/client.route';

@@ -27,7 +27,7 @@ export class UsersController implements IUsersController{
        @inject("IGetUserDataUseCase")
        private _getUserDataUseCase: IGetUserDataUseCase,
     ){}
-
+    
     async getAllUsers(req: Request, res: Response): Promise<void> {
         try {
            const { page = 1, limit = 10, search = "", role, excludeStatus  } = req.query; 

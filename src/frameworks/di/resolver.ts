@@ -1,7 +1,7 @@
 import { container } from "tsyringe";
 import { DependencyInjection } from "./index";
 import { AuthController } from "../../interfaceAdapters/controllers/auth/auth.controller";
-import { IAuthController } from "../../entities/controllerInterfaces/users/auth-controller.interface";
+import { IAuthController } from "../../entities/controllerInterfaces/auth/auth-controller.interface";
 import { IUsersController } from "../../entities/controllerInterfaces/users/users-controller.interface";
 import { UsersController } from "../../interfaceAdapters/controllers/users.controller";
 import { IVendorController } from "../../entities/controllerInterfaces/users/vendor-controller.interface";
