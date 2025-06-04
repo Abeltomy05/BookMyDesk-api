@@ -113,9 +113,8 @@ export class AuthController implements IAuthController {
                return;
           }
           const user = await this._loginUserUseCase.execute(validatedData);
-          if (!user._id || !user.email || !user.role) {
-				throw new Error("User ID, email, or role is missing");
-			};
+
+          console.log("User status:", user.status, user._id, user.email, user.role);
 
           if (!user) {
                res.status(401).json({
@@ -124,13 +123,10 @@ export class AuthController implements IAuthController {
                });
                return;
           }
-          const tokens = await this._generateTokenUseCase.execute(user._id as Schema.Types.ObjectId,user.email!,user.role!);
-          const accessTokenName = `${user.role}_access_token`;
-		const refreshTokenName = `${user.role}_refresh_token`;
 
           const { password, ...userWithoutPassword } = user;
 
-          if( userWithoutPassword.status === "pending" && 
+           if( userWithoutPassword.status === "pending" && 
               userWithoutPassword.role === "vendor"
             ){
                res.status(400).json({
@@ -149,6 +145,23 @@ export class AuthController implements IAuthController {
                });
                return;
             }  
+
+            if( userWithoutPassword.status === "blocked"){
+               res.status(400).json({
+                    success:false,
+                    message:"Your account has been blocked by the admin."
+               });
+               return;
+            }
+            
+            if (!user._id || !user.email || !user.role) {
+               throw new Error("User ID, email, or role is missing");
+               }
+
+          const tokens = await this._generateTokenUseCase.execute(user._id as Schema.Types.ObjectId,user.email!,user.role!);
+          const accessTokenName = `${user.role}_access_token`;
+		const refreshTokenName = `${user.role}_refresh_token`;
+
 
             res.cookie(accessTokenName, tokens.accessToken, {
                httpOnly: true,
@@ -199,10 +212,17 @@ export class AuthController implements IAuthController {
 				throw new Error("User ID, email, or role is missing");
 			};
 
+               if(user.status === "blocked"){
+                    const role = user.role;
+                     const redirectErrorURL = `${process.env.FRONTEND_URL}${role === "client" ? "/login" : `/${role}/login`}?error=${encodeURIComponent("Your account has been blocked by the admin.")}`;
+                     return res.redirect(redirectErrorURL);
+               }
+
                if (user.role === "vendor") {
                const status = (user as IVendorModel).status;
                const idProof = (user as IVendorModel).idProof;
                console.log("Vendor login check:", { status, idProof });
+               
                if ((status === "pending" || status === "rejected") && idProof) {
                const redirectErrorURL = `${process.env.FRONTEND_URL}/vendor/login?error=${encodeURIComponent(
                     user.status === "pending"

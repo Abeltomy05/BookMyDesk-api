@@ -38,10 +38,6 @@ export class LoginUserUseCase implements ILoginUserUseCase{
        if(!userData){
             throw new Error("User not found");
         }
-      
-        if (userData.status === "blocked") {
-			throw new Error("User is blocked");
-		}
 
         if(user.password){
             const isPasswordValid = await this._passwordBcrypt.compare(user.password, userData.password);
