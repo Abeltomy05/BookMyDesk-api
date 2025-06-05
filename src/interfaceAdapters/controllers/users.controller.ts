@@ -30,8 +30,8 @@ export class UsersController implements IUsersController{
     
     async getAllUsers(req: Request, res: Response): Promise<void> {
         try {
-           const { page = 1, limit = 10, search = "", role, excludeStatus  } = req.query; 
-           console.log("Fetching all users with params:", { page, limit, search, role, excludeStatus });
+           const { page = 1, limit = 10, search = "", role, status, excludeStatus  } = req.query; 
+           console.log("Fetching all users with params:", { page, limit, search, role, status, excludeStatus });
            const pageNumber = Math.max(Number(page), 1);
            const pageSize = Math.max(Number(limit), 1);
            const searchTerm = typeof search === "string" ? search : "";
@@ -50,6 +50,7 @@ export class UsersController implements IUsersController{
 			pageNumber,
 			pageSize,
 			searchTerm,
+            status as string,
             excludeStatusArr
 		   );
 

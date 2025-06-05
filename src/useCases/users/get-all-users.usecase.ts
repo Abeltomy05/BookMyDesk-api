@@ -19,6 +19,7 @@ export class GetAllUsersUseCase implements IGetAllUsersUseCase {
     page: number,
     limit: number,
     search: string,
+    status: string,
     excludeStatus: string[] = []
   ): Promise<{
     users: (
@@ -41,9 +42,12 @@ export class GetAllUsersUseCase implements IGetAllUsersUseCase {
       }
     }
 
-    if (excludeStatus.length > 0) {
+    if (status && status !== "all") {
+      filter.status = status;
+    } else if (excludeStatus.length > 0) {
       filter.status = { $nin: excludeStatus };
     }
+
 
     let repo =
       userType === "client" ? this._clientRepository : this._vendorRepository;
