@@ -88,7 +88,7 @@ async sendResetEmail(to: string, subject: string, resetUrl: string): Promise<voi
     await this._sendMail(mailOptions);
   }
 
-async sendVendorRejectionEmail(to: string, reason: string): Promise<void> {
+async sendVendorRejectionEmail(to: string, reason: string, retryUrl: string): Promise<void> {
   const subject = "Vendor Application Rejected - BookMyDesk";
 
   const htmlContent = `
@@ -102,7 +102,12 @@ async sendVendorRejectionEmail(to: string, reason: string): Promise<void> {
       <blockquote style="background-color: #f8d7da; padding: 12px; border-left: 4px solid #dc3545; font-size: 14px; color: #721c24; border-radius: 4px;">
         ${reason}
       </blockquote>
-      <p style="color: #555; font-size: 14px;">You may reapply with updated or corrected information. If you have any questions, feel free to contact our support team.</p>
+      <p style="color: #555; font-size: 14px;">If you'd like to update your information and try again, click the button below:</p>
+      <div style="text-align: center; margin: 20px 0;">
+        <a href="${retryUrl}" style="background-color: #007bff; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px;">
+          Retry Application
+        </a>
+      </div>
       <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #eee; color: #999; font-size: 12px; text-align: center;">
         &copy; ${new Date().getFullYear()} BookMyDesk. All rights reserved.<br>
         This is an automated message, please do not reply.

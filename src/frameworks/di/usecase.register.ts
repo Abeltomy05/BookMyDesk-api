@@ -31,6 +31,8 @@ import { UploadIdProofUseCase } from "../../useCases/vendor/upload-IdProof.useca
 import { UpdateUserProfileUseCase } from "../../useCases/users/update-user-profile.usecase";
 import { UpdateUserPasswordUseCase } from "../../useCases/users/update-password.usecase";
 import { GetUserDataUseCase } from "../../useCases/users/get-user-data.usecase";
+import { GetRetryDataUseCase } from "../../useCases/vendor/get-retry-data.usecase";
+import { RetryRegistration } from "../../useCases/vendor/retry-registration.usecase";
 
 
 export class UseCaseRegistry{
@@ -92,6 +94,12 @@ export class UseCaseRegistry{
        })
        container.register("IGetUserDataUseCase",{
         useClass: GetUserDataUseCase
+       })
+       container.register("IGetRetryDataUseCase",{
+        useClass: GetRetryDataUseCase
+       })
+       container.register("IRetryRegistration",{
+         useClass: RetryRegistration
        })
 
 

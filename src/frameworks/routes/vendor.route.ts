@@ -32,5 +32,12 @@ export class VendorRoutes extends BaseRoute{
      this.router.put("/vendor/update-password", verifyAuth, (req: Request, res: Response) => {
             usersController.updateUserPassword(req, res);
         });
+
+    this.router.get("/vendor/get-retry-data", (req: Request, res: Response) => {
+            vendorController.getRetryData(req, res);
+        }); 
+      this.router.post("/vendor/retry-registration", (req: Request, res: Response) => {
+            vendorController.retryRegistration(req, res);
+        }); 
     }
 }

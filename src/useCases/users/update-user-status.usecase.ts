@@ -4,6 +4,7 @@ import { IVendorRepository } from "../../entities/repositoryInterfaces/users/ven
 import { IUpdateUserStatusUseCase } from "../../entities/usecaseInterfaces/users/update-user-status-usecase.interface";
 import { Types } from "mongoose";
 import { IEmailService } from "../../entities/serviceInterfaces/email-service.interface";
+import { IJwtService } from "../../entities/serviceInterfaces/jwt-service.interface";
 
 @injectable()
 export class UpdateUserStatusUseCase implements IUpdateUserStatusUseCase {
@@ -14,6 +15,8 @@ export class UpdateUserStatusUseCase implements IUpdateUserStatusUseCase {
 		private _vendorRepository: IVendorRepository,
 		@inject("IEmailService")
 	    private _emailService: IEmailService, 
+		@inject("IJwtService")
+	    private _tokenService: IJwtService, 
 	) {}
 	async execute(userType: string, userId: any, status: string, reason?: string): Promise<void> {
 		let repo;
@@ -35,7 +38,11 @@ export class UpdateUserStatusUseCase implements IUpdateUserStatusUseCase {
 
 		 if (userType === "vendor" && status === "rejected" && reason) {
 			console.log(`Sending rejection email to vendor: ${user.email}`);
-         await this._emailService.sendVendorRejectionEmail(user.email, reason);
+
+			const retryToken = this._tokenService.generateResetToken(user.email);
+			const retryUrl = new URL(`/vendor/retry/${retryToken}`, process.env.CORS_ORIGIN).toString();
+
+            await this._emailService.sendVendorRejectionEmail(user.email, reason, retryUrl);
         }
 	}
 }
