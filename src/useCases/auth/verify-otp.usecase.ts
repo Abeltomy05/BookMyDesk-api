@@ -11,7 +11,7 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
     async execute({email,otp}:{email:string,otp:string}):Promise<void>{
             const isOtpValid = await this._otpService.verifyOtp(email, otp);
             if (!isOtpValid) {
-                throw new Error("Invalid OTP");
+                throw new Error("The OTP you entered is incorrect or has expired. Please try again or request a new OTP.");
             }
     }
 }

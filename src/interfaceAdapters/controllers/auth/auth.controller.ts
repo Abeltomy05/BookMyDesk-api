@@ -327,7 +327,7 @@ export class AuthController implements IAuthController {
 		} catch (error) {
 			res.status(500).json({
                     success: false,
-                    message: "Failed to verify OTP",
+                    message: "The OTP you entered is incorrect or has expired. Please try again or request a new OTP.",
                });
 		}
 	}
