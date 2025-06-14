@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
 import { IGetAllUsersUseCase } from "../../entities/usecaseInterfaces/users/get-all-users-usecase.interface";
-import { IUsersController } from "../../entities/controllerInterfaces/users/users-controller.interface";
+import { IUsersController } from "../../entities/controllerInterfaces/others/users-controller.interface";
 import { StatusCodes } from "http-status-codes";
 import { IUpdateUserStatusUseCase } from "../../entities/usecaseInterfaces/users/update-user-status-usecase.interface";
 import { IGetUserCountUseCase } from "../../entities/usecaseInterfaces/users/get-user-count-usecase.interface";
@@ -30,7 +30,7 @@ export class UsersController implements IUsersController{
     
     async getAllUsers(req: Request, res: Response): Promise<void> {
         try {
-           const { page = 1, limit = 10, search = "", role, status, excludeStatus  } = req.query; 
+           const { page = 1, limit = 4, search = "", role, status, excludeStatus  } = req.query; 
            console.log("Fetching all users with params:", { page, limit, search, role, status, excludeStatus });
            const pageNumber = Math.max(Number(page), 1);
            const pageSize = Math.max(Number(limit), 1);
@@ -54,7 +54,6 @@ export class UsersController implements IUsersController{
             excludeStatusArr
 		   );
 
-    
            res.status(200).json({
 			success: true,
 			users,

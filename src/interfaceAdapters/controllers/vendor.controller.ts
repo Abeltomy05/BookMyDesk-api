@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
-import { IVendorController } from "../../entities/controllerInterfaces/users/vendor-controller.interface";
+import { IVendorController } from "../../entities/controllerInterfaces/others/vendor-controller.interface";
 import { StatusCodes } from "http-status-codes";
 import { CustomRequest } from "../middlewares/auth.middleware";
 import { IUploadIdProofUseCase } from "../../entities/usecaseInterfaces/vendor/uploadIdProof-usecase.interface";
@@ -15,7 +15,7 @@ export class VendorController implements IVendorController{
         @inject("IGetRetryDataUseCase")
         private _getRetryDataUseCase: IGetRetryDataUseCase,
         @inject("IRetryRegistration")
-        private _retryRegistration: IRetryRegistration
+        private _retryRegistration: IRetryRegistration,
     ){}
 
     async uploadIdProof(req: Request, res: Response): Promise<void> {
@@ -104,4 +104,7 @@ export class VendorController implements IVendorController{
         });
       }
     }
+
+
+
 }

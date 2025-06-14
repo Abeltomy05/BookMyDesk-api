@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { BaseRoute } from "./base.route";
-import { authController,usersController,vendorController } from "../di/resolver";
+import { authController,buildingController,usersController,vendorController } from "../di/resolver";
 import { CustomRequest, decodeToken, verifyAuth } from "../../interfaceAdapters/middlewares/auth.middleware";
 
 export class VendorRoutes extends BaseRoute{
@@ -39,5 +39,11 @@ export class VendorRoutes extends BaseRoute{
       this.router.post("/vendor/retry-registration", (req: Request, res: Response) => {
             vendorController.retryRegistration(req, res);
         }); 
+    this.router.get("/vendor/get-all-buildings",verifyAuth, (req: Request, res: Response) => {
+            buildingController.getAllBuilding(req, res);
+        });  
+     this.router.post("/vendor/register-building",verifyAuth, (req: Request, res: Response) => {
+            buildingController.registerBuilding(req, res);
+        });      
     }
 }

@@ -7,4 +7,4 @@ export interface ISpaceModel extends Omit<ISpaceEntity, "buildingId">, Document 
     buildingId: ObjectId;
 }
 
-export const spaceModel = model<ISpaceModel>('Space', spaceSchema);
+export const SpaceModel = model<ISpaceModel>('Space', spaceSchema);

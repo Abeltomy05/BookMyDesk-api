@@ -8,6 +8,8 @@ import { AdminRepository } from "../../interfaceAdapters/repositories/users/admi
 import { OtpRepository } from "../../interfaceAdapters/repositories/auth/otp.repository";
 import { RedisTokenRepository } from "../../interfaceAdapters/repositories/redis/redis-token.repository";
 import { RefreshTokenRepository } from "../../interfaceAdapters/repositories/auth/refresh-token.repository";
+import { BuildingRepository } from "../../interfaceAdapters/repositories/building/building.repository";
+import { SpaceRepository } from "../../interfaceAdapters/repositories/building/space.repository";
 
 export class RepositoryRegistry{
     static registerRepositories():void{
@@ -31,7 +33,12 @@ export class RepositoryRegistry{
         container.register("IRefreshTokenRepository", {
             useClass: RefreshTokenRepository
         })
-        
+        container.register("IBuildingRepository",{
+            useClass: BuildingRepository
+        })
+        container.register("ISpaceRepository",{
+            useClass: SpaceRepository,
+        })
         
     }
 }

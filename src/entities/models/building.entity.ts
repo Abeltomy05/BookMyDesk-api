@@ -4,22 +4,31 @@ export interface IBuildingEntity{
     buildingName:string;
     vendorId: string; 
     location?: {
-		type?: "Point";
-		name?: string;
-		displayName?: string;
-		zipCode?: string;
-		coordinates?: number[];
-	};
+    type?: string;
+    name?: string;
+    displayName?: string;
+    zipCode?: string;
+    coordinates?: number[];
+   };
     openingHours?: {
-    [day: string]: {
-      open?: string;
-      close?: string;
-      closed?: boolean;
-      is24Hours?: boolean;
+     weekdays: {
+      is24_7: boolean;
+      openTime?: string;
+      closeTime?: string;
+    };
+    weekends: {
+      is24_7: boolean;
+      openTime?: string;
+      closeTime?: string;
     };
     };
+    summarizedSpaces?:{
+      name:string;
+      count:number;
+    }[];
     phone?:string;
     email?:string;
+    description?:string;
     images?:string[];
     amenities?:string[];
     status:BuildingStatus;

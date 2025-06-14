@@ -33,6 +33,8 @@ import { UpdateUserPasswordUseCase } from "../../useCases/users/update-password.
 import { GetUserDataUseCase } from "../../useCases/users/get-user-data.usecase";
 import { GetRetryDataUseCase } from "../../useCases/vendor/get-retry-data.usecase";
 import { RetryRegistration } from "../../useCases/vendor/retry-registration.usecase";
+import { GetAllBuildingsUsecase } from "../../useCases/building/get-all-building.usecase";
+import { RegisterBuildingUsecase } from "../../useCases/building/register-building.usecase";
 
 
 export class UseCaseRegistry{
@@ -101,6 +103,12 @@ export class UseCaseRegistry{
        container.register("IRetryRegistration",{
          useClass: RetryRegistration
        })
+      container.register("IGetAllBuildingsUsecase",{
+        useClass: GetAllBuildingsUsecase
+      }) 
+      container.register("IRegisterBuildingUsecase",{
+        useClass: RegisterBuildingUsecase
+      })
 
 
 
