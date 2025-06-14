@@ -25,7 +25,7 @@ import { RevokeRefreshTokenUseCase } from "../../useCases/auth/revoke-refresh-to
 import { BlackListTokenUseCase } from "../../useCases/auth/blacklist-token.usecase";
 import { RefreshTokenUseCase } from "../../useCases/auth/refresh-token.usecase";
 import { GetAllUsersUseCase } from "../../useCases/users/get-all-users.usecase";
-import { UpdateUserStatusUseCase } from "../../useCases/users/update-user-status.usecase";
+import { UpdateEntityStatusUseCase  } from "../../useCases/users/update-entity-status.usecase";
 import { GetUserCountUseCase } from "../../useCases/users/get-user-count.usecase";
 import { UploadIdProofUseCase } from "../../useCases/vendor/upload-IdProof.usecase";
 import { UpdateUserProfileUseCase } from "../../useCases/users/update-user-profile.usecase";
@@ -35,6 +35,8 @@ import { GetRetryDataUseCase } from "../../useCases/vendor/get-retry-data.usecas
 import { RetryRegistration } from "../../useCases/vendor/retry-registration.usecase";
 import { GetAllBuildingsUsecase } from "../../useCases/building/get-all-building.usecase";
 import { RegisterBuildingUsecase } from "../../useCases/building/register-building.usecase";
+import { GetBuildingsForVerification } from "../../useCases/building/get-buildings-verification.usecase";
+
 
 
 export class UseCaseRegistry{
@@ -79,8 +81,8 @@ export class UseCaseRegistry{
        container.register("IGetAllUsersUseCase",{
         useClass: GetAllUsersUseCase
        })
-       container.register("IUpdateUserStatusUseCase",{
-        useClass: UpdateUserStatusUseCase
+       container.register("IUpdateEntityStatusUseCase",{
+        useClass: UpdateEntityStatusUseCase 
        })
        container.register("IGetUserCountUseCase",{
         useClass: GetUserCountUseCase
@@ -108,6 +110,9 @@ export class UseCaseRegistry{
       }) 
       container.register("IRegisterBuildingUsecase",{
         useClass: RegisterBuildingUsecase
+      })
+      container.register("IGetBuildingsForVerification",{
+        useClass: GetBuildingsForVerification
       })
 
 

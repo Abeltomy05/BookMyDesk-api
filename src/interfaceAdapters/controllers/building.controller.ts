@@ -6,6 +6,7 @@ import { IBuildingController } from "../../entities/controllerInterfaces/others/
 import { StatusCodes } from "http-status-codes";
 import { CustomRequest } from "../middlewares/auth.middleware";
 import { buildingRegistrationSchema, type BuildingRegistrationData } from "../../shared/validations/register-building.validation";
+import { IGetBuildingsForVerification } from "../../entities/usecaseInterfaces/building/get-building-varification-usecase.interface";
 
 @injectable()
 export class BuildingController implements IBuildingController{
@@ -14,6 +15,8 @@ export class BuildingController implements IBuildingController{
         private _getAllBuildingsUseCase: IGetAllBuildingsUsecase,
         @inject("IRegisterBuildingUsecase")
         private _registerBuildingUseCase: IRegisterBuildingUsecase,
+        @inject("IGetBuildingsForVerification")
+        private _getBuildingsForVerification: IGetBuildingsForVerification,
     ){}
 
    async getAllBuilding(req:Request, res: Response): Promise<void>{
@@ -22,9 +25,11 @@ export class BuildingController implements IBuildingController{
         console.log("Fetching all buildings with params:", { page, limit, search, status });
         const pageNumber = Math.max(Number(page), 1);
         const pageSize = Math.max(Number(limit), 1);
+        const vendorId = (req as CustomRequest).user.userId;
         const searchTerm = typeof search === "string" ? search : "";
 
         const {buildings,totalPages} = await this._getAllBuildingsUseCase.execute(
+           vendorId,
 			     pageNumber,
 			     pageSize,
 		       searchTerm,
@@ -99,4 +104,35 @@ export class BuildingController implements IBuildingController{
         });
       }
     }
+
+   async getBuildingsForVerification(req:Request, res: Response): Promise<void>{
+    try {
+      const {page=1,limit=5} = req.query;
+      const pageNumber = Math.max(Number(page), 1);
+      const pageSize = Math.max(Number(limit), 1);
+      const status = "pending"
+
+      const result  = await this._getBuildingsForVerification.execute(
+           pageNumber,
+			     pageSize,
+           status
+          )
+       console.log("usecase success",result.buildings)   
+
+      res.status(200).json({
+      success: true,
+      buildings: result.buildings,
+      totalPages: result.totalPages,
+      currentPage: result.currentPage,
+    });    
+    } catch (error) {
+       console.error("Error fetching buildings for verification:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch buildings for verification.",
+    });
+    }
+   }
+
+
 }

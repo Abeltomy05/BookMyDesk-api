@@ -8,4 +8,23 @@ export class BuildingRepository extends BaseRepository<IBuildingModel> implement
    constructor(){
     super(BuildingModel)
    }
+
+    async findAndPopulate(
+    filter: any,
+    skip: number,
+    limit: number,
+    sort: any = { createdAt: -1 },
+    populateFields: { path: string; select?: string }[] = []
+  ): Promise<{ items: any[] }> {
+    let query = this.model.find(filter).skip(skip).limit(limit).sort(sort);
+
+    // Apply each populate
+    for (const populate of populateFields) {
+      query = query.populate(populate);
+    }
+
+    const items = await query.lean();
+    return { items };
+  }
+
 }

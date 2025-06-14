@@ -12,12 +12,15 @@ export class GetAllBuildingsUsecase implements IGetAllBuildingsUsecase{
     ){}
 
     async execute(
+        vendorId:string,
         page: number,
         limit: number,
         search: string,
-        status?: string
+        status?: string,
     ): Promise<{ buildings: IBuildingEntity[]; totalPages: number }>{
-        const filterCriteria: any = {};
+        const filterCriteria: any = {
+             vendorId: new Types.ObjectId(vendorId),
+        };
          if (search && search.trim() !== '') {
                 filterCriteria.$or = [
                     { buildingName: { $regex: search.trim(), $options: 'i' } },
