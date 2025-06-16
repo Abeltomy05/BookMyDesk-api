@@ -36,6 +36,8 @@ import { RetryRegistration } from "../../useCases/vendor/retry-registration.usec
 import { GetAllBuildingsUsecase } from "../../useCases/building/get-all-building.usecase";
 import { RegisterBuildingUsecase } from "../../useCases/building/register-building.usecase";
 import { GetBuildingsForVerification } from "../../useCases/building/get-buildings-verification.usecase";
+import { EditBuildingUsecase } from "../../useCases/building/edit-building.usecase";
+import { GetSingleBuilding } from "../../useCases/building/get-single-building.usecase";
 
 
 
@@ -113,6 +115,12 @@ export class UseCaseRegistry{
       })
       container.register("IGetBuildingsForVerification",{
         useClass: GetBuildingsForVerification
+      })
+      container.register("IEditBuildingUsecase",{
+        useClass: EditBuildingUsecase
+      })
+      container.register("IGetSingleBuilding",{
+        useClass: GetSingleBuilding
       })
 
 

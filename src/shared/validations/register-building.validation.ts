@@ -46,11 +46,11 @@ export const buildingRegistrationSchema = z.object({
   
   openingHours: z.object({
     weekdays: z.object({
-      is24_7: z.boolean(),
+      is24Hour: z.boolean(),
       openTime: z.string().optional(),
       closeTime: z.string().optional()
     }).refine((data) => {
-      if (!data.is24_7) {
+      if (!data.is24Hour) {
         return data.openTime && data.closeTime;
       }
       return true;
@@ -59,11 +59,11 @@ export const buildingRegistrationSchema = z.object({
     }),
     
     weekends: z.object({
-      is24_7: z.boolean(),
+      is24Hour: z.boolean(),
       openTime: z.string().optional(),
       closeTime: z.string().optional()
     }).refine((data) => {
-      if (!data.is24_7) {
+      if (!data.is24Hour) {
         return data.openTime && data.closeTime;
       }
       return true;

@@ -2,7 +2,7 @@ import { Document, model, Types } from 'mongoose';
 import { buildingSchema } from '../schemas/building.schema';
 import { IBuildingEntity } from '../../../../entities/models/building.entity';
 
-export interface IBuildingModel extends Omit<IBuildingEntity, "vendorId" | "location">, Document {
+export interface IBuildingModel extends Omit<IBuildingEntity, "vendorId" | "location" | "_id">, Document {
     _id: Types.ObjectId;
     vendorId: Types.ObjectId;
     location?: {

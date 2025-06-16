@@ -1,4 +1,5 @@
 export interface ISpaceEntity{
+    _id?:string
     buildingId:string;
     name:string;
     description?:string;

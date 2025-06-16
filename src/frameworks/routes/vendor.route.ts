@@ -39,11 +39,19 @@ export class VendorRoutes extends BaseRoute{
       this.router.post("/vendor/retry-registration", (req: Request, res: Response) => {
             vendorController.retryRegistration(req, res);
         }); 
+    
+    this.router.get("/vendor/building/:id",verifyAuth, (req: Request, res: Response) => {
+            buildingController.getSingleBuilding(req, res);
+        }); 
+
     this.router.get("/vendor/get-all-buildings",verifyAuth, (req: Request, res: Response) => {
             buildingController.getAllBuilding(req, res);
         });  
      this.router.post("/vendor/register-building",verifyAuth, (req: Request, res: Response) => {
             buildingController.registerBuilding(req, res);
         });      
+      this.router.put("/vendor/edit-building",verifyAuth, (req: Request, res: Response) => {
+            buildingController.editBuilding(req, res);
+        });     
     }
 }

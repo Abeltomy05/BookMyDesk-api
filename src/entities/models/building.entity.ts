@@ -1,6 +1,7 @@
 import { BuildingStatus } from "../../shared/types/types";
 
 export interface IBuildingEntity{
+    _id?:string;
     buildingName:string;
     vendorId: string; 
     location?: {
@@ -12,12 +13,12 @@ export interface IBuildingEntity{
    };
     openingHours?: {
      weekdays: {
-      is24_7: boolean;
+      is24Hour: boolean;
       openTime?: string;
       closeTime?: string;
     };
     weekends: {
-      is24_7: boolean;
+      is24Hour: boolean;
       openTime?: string;
       closeTime?: string;
     };

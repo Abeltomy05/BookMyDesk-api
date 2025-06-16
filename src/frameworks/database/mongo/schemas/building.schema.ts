@@ -18,12 +18,12 @@ export const buildingSchema = new Schema<IBuildingModel>(
     },
     openingHours: {
        weekdays: {
-        is24_7: { type: Boolean },
+        is24Hour: { type: Boolean },
         openTime: { type: String },
         closeTime: { type: String }
       },
        weekends: {
-        is24_7: { type: Boolean },
+        is24Hour: { type: Boolean },
         openTime: { type: String },
         closeTime: { type: String }
       }

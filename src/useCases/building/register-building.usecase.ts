@@ -33,15 +33,15 @@ export class RegisterBuildingUsecase implements IRegisterBuildingUsecase{
         
       const cleanedOpeningHours = {
           weekdays: {
-            is24_7: data.openingHours.weekdays.is24_7,
-            ...(data.openingHours.weekdays.is24_7 ? {} : {
+            is24Hour: data.openingHours.weekdays.is24Hour,
+            ...(data.openingHours.weekdays.is24Hour ? {} : {
               openTime: data.openingHours.weekdays.openTime,
               closeTime: data.openingHours.weekdays.closeTime,
             })
           },
           weekends: {
-            is24_7: data.openingHours.weekends.is24_7,
-            ...(data.openingHours.weekends.is24_7 ? {} : {
+            is24Hour: data.openingHours.weekends.is24Hour,
+            ...(data.openingHours.weekends.is24Hour ? {} : {
               openTime: data.openingHours.weekends.openTime,
               closeTime: data.openingHours.weekends.closeTime,
             })

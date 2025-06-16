@@ -7,6 +7,11 @@ import { StatusCodes } from "http-status-codes";
 import { CustomRequest } from "../middlewares/auth.middleware";
 import { buildingRegistrationSchema, type BuildingRegistrationData } from "../../shared/validations/register-building.validation";
 import { IGetBuildingsForVerification } from "../../entities/usecaseInterfaces/building/get-building-varification-usecase.interface";
+import { editBuildingValidator } from "./validations/editBuilding.validation";
+import { ZodError } from "zod";
+import { IEditBuildingUsecase } from "../../entities/usecaseInterfaces/building/edit-building-usecase.interface";
+import { IBuildingEntity } from "../../entities/models/building.entity";
+import { IGetSingleBuilding } from "../../entities/usecaseInterfaces/building/get-single-building-usecase.interface";
 
 @injectable()
 export class BuildingController implements IBuildingController{
@@ -17,8 +22,12 @@ export class BuildingController implements IBuildingController{
         private _registerBuildingUseCase: IRegisterBuildingUsecase,
         @inject("IGetBuildingsForVerification")
         private _getBuildingsForVerification: IGetBuildingsForVerification,
+        @inject("IEditBuildingUsecase")
+         private _editBuildingUseCase: IEditBuildingUsecase,
+        @inject("IGetSingleBuilding")
+        private _getSingleBuildingUseCase: IGetSingleBuilding,
     ){}
-
+//get buildings of a vendor
    async getAllBuilding(req:Request, res: Response): Promise<void>{
       try {
         const{page=1,limit=5,search='',status} = req.query;
@@ -104,7 +113,7 @@ export class BuildingController implements IBuildingController{
         });
       }
     }
-
+//get buildings with pending status for admin side
    async getBuildingsForVerification(req:Request, res: Response): Promise<void>{
     try {
       const {page=1,limit=5} = req.query;
@@ -131,6 +140,55 @@ export class BuildingController implements IBuildingController{
       success: false,
       message: "Failed to fetch buildings for verification.",
     });
+    }
+   }
+
+   async editBuilding(req:Request, res: Response): Promise<void>{
+    try {
+      const { id, name, email, phone,location, openingHours, description, images, amenities, spaces,} = req.body;
+      if(email || phone){
+      const parsedData = editBuildingValidator.parse({
+            email: email,
+            phone: phone,
+          });
+      }
+
+      const buildingDataToUpdate= { id:id, buildingName: name, email, phone, location, openingHours, description, images, amenities, };
+      const spaceList = Array.isArray(spaces) ? spaces : [];
+      
+      const result = await this._editBuildingUseCase.execute(buildingDataToUpdate,spaceList);
+        res.status(200).json({
+        success: true,
+        message: "Building updated successfully",
+        data: result,
+      });
+
+    } catch (error) {
+       if (error instanceof ZodError) {
+        res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          errors: error.errors, 
+        });
+        return
+     }
+      console.error("Unexpected error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+      return
+        }
+   }
+
+   async getSingleBuilding(req:Request, res: Response): Promise<void>{
+    try {
+      const id = req.params.id;
+      const buildingWithSpaces  = await this._getSingleBuildingUseCase.execute(id);
+      res.status(200).json({ success: true, data: buildingWithSpaces });
+    } catch (error) {
+        console.error("Error getting building:", error);
+       res.status(500).json({ success: false, message: "Error retrieving building" });
     }
    }
 
