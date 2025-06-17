@@ -25,7 +25,7 @@ import { RevokeRefreshTokenUseCase } from "../../useCases/auth/revoke-refresh-to
 import { BlackListTokenUseCase } from "../../useCases/auth/blacklist-token.usecase";
 import { RefreshTokenUseCase } from "../../useCases/auth/refresh-token.usecase";
 import { GetAllUsersUseCase } from "../../useCases/users/get-all-users.usecase";
-import { UpdateUserStatusUseCase } from "../../useCases/users/update-user-status.usecase";
+import { UpdateEntityStatusUseCase  } from "../../useCases/users/update-entity-status.usecase";
 import { GetUserCountUseCase } from "../../useCases/users/get-user-count.usecase";
 import { UploadIdProofUseCase } from "../../useCases/vendor/upload-IdProof.usecase";
 import { UpdateUserProfileUseCase } from "../../useCases/users/update-user-profile.usecase";
@@ -33,6 +33,13 @@ import { UpdateUserPasswordUseCase } from "../../useCases/users/update-password.
 import { GetUserDataUseCase } from "../../useCases/users/get-user-data.usecase";
 import { GetRetryDataUseCase } from "../../useCases/vendor/get-retry-data.usecase";
 import { RetryRegistration } from "../../useCases/vendor/retry-registration.usecase";
+import { GetAllBuildingsUsecase } from "../../useCases/building/get-all-building.usecase";
+import { RegisterBuildingUsecase } from "../../useCases/building/register-building.usecase";
+import { GetBuildingsForVerification } from "../../useCases/building/get-buildings-verification.usecase";
+import { EditBuildingUsecase } from "../../useCases/building/edit-building.usecase";
+import { GetSingleBuilding } from "../../useCases/building/get-single-building.usecase";
+import { FetchBuildingUseCase } from "../../useCases/building/fetch-building.usecase";
+
 
 
 export class UseCaseRegistry{
@@ -77,8 +84,8 @@ export class UseCaseRegistry{
        container.register("IGetAllUsersUseCase",{
         useClass: GetAllUsersUseCase
        })
-       container.register("IUpdateUserStatusUseCase",{
-        useClass: UpdateUserStatusUseCase
+       container.register("IUpdateEntityStatusUseCase",{
+        useClass: UpdateEntityStatusUseCase 
        })
        container.register("IGetUserCountUseCase",{
         useClass: GetUserCountUseCase
@@ -101,6 +108,24 @@ export class UseCaseRegistry{
        container.register("IRetryRegistration",{
          useClass: RetryRegistration
        })
+      container.register("IGetAllBuildingsUsecase",{
+        useClass: GetAllBuildingsUsecase
+      }) 
+      container.register("IRegisterBuildingUsecase",{
+        useClass: RegisterBuildingUsecase
+      })
+      container.register("IGetBuildingsForVerification",{
+        useClass: GetBuildingsForVerification
+      })
+      container.register("IEditBuildingUsecase",{
+        useClass: EditBuildingUsecase
+      })
+      container.register("IGetSingleBuilding",{
+        useClass: GetSingleBuilding
+      })
+      container.register("IFetchBuildingUseCase",{
+        useClass : FetchBuildingUseCase
+      })
 
 
 

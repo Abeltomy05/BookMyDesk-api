@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { BaseRoute } from "./base.route";
-import { authController, usersController } from "../di/resolver";
+import { authController, buildingController, usersController } from "../di/resolver";
 import { CustomRequest, decodeToken, verifyAuth } from "../../interfaceAdapters/middlewares/auth.middleware";
 
 export class ClientRoutes extends BaseRoute{
@@ -27,6 +27,10 @@ export class ClientRoutes extends BaseRoute{
 
         this.router.put("/client/update-password", verifyAuth, (req: Request, res: Response) => {
             usersController.updateUserPassword(req, res);
+        });
+
+         this.router.get("/client/list-buildings", verifyAuth, (req: Request, res: Response) => {
+            buildingController.fetchBuildings(req, res);
         });
     }
 }

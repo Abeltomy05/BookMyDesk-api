@@ -126,5 +126,37 @@ async sendVendorRejectionEmail(to: string, reason: string, retryUrl: string): Pr
   await this._sendMail(mailOptions);
 }
 
+async sendBuildingRejectionEmail(to: string, reason: string): Promise<void> {
+  const subject = "Building Registration Rejected - BookMyDesk";
+
+  const htmlContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+      <div style="text-align: center; padding: 15px 0; background-color: #dc3545; margin-bottom: 20px;">
+        <h2 style="color: white; margin: 0;">BookMyDesk</h2>
+      </div>
+      <h3 style="color: #333;">Building Rejected</h3>
+      <p style="color: #555; font-size: 16px;">We regret to inform you that your building registration has been rejected.</p>
+      <p style="color: #555; font-size: 16px;">Reason:</p>
+      <blockquote style="background-color: #f8d7da; padding: 12px; border-left: 4px solid #dc3545; font-size: 14px; color: #721c24; border-radius: 4px;">
+        ${reason}
+      </blockquote>
+      <p style="color: #555; font-size: 14px;">For further assistance, please contact support.</p>
+      <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #eee; color: #999; font-size: 12px; text-align: center;">
+        &copy; ${new Date().getFullYear()} BookMyDesk. All rights reserved.<br>
+        This is an automated message, please do not reply.
+      </div>
+    </div>
+  `;
+
+  const mailOptions = {
+    from: `BookMyDesk <${process.env.EMAIL_USER}>`,
+    to,
+    subject,
+    text: `Your building registration has been rejected. Reason: ${reason}`,
+    html: htmlContent
+  };
+
+  await this._sendMail(mailOptions);
+}
 
 }

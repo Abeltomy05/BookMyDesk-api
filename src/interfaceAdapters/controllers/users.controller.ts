@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
 import { IGetAllUsersUseCase } from "../../entities/usecaseInterfaces/users/get-all-users-usecase.interface";
-import { IUsersController } from "../../entities/controllerInterfaces/users/users-controller.interface";
+import { IUsersController } from "../../entities/controllerInterfaces/others/users-controller.interface";
 import { StatusCodes } from "http-status-codes";
-import { IUpdateUserStatusUseCase } from "../../entities/usecaseInterfaces/users/update-user-status-usecase.interface";
+import { IUpdateEntityStatusUseCase } from "../../entities/usecaseInterfaces/users/update-user-status-usecase.interface";
 import { IGetUserCountUseCase } from "../../entities/usecaseInterfaces/users/get-user-count-usecase.interface";
 import { CustomRequest } from "../middlewares/auth.middleware";
 import { IUpdateUserProfileUseCase } from "../../entities/usecaseInterfaces/users/update-user-profile.interface";
@@ -16,8 +16,8 @@ export class UsersController implements IUsersController{
     constructor(
        @inject("IGetAllUsersUseCase")
        private _getAllUsersUseCase: IGetAllUsersUseCase,
-       @inject("IUpdateUserStatusUseCase") 
-       private _updateUserStatusUseCase: IUpdateUserStatusUseCase,
+       @inject("IUpdateEntityStatusUseCase") 
+       private _updateEnitityStatusUseCase: IUpdateEntityStatusUseCase,
        @inject("IGetUserCountUseCase")
        private _getUserCountUseCase: IGetUserCountUseCase,
        @inject("IUpdateUserProfileUseCase")
@@ -30,7 +30,7 @@ export class UsersController implements IUsersController{
     
     async getAllUsers(req: Request, res: Response): Promise<void> {
         try {
-           const { page = 1, limit = 10, search = "", role, status, excludeStatus  } = req.query; 
+           const { page = 1, limit = 4, search = "", role, status, excludeStatus  } = req.query; 
            console.log("Fetching all users with params:", { page, limit, search, role, status, excludeStatus });
            const pageNumber = Math.max(Number(page), 1);
            const pageSize = Math.max(Number(limit), 1);
@@ -54,7 +54,6 @@ export class UsersController implements IUsersController{
             excludeStatusArr
 		   );
 
-    
            res.status(200).json({
 			success: true,
 			users,
@@ -91,15 +90,15 @@ export class UsersController implements IUsersController{
         }
     }
 
-    async updateUserStatus(req: Request, res: Response): Promise<void> {
+    async updateEntityStatus(req: Request, res: Response): Promise<void> {
         try {
-            const { userType, userId, status, reason } = req.body;
-            console.log("Updating user status:", { userType, userId, status });
-            await this._updateUserStatusUseCase.execute(userType, userId, status, reason);
+            const { entityType, entityId, status, reason } = req.body;
+            console.log("Updating user status:", { entityType, entityId, status });
+            await this._updateEnitityStatusUseCase.execute(entityType, entityId, status, reason);
 
             res.status(StatusCodes.OK).json({ 
                 success: true,
-                message: "User status updated successfully" 
+                message: `${entityType} status updated successfully`
             });
         } catch (error) {
             console.error("Error updating user status:", error);
