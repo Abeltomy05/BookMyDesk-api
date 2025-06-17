@@ -2,11 +2,13 @@ import { inject, injectable } from "tsyringe";
 import { IBuildingRepository } from "../../entities/repositoryInterfaces/building/building-repository.interface";
 import { IBuildingEntity } from "../../entities/models/building.entity";
 import { Types } from "mongoose";
-import { BuildingStatus } from "../../shared/types/types";
+import { BuildingStatus, SpaceAggregation } from "../../shared/types/types";
 import { IRegisterBuildingUsecase } from "../../entities/usecaseInterfaces/building/register-building-usecase.interface";
 import { BuildingRegistrationData } from "../../shared/validations/register-building.validation";
 import { ISpaceRepository } from "../../entities/repositoryInterfaces/building/space-repository.interface";
 import { ISpaceEntity } from "../../entities/models/space.entity";
+
+
 
 @injectable()
 export class RegisterBuildingUsecase implements IRegisterBuildingUsecase{
@@ -48,14 +50,29 @@ export class RegisterBuildingUsecase implements IRegisterBuildingUsecase{
           }
         };
 
-      const spaceSummary: Record<string, number> = {};
-      data.spaceTypes.forEach(space => {
-        spaceSummary[space.name] = (spaceSummary[space.name] || 0) + (space.totalSeats || 0);
-      });
+      const spaceMap: Record<string, SpaceAggregation> = {};
+      data.spaceTypes.forEach((space) => {
+      if (!space.name) return;
 
-      const summarizedSpaces = Object.entries(spaceSummary).map(([name, count]) => ({
+      const existing = spaceMap[space.name];
+      const count = space.totalSeats || 0;
+      const price = space.pricePerDay || 0;
+
+      if (existing) {
+        spaceMap[space.name].count += count;
+        spaceMap[space.name].price = Math.min(existing.price, price);
+      } else {
+        spaceMap[space.name] = {
+          count,
+          price
+        };
+      }
+    });
+
+      const summarizedSpaces = Object.entries(spaceMap).map(([name, { count, price }]) => ({
         name,
-        count
+        count,
+        price
       }));
   
        const locationData = data.location ? {

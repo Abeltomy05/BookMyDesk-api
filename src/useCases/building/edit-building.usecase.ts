@@ -7,6 +7,7 @@ import { toEntitySpace, toModelSpace } from "../../interfaceAdapters/mappers/spa
 import { toEntityBuilding } from "../../interfaceAdapters/mappers/building.mapper";
 import { IEditBuildingUsecase } from "../../entities/usecaseInterfaces/building/edit-building-usecase.interface";
 import mongoose from "mongoose";
+import { SpaceAggregation } from "../../shared/types/types";
 
 @injectable()
 export class EditBuildingUsecase implements IEditBuildingUsecase{
@@ -70,10 +71,26 @@ export class EditBuildingUsecase implements IEditBuildingUsecase{
             await this.spaceRepository.delete({ _id: space._id });
         }
 
-      const summarizedSpaces = updatedSpaces.map(space => ({
-            name: space.name,
-            count: space.capacity || 0, 
-       }));
+      const summaryMap: Record<string, SpaceAggregation> = {};
+      for (const space of updatedSpaces) {
+        const { name, capacity = 0, pricePerDay = 0 } = space;
+
+        if (summaryMap[name]) {
+            summaryMap[name].count += capacity;
+            summaryMap[name].price = Math.min(summaryMap[name].price, pricePerDay);
+        } else {
+            summaryMap[name] = {
+            count: capacity,
+            price: pricePerDay
+            };
+        }
+        }
+
+        const summarizedSpaces = Object.entries(summaryMap).map(([name, { count, price }]) => ({
+            name,
+            count,
+            price
+            }));
 
         updatedBuilding = await this.buildingRepository.update(
             { _id: id },

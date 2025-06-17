@@ -31,7 +31,8 @@ export const buildingSchema = new Schema<IBuildingModel>(
     summarizedSpaces: [
       {
         name: { type: String, required: true },
-        count: { type: Number, required: true }
+        count: { type: Number, required: true },
+        price: { type: Number, required: true }
       }
     ],              
     phone: {type: String},

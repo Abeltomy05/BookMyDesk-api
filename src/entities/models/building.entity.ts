@@ -26,6 +26,7 @@ export interface IBuildingEntity{
     summarizedSpaces?:{
       name:string;
       count:number;
+      price:number;
     }[];
     phone?:string;
     email?:string;

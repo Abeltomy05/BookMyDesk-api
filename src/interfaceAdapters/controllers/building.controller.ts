@@ -12,6 +12,7 @@ import { ZodError } from "zod";
 import { IEditBuildingUsecase } from "../../entities/usecaseInterfaces/building/edit-building-usecase.interface";
 import { IBuildingEntity } from "../../entities/models/building.entity";
 import { IGetSingleBuilding } from "../../entities/usecaseInterfaces/building/get-single-building-usecase.interface";
+import { IFetchBuildingUseCase } from "../../entities/usecaseInterfaces/building/fetch-building-usecase.interface";
 
 @injectable()
 export class BuildingController implements IBuildingController{
@@ -26,6 +27,8 @@ export class BuildingController implements IBuildingController{
          private _editBuildingUseCase: IEditBuildingUsecase,
         @inject("IGetSingleBuilding")
         private _getSingleBuildingUseCase: IGetSingleBuilding,
+        @inject("IFetchBuildingUseCase")
+        private _fetchBuildingUseCase: IFetchBuildingUseCase,
     ){}
 //get buildings of a vendor
    async getAllBuilding(req:Request, res: Response): Promise<void>{
@@ -189,6 +192,26 @@ export class BuildingController implements IBuildingController{
     } catch (error) {
         console.error("Error getting building:", error);
        res.status(500).json({ success: false, message: "Error retrieving building" });
+    }
+   }
+
+   async fetchBuildings(req:Request, res: Response): Promise<void>{
+    try {
+       const page = parseInt(req.query.page as string) || 1;
+       const limit = parseInt(req.query.limit as string) || 5;
+
+      const result = await this._fetchBuildingUseCase.execute(page, limit);
+       res.status(200).json({
+      success: true,
+      data: result.items,
+      total: result.total,
+      page,
+      limit,
+      totalPages: Math.ceil(result.total / limit),
+    });
+    } catch (error) {
+      console.error(error);
+       res.status(500).json({ success: false, message: "Failed to fetch buildings" });
     }
    }
 

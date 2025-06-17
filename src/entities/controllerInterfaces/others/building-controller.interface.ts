@@ -6,4 +6,5 @@ export interface IBuildingController{
     getBuildingsForVerification(req:Request, res: Response): Promise<void>;
     editBuilding(req:Request, res: Response): Promise<void>;
     getSingleBuilding(req:Request, res: Response): Promise<void>;
+    fetchBuildings(req:Request, res: Response): Promise<void>
 }

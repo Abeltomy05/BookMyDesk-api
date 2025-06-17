@@ -2,6 +2,10 @@ export type VendorStatus = "pending" | "approved" | "rejected" | "blocked";
 export type ClientStatus = "active" | "blocked";
 export type AdminStatus = "active";
 export type BuildingStatus = "pending" | "approved" | "archived" | "rejected";
+export type SpaceAggregation = {
+  count: number;
+  price: number;
+};
 
 export interface User {
   id: string;

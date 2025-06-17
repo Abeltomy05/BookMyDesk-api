@@ -38,6 +38,7 @@ import { RegisterBuildingUsecase } from "../../useCases/building/register-buildi
 import { GetBuildingsForVerification } from "../../useCases/building/get-buildings-verification.usecase";
 import { EditBuildingUsecase } from "../../useCases/building/edit-building.usecase";
 import { GetSingleBuilding } from "../../useCases/building/get-single-building.usecase";
+import { FetchBuildingUseCase } from "../../useCases/building/fetch-building.usecase";
 
 
 
@@ -121,6 +122,9 @@ export class UseCaseRegistry{
       })
       container.register("IGetSingleBuilding",{
         useClass: GetSingleBuilding
+      })
+      container.register("IFetchBuildingUseCase",{
+        useClass : FetchBuildingUseCase
       })
 
 
