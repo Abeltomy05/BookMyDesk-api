@@ -53,5 +53,8 @@ export class VendorRoutes extends BaseRoute{
       this.router.put("/vendor/edit-building",verifyAuth, (req: Request, res: Response) => {
             buildingController.editBuilding(req, res);
         });     
+       this.router.patch("/vendor/update-status",verifyAuth,(req: Request, res: Response) => {
+            usersController.updateEntityStatus(req, res);
+        });  
     }
 }

@@ -21,7 +21,7 @@ export class AdminRoutes extends BaseRoute{
             usersController.getAllUsers(req, res);
         });
 
-         this.router.post("/admin/update-status",verifyAuth,(req: Request, res: Response) => {
+         this.router.patch("/admin/update-status",verifyAuth,(req: Request, res: Response) => {
             usersController.updateEntityStatus(req, res);
         });
         this.router.get("/admin/get-user-count",verifyAuth,(req: Request, res: Response) => {

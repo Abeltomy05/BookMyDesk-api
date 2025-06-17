@@ -11,5 +11,15 @@ export interface IBuildingRepository extends IBaseRepository<IBuildingModel>{
     populateFields: { path: string; select?: string }[]
   ): Promise<{ items: any[] }>;
 
-  
+  searchBuildings(
+    filters: {
+      locationName?: string;
+      type?: string;
+      minPrice?: number;
+      maxPrice?: number;
+    },
+    skip?: number,
+    limit?: number,
+    sort?: Record<string, 1 | -1>
+  ): Promise<{ items: IBuildingModel[]; total: number }>;
 }
