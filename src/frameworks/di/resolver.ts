@@ -8,9 +8,11 @@ import { IVendorController } from "../../entities/controllerInterfaces/others/ve
 import { VendorController } from "../../interfaceAdapters/controllers/vendor.controller";
 import { BuildingController } from "../../interfaceAdapters/controllers/building.controller";
 import { IBuildingController } from "../../entities/controllerInterfaces/others/building-controller.interface";
+import { BlockStatusMiddleware } from "../../interfaceAdapters/middlewares/blockStatus.middleware";
 
 DependencyInjection.registerAll();
 //* ====== Middleware Resolving ====== *//
+export const blockStatusMiddleware = container.resolve(BlockStatusMiddleware)
 
 //* ====== Controller Resolving ====== *//
 export const authController = 

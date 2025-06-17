@@ -185,20 +185,13 @@ export class AuthController implements IAuthController {
                },
             })
           }catch(error:any){
-               const message = error.message?.toLowerCase();
-                 if (message?.includes("invalid password")) {
-                    res.status(401).json({
-                         success: false,
-                         message: "Invalid email or password"
-                    });
-                    return;
-                    }
+
                if (error instanceof Error) {
                     console.error("Error in login:", error.message);
 
                     res.status(500).json({
                          success: false,
-                         message: "An unexpected error occurred during login. Please try again later.",
+                         message: error.message,
                          error: process.env.NODE_ENV === "development" ? error.message : undefined
                     });
                } else {
