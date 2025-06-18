@@ -40,7 +40,7 @@ export class BuildingRepository extends BaseRepository<IBuildingModel> implement
     sort: Record<string, 1 | -1> = {}
   ) {
     const query: FilterQuery<IBuildingModel> = {
-      status: { $ne: "archived" }
+      status: "approved"
     };
 
      if (filters.locationName) {
