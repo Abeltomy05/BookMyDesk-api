@@ -33,5 +33,9 @@ export class ClientRoutes extends BaseRoute{
          this.router.get("/client/list-buildings", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response) => {
             buildingController.fetchBuildings(req, res);
         });
+
+         this.router.get("/client/building/:id", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response) => {
+            buildingController.getSingleBuilding(req, res);
+        });
     }
 }
