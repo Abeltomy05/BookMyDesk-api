@@ -22,12 +22,10 @@ export const buildingRegistrationSchema = z.object({
       .default([0, 0])
       .optional()
   }).refine((data) => {
-    // At least one of name or displayName should be provided
     return data.name || data.displayName;
   }, {
     message: "Either location name or display name is required"
   }).refine((data) => {
-    // If coordinates are provided, validate them
     if (data.coordinates) {
       const [lng, lat] = data.coordinates;
       return lng >= -180 && lng <= 180 && lat >= -90 && lat <= 90;
