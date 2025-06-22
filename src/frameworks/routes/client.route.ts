@@ -1,6 +1,6 @@
 import { Request, RequestHandler, Response } from "express";
 import { BaseRoute } from "./base.route";
-import { blockStatusMiddleware, authController, buildingController, usersController } from "../di/resolver";
+import { blockStatusMiddleware, authController, buildingController, usersController, bookingController } from "../di/resolver";
 import { authorizeRole, decodeToken, verifyAuth } from "../../interfaceAdapters/middlewares/auth.middleware";
 
 export class ClientRoutes extends BaseRoute{
@@ -36,6 +36,10 @@ export class ClientRoutes extends BaseRoute{
 
          this.router.get("/client/building/:id", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response) => {
             buildingController.getSingleBuilding(req, res);
+        });
+
+        this.router.get("/client/get-booking-page-data/:spaceId", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response) => {
+            bookingController.getBookingPageData(req, res);
         });
     }
 }

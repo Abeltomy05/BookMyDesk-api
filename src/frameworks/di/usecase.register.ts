@@ -39,6 +39,7 @@ import { GetBuildingsForVerification } from "../../useCases/building/get-buildin
 import { EditBuildingUsecase } from "../../useCases/building/edit-building.usecase";
 import { GetSingleBuilding } from "../../useCases/building/get-single-building.usecase";
 import { FetchBuildingUseCase } from "../../useCases/building/fetch-building.usecase";
+import { GetBookingPageDataUseCase } from "../../useCases/booking/get-booking-page-data.usecase";
 
 
 
@@ -125,6 +126,9 @@ export class UseCaseRegistry{
       })
       container.register("IFetchBuildingUseCase",{
         useClass : FetchBuildingUseCase
+      })
+      container.register("IGetBookingPageDataUseCase",{
+        useClass: GetBookingPageDataUseCase
       })
 
 
