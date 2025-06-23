@@ -41,5 +41,13 @@ export class ClientRoutes extends BaseRoute{
         this.router.get("/client/get-booking-page-data/:spaceId", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response) => {
             bookingController.getBookingPageData(req, res);
         });
+
+        this.router.post("/client/create-payment-intent", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response) => {
+            bookingController.createPaymentIntent(req, res);
+        });
+
+        this.router.post("/client/confirm-payment", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response) => {
+            bookingController.confirmPayment(req, res);
+        });
     }
 }

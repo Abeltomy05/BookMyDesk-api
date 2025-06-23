@@ -10,6 +10,7 @@ import { RedisTokenRepository } from "../../interfaceAdapters/repositories/redis
 import { RefreshTokenRepository } from "../../interfaceAdapters/repositories/auth/refresh-token.repository";
 import { BuildingRepository } from "../../interfaceAdapters/repositories/building/building.repository";
 import { SpaceRepository } from "../../interfaceAdapters/repositories/building/space.repository";
+import { BookingRepository } from "../../interfaceAdapters/repositories/booking/booking.repository";
 
 export class RepositoryRegistry{
     static registerRepositories():void{
@@ -38,6 +39,9 @@ export class RepositoryRegistry{
         })
         container.register("ISpaceRepository",{
             useClass: SpaceRepository,
+        })
+        container.register("IBookingRepository",{
+            useClass: BookingRepository
         })
         
     }

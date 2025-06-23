@@ -40,6 +40,9 @@ import { EditBuildingUsecase } from "../../useCases/building/edit-building.useca
 import { GetSingleBuilding } from "../../useCases/building/get-single-building.usecase";
 import { FetchBuildingUseCase } from "../../useCases/building/fetch-building.usecase";
 import { GetBookingPageDataUseCase } from "../../useCases/booking/get-booking-page-data.usecase";
+import { StripeService } from "../../interfaceAdapters/services/stripe.service";
+import { CreatePaymentIntentUseCase } from "../../useCases/booking/create-payment-intent.usecase";
+import { ConfirmPaymentUseCase } from "../../useCases/booking/confirm-payment.usecase";
 
 
 
@@ -130,6 +133,12 @@ export class UseCaseRegistry{
       container.register("IGetBookingPageDataUseCase",{
         useClass: GetBookingPageDataUseCase
       })
+      container.register("ICreatePaymentIntentUseCase",{
+        useClass: CreatePaymentIntentUseCase
+      })
+      container.register("IConfirmPaymentUseCase",{
+        useClass: ConfirmPaymentUseCase
+      })
 
 
 
@@ -161,7 +170,10 @@ export class UseCaseRegistry{
 
         container.register<IJwtService>("IJwtService",{
             useClass: JwtService
-        }) 
+        })
+        container.register("IStripeService",{
+          useClass: StripeService
+        })
 
     }
 }
