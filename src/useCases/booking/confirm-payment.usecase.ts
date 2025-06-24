@@ -24,22 +24,98 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
     async execute(data: ConfirmPaymentDTO): Promise<{}> {
        try {
         const paymentIntent = await this._stripeService.retrievePaymentIntent(data.paymentIntentId);
-        if (paymentIntent.status === 'succeeded') {  
+        console.log("Payment Intent retrieved:", paymentIntent);
+
+        if (paymentIntent.status !== 'requires_capture') {
+            throw new Error('Payment intent is not in the correct state for confirmation');
+        }
+ 
             const spaceId = paymentIntent.metadata.spaceId;
             const buildingId = paymentIntent.metadata.buildingId;
+            const clientId = paymentIntent.metadata.clientId;
+            const vendorId = paymentIntent.metadata.vendorId;
+            const bookingDate = paymentIntent.metadata.bookingDate;
             const numberOfDesks = parseInt(paymentIntent.metadata.numberOfDesks);
+            const totalPrice = parseFloat(paymentIntent.metadata.totalPrice);
             
              const space = await this._spaceRepository.findOne({_id: spaceId});
                 if (!space) {
+                    await this._stripeService.cancelPaymentIntent(data.paymentIntentId);
+
+                    const failedBookingData = {
+                        spaceId: new Types.ObjectId(spaceId),
+                        clientId: new Types.ObjectId(clientId),
+                        vendorId: new Types.ObjectId(vendorId),
+                        buildingId: new Types.ObjectId(buildingId),
+                        bookingDate: new Date(bookingDate),
+                        numberOfDesks: numberOfDesks,
+                        totalPrice: totalPrice,
+                        status: 'failed' as BookingStatus,
+                        paymentStatus: 'failed' as PaymentStatus,
+                        paymentMethod: 'stripe' as PaymentMethod,
+                        transactionId: data.paymentIntentId,
+                    }; 
+                    await this._bookingRepository.save(failedBookingData);
                     throw new Error('Space not found');
                 }
 
              if (!space.isAvailable) {
+                await this._stripeService.cancelPaymentIntent(data.paymentIntentId);
+                 const failedBookingData = {
+                    spaceId: new Types.ObjectId(spaceId),
+                    clientId: new Types.ObjectId(clientId),
+                    vendorId: new Types.ObjectId(vendorId),
+                    buildingId: new Types.ObjectId(buildingId),
+                    bookingDate: new Date(bookingDate),
+                    numberOfDesks: numberOfDesks,
+                    totalPrice: totalPrice,
+                    status: 'failed' as BookingStatus,
+                    paymentStatus: 'failed' as PaymentStatus,
+                    paymentMethod: 'stripe' as PaymentMethod,
+                    transactionId: data.paymentIntentId,
+                };
+                await this._bookingRepository.save(failedBookingData);
                 throw new Error('Space is no longer available');
             }
             
              if (!space.capacity || space.capacity < numberOfDesks) {
+                await this._stripeService.cancelPaymentIntent(data.paymentIntentId);
+                 const failedBookingData = {
+                        spaceId: new Types.ObjectId(spaceId),
+                        clientId: new Types.ObjectId(clientId),
+                        vendorId: new Types.ObjectId(vendorId),
+                        buildingId: new Types.ObjectId(buildingId),
+                        bookingDate: new Date(bookingDate),
+                        numberOfDesks: numberOfDesks,
+                        totalPrice: totalPrice,
+                        status: 'failed' as BookingStatus,
+                        paymentStatus: 'failed' as PaymentStatus,
+                        paymentMethod: 'stripe' as PaymentMethod,
+                        transactionId: data.paymentIntentId,
+                    };
+                await this._bookingRepository.save(failedBookingData);
                 throw new Error(`Insufficient capacity. Only ${space.capacity || 0} desks available`);
+            }
+
+            const capturedPayment = await this._stripeService.capturePaymentIntent(data.paymentIntentId);
+
+             if (capturedPayment.status !== 'succeeded') {
+
+                    const failedBookingData = {
+                        spaceId: new Types.ObjectId(spaceId),
+                        clientId: new Types.ObjectId(clientId),
+                        vendorId: new Types.ObjectId(vendorId),
+                        buildingId: new Types.ObjectId(buildingId),
+                        bookingDate: new Date(bookingDate),
+                        numberOfDesks: numberOfDesks,
+                        totalPrice: totalPrice,
+                        status: 'failed' as BookingStatus,
+                        paymentStatus: 'failed' as PaymentStatus,
+                        paymentMethod: 'stripe' as PaymentMethod,
+                        transactionId: data.paymentIntentId,
+                    };
+                await this._bookingRepository.save(failedBookingData);    
+                throw new Error('Failed to capture payment');
             }
 
             const newCapacity = space.capacity - numberOfDesks;
@@ -75,13 +151,13 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
             }
 
             const bookingData = {
-            spaceId: new Types.ObjectId(paymentIntent.metadata.spaceId),
-            clientId: new Types.ObjectId(paymentIntent.metadata.clientId),
-            vendorId: new Types.ObjectId(paymentIntent.metadata.vendorId),
-            buildingId: new Types.ObjectId(paymentIntent.metadata.buildingId),
-            bookingDate: new Date(paymentIntent.metadata.bookingDate),
+            spaceId: new Types.ObjectId(spaceId),
+            clientId: new Types.ObjectId(clientId),
+            vendorId: new Types.ObjectId(vendorId),
+            buildingId: new Types.ObjectId(buildingId),
+            bookingDate: new Date(bookingDate),
             numberOfDesks: numberOfDesks,
-            totalPrice: parseFloat(paymentIntent.metadata.totalPrice),
+            totalPrice: totalPrice,
             status: 'confirmed' as BookingStatus,
             paymentStatus: 'succeeded' as PaymentStatus,
             paymentMethod: 'stripe' as PaymentMethod,
@@ -90,17 +166,25 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
 
         const newBooking = await this._bookingRepository.save(bookingData);
 
+         if (!newBooking) {
+              await this._spaceRepository.update(
+                { _id: spaceId },
+                { 
+                    capacity: space.capacity,
+                }  
+            );
+            throw new Error('Failed to create booking');
+        }
+
         return {
             success: true,
            data: {
                 booking: newBooking,
                 bookingId: newBooking._id.toString(),
+                paymentStatus: 'succeeded',
+                transactionId: data.paymentIntentId
             }
         };
-
-        } else {
-            throw new Error('Payment not successful');
-        }
        } catch (error: any) {
             console.error("Error confirming payment:", error);
              return {

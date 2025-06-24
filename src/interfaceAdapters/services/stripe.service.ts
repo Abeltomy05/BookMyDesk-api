@@ -16,22 +16,24 @@ export class StripeService implements IStripeService {
     });
   }
 
-  async createPaymentIntent(data: {
-    amount: number;
-    currency: string;
-    metadata?: Record<string, string>;
-    description?: string;
-  }): Promise<Stripe.PaymentIntent> {
-    return await this.stripe.paymentIntents.create({
-      amount: data.amount,
-      currency: data.currency,
-      metadata: data.metadata || {},
-      description: data.description,
-    });
+  async createPaymentIntent(
+     data: Stripe.PaymentIntentCreateParams
+  ): Promise<Stripe.PaymentIntent> {
+    return await this.stripe.paymentIntents.create(data);
   }
 
   async retrievePaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent> {
     return await this.stripe.paymentIntents.retrieve(paymentIntentId);
   }
+
+  async capturePaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent> {
+    return await this.stripe.paymentIntents.capture(paymentIntentId);
+  }
+
+  async cancelPaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent> {
+    return await this.stripe.paymentIntents.cancel(paymentIntentId);
+  }
+
+  
 } 
 

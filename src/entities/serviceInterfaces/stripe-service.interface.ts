@@ -1,12 +1,11 @@
 import Stripe from 'stripe';
 
 export interface IStripeService {
-  createPaymentIntent(data: {
-    amount: number;
-    currency: string;
-    metadata?: Record<string, string>;
-    description?: string;
-  }): Promise<Stripe.PaymentIntent>;
+  createPaymentIntent(
+     data: Stripe.PaymentIntentCreateParams
+  ): Promise<Stripe.PaymentIntent> ;
   
   retrievePaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent>;
+  capturePaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent>;
+  cancelPaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent>;
 }

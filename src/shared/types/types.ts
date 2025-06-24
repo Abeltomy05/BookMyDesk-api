@@ -6,7 +6,7 @@ export type SpaceAggregation = {
   count: number;
   price: number;
 };
-export type BookingStatus = "pending" | "confirmed" | "cancelled" | "completed";
+export type BookingStatus = "pending" | "confirmed" | "cancelled" | "completed" | "failed";
 export type PaymentStatus = "unpaid" | "pending" | "succeeded" | "failed" | "refunded";
 export type PaymentMethod = "stripe" | "wallet";
 

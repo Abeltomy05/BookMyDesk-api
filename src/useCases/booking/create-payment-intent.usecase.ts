@@ -33,9 +33,12 @@ export class CreatePaymentIntentUseCase implements ICreatePaymentIntentUseCase{
          throw new Error('Building not found for the space');
         }
 
+        console.log("Creating payment intent with amount:", data.amount);
+        console.log("Total price metadata:", data.amount / 100);
       const paymentIntent = await this._stripeService.createPaymentIntent({
             amount: data.amount, 
             currency: data.currency,
+            capture_method: 'manual',
             metadata: {
                 spaceId: data.spaceId,
                 clientId: data.clientId,
