@@ -5,6 +5,7 @@ import { IGetBookingPageDataUseCase } from "../../entities/usecaseInterfaces/boo
 import { CustomRequest } from "../middlewares/auth.middleware";
 import { ICreatePaymentIntentUseCase } from "../../entities/usecaseInterfaces/booking/create-payment-intent-usecase.interface";
 import { IConfirmPaymentUseCase } from "../../entities/usecaseInterfaces/booking/confirm-payment-usecase.interface";
+import { IGetBookingsUseCase } from "../../entities/usecaseInterfaces/booking/get-booking-usecase.interface";
 
 @injectable()
 export class BookingController implements IBookingController{
@@ -15,6 +16,8 @@ export class BookingController implements IBookingController{
        private _createPaymentIntentUseCase: ICreatePaymentIntentUseCase,
        @inject("IConfirmPaymentUseCase")
        private _confirmPaymentUseCase: IConfirmPaymentUseCase,
+       @inject("IGetBookingsUseCase")
+       private _getBookings: IGetBookingsUseCase
     ){}
 
     async getBookingPageData(req:Request, res: Response): Promise<void>{
@@ -109,5 +112,41 @@ export class BookingController implements IBookingController{
             message: error.message || "Something went wrong while confirming payment.",
         });
       }
+    }
+
+    async getBookings(req: Request, res: Response): Promise<void> {
+        try {
+            const { page = '1', limit = '5', search = '', status } = req.query;
+            const {userId,role} = (req as CustomRequest).user;
+ 
+            const pageNum = parseInt(page as string, 10);
+            const limitNum = parseInt(limit as string, 10);
+            const searchStr = search as string;
+            const statusStr = status as string;
+
+            const result  = await this._getBookings.execute({
+              userId,
+              role,
+              page: pageNum,
+              limit: limitNum,
+              search: searchStr,
+              status: statusStr
+            });
+
+            res.status(200).json({
+                success: true,
+                data: result.bookings,
+                currentPage: pageNum,
+                totalPages: result.totalPages,
+                totalItems: result.totalItems,
+                message: "Bookings fetched successfully."
+            });
+        } catch (error:any) {
+            console.error("Error fetching bookings:", error);
+            res.status(500).json({
+                success: false,
+                message: error.message || "Something went wrong while fetching bookings.",
+            });
+        }
     }
 }

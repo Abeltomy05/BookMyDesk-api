@@ -1,6 +1,6 @@
 import { Request, RequestHandler, Response } from "express";
 import { BaseRoute } from "./base.route";
-import { blockStatusMiddleware, authController,buildingController,usersController,vendorController } from "../di/resolver";
+import { blockStatusMiddleware, authController,buildingController,usersController,vendorController, bookingController } from "../di/resolver";
 import { authorizeRole, decodeToken, verifyAuth } from "../../interfaceAdapters/middlewares/auth.middleware";
 
 export class VendorRoutes extends BaseRoute{
@@ -56,5 +56,9 @@ export class VendorRoutes extends BaseRoute{
        this.router.patch("/vendor/update-status",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response) => {
             usersController.updateEntityStatus(req, res);
         });  
+     
+        this.router.get("/vendor/get-bookings",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response) => {
+         bookingController.getBookings(req, res);
+       });  
     }
 }
