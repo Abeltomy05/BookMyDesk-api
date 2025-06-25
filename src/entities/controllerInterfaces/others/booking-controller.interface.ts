@@ -5,4 +5,5 @@ export interface IBookingController{
     createPaymentIntent(req: Request, res: Response): Promise<void>;
     confirmPayment(req: Request, res: Response): Promise<void>;
     getBookings(req: Request, res: Response): Promise<void>;
+    getBookingDetails(req: Request, res: Response): Promise<void>;
 }

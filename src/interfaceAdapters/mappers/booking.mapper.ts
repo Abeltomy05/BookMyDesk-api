@@ -56,6 +56,7 @@ export const toEntityBookingWithDetails = (model: any): IBookingEntityWithDetail
   } : undefined,
   space: typeof model.spaceId === 'object' ? {
     name: model.spaceId.name,
+    pricePerDay: model.spaceId.pricePerDay,
   } : undefined,
    client: typeof model.spaceId === 'object' ? {
     username: model.clientId.username,

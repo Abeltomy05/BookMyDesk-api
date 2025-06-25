@@ -53,5 +53,8 @@ export class ClientRoutes extends BaseRoute{
         this.router.get("/client/get-bookings", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response) => {
             bookingController.getBookings(req, res);
         });
+         this.router.get("/client/get-booking-details/:bookingId", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response) => {
+            bookingController.getBookingDetails(req, res);
+        });
     }
 }

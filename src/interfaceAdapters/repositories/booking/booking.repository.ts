@@ -30,7 +30,7 @@ async findAllWithDetails(
   const query = this.model
     .find(filter)
     .populate('buildingId', 'buildingName location')
-    .populate('spaceId', 'name') 
+    .populate('spaceId', 'name pricePerDay') 
 
    if (role === 'vendor') {
     query.populate('clientId', 'username email phone');
@@ -44,6 +44,15 @@ async findAllWithDetails(
   ]);
 
   return { items, total };
+}
+
+async findOneWithDetails(filter: FilterQuery<IBookingModel>) {
+  const query = this.model
+    .findOne(filter)
+    .populate('buildingId', 'buildingName location')
+    .populate('spaceId', 'name pricePerDay')
+
+  return await query.lean();
 }
 
 }

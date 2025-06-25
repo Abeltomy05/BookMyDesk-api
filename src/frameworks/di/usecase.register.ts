@@ -44,6 +44,7 @@ import { StripeService } from "../../interfaceAdapters/services/stripe.service";
 import { CreatePaymentIntentUseCase } from "../../useCases/booking/create-payment-intent.usecase";
 import { ConfirmPaymentUseCase } from "../../useCases/booking/confirm-payment.usecase";
 import { GetBookingsUseCase } from "../../useCases/booking/bookings-get.usecase";
+import { GetBookingDetailsUseCase } from "../../useCases/booking/single-booking-details";
 
 
 
@@ -142,6 +143,9 @@ export class UseCaseRegistry{
       })
       container.register("IGetBookingsUseCase",{
         useClass: GetBookingsUseCase
+      })
+      container.register("IGetBookingDetailsUseCase",{
+        useClass: GetBookingDetailsUseCase
       })
 
 

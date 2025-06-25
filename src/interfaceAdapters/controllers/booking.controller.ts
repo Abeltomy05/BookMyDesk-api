@@ -6,6 +6,7 @@ import { CustomRequest } from "../middlewares/auth.middleware";
 import { ICreatePaymentIntentUseCase } from "../../entities/usecaseInterfaces/booking/create-payment-intent-usecase.interface";
 import { IConfirmPaymentUseCase } from "../../entities/usecaseInterfaces/booking/confirm-payment-usecase.interface";
 import { IGetBookingsUseCase } from "../../entities/usecaseInterfaces/booking/get-booking-usecase.interface";
+import { IGetBookingDetailsUseCase } from "../../entities/usecaseInterfaces/booking/single-booking-details-usecase.interface";
 
 @injectable()
 export class BookingController implements IBookingController{
@@ -17,7 +18,9 @@ export class BookingController implements IBookingController{
        @inject("IConfirmPaymentUseCase")
        private _confirmPaymentUseCase: IConfirmPaymentUseCase,
        @inject("IGetBookingsUseCase")
-       private _getBookings: IGetBookingsUseCase
+       private _getBookings: IGetBookingsUseCase,
+       @inject("IGetBookingDetailsUseCase")
+       private _getBookingDetailsUseCase: IGetBookingDetailsUseCase
     ){}
 
     async getBookingPageData(req:Request, res: Response): Promise<void>{
@@ -148,5 +151,39 @@ export class BookingController implements IBookingController{
                 message: error.message || "Something went wrong while fetching bookings.",
             });
         }
+    }
+
+    async getBookingDetails(req: Request, res: Response): Promise<void> {
+      try {
+        const bookingId = req.params.bookingId;
+        if (!bookingId) {
+          res.status(400).json({ 
+            success: false,
+            message: 'Booking ID is required to fetch booking details.' 
+          });
+          return;
+        }
+        const booking  = await this._getBookingDetailsUseCase.execute(bookingId);
+        if (!booking) {
+          res.status(404).json({ 
+            success: false,
+            message: 'Booking not found.' 
+          });
+          return;
+        }
+        console.log("Booking details:", booking);
+        res.status(200).json({
+          success: true,
+          data: booking,
+          message: 'Booking fetched successfully.'
+        });
+      } catch (error:any) {
+        console.error("Error fetching booking details:", error);
+        res.status(500).json({
+            success: false,
+            message: error.message || "Something went wrong while fetching booking details.",
+        });
+        
+      }
     }
 }

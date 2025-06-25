@@ -50,6 +50,7 @@ export interface IBookingEntityWithDetails extends IBookingEntity {
   };
   space?: {
     name: string;
+    pricePerDay: number;
   };
   client?: {
     username: string;

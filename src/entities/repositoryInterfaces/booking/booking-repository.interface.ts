@@ -13,4 +13,6 @@ export interface IBookingRepository extends IBaseRepository<IBookingModel>{
     items: IBookingModel[]; 
     total: number;
   }>;
+
+  findOneWithDetails(filter: FilterQuery<IBookingModel>):Promise<IBookingModel | null>;
 }
