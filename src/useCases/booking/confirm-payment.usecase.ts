@@ -37,6 +37,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
             const bookingDate = paymentIntent.metadata.bookingDate;
             const numberOfDesks = parseInt(paymentIntent.metadata.numberOfDesks);
             const totalPrice = parseFloat(paymentIntent.metadata.totalPrice);
+            const bookingId = paymentIntent.metadata.bookingId;
             
              const space = await this._spaceRepository.findOne({_id: spaceId});
                 if (!space) {
@@ -150,7 +151,50 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                 }
             }
 
-            const bookingData = {
+        if (bookingId) {
+            const existingBooking = await this._bookingRepository.findOne({
+                _id: new Types.ObjectId(bookingId),
+                clientId: new Types.ObjectId(clientId),
+            });   
+
+            if (!existingBooking) {
+                throw new Error('Booking not found for update');
+            }
+
+            const updatedBooking = await this._bookingRepository.update(
+                { _id: existingBooking._id },
+                {
+                    status: 'confirmed' as BookingStatus,
+                    paymentStatus: 'succeeded' as PaymentStatus,
+
+                    numberOfDesks: numberOfDesks,
+                    totalPrice: totalPrice,
+                    bookingDate: new Date(bookingDate),
+                    transactionId: data.paymentIntentId,
+                }
+            );
+   
+            if (!updatedBooking) {
+                await this._spaceRepository.update(
+                    { _id: spaceId },
+                    { capacity: space.capacity }
+                );
+                throw new Error('Failed to update existing booking');
+            }
+
+             return {
+                success: true,
+                data: {
+                    booking: updatedBooking,
+                    bookingId: updatedBooking._id.toString(),
+                    paymentStatus: 'succeeded',
+                    transactionId: data.paymentIntentId,
+                    isRetry: true
+                }
+            };
+        }else{
+
+        const bookingData = {
             spaceId: new Types.ObjectId(spaceId),
             clientId: new Types.ObjectId(clientId),
             vendorId: new Types.ObjectId(vendorId),
@@ -182,9 +226,11 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                 booking: newBooking,
                 bookingId: newBooking._id.toString(),
                 paymentStatus: 'succeeded',
-                transactionId: data.paymentIntentId
+                transactionId: data.paymentIntentId,
+                isRetry: false
             }
         };
+    }
        } catch (error: any) {
             console.error("Error confirming payment:", error);
              return {

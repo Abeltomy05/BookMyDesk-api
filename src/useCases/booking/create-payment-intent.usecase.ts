@@ -33,8 +33,17 @@ export class CreatePaymentIntentUseCase implements ICreatePaymentIntentUseCase{
          throw new Error('Building not found for the space');
         }
 
-        console.log("Creating payment intent with amount:", data.amount);
-        console.log("Total price metadata:", data.amount / 100);
+      if (data.bookingId) {
+        const existingBooking = await this._bookingRepository.findOne({
+          _id: new Types.ObjectId(data.bookingId),
+          clientId: new Types.ObjectId(data.clientId),
+          status: { $in: ['failed', 'cancelled'] } 
+        });
+
+         if (!existingBooking) {
+          throw new Error('Invalid booking ID or booking cannot be retried');
+        }
+      }
       const paymentIntent = await this._stripeService.createPaymentIntent({
             amount: data.amount, 
             currency: data.currency,
@@ -47,11 +56,11 @@ export class CreatePaymentIntentUseCase implements ICreatePaymentIntentUseCase{
                 bookingDate: new Date(data.bookingDate).toISOString(),
                 numberOfDesks: (data.numberOfDesks ?? 1).toString(),
                 totalPrice: (data.amount / 100).toString(),
+                bookingId: data.bookingId || '',
             },
             description: `Booking payment for ${data.numberOfDesks || 1} desk(s)`,
         });
 
-        // console.log('Payment Intent created:', paymentIntent);
 
        return {
         clientSecret: paymentIntent.client_secret!,

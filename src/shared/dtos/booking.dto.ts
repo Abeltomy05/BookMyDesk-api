@@ -7,6 +7,7 @@ export interface CreatePaymentIntentDTO{
     bookingDate: Date;
     numberOfDesks?: number; 
     clientId: string;
+    bookingId?: string;
 }
 
 export interface ConfirmPaymentDTO {

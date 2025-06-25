@@ -53,7 +53,7 @@ export class BookingController implements IBookingController{
 
     async createPaymentIntent(req: Request, res: Response): Promise<void> {
         try {
-            const { amount, currency = "inr", spaceId, bookingDate, numberOfDesks  } = req.body;
+            const { amount, currency = "inr", spaceId, bookingDate, numberOfDesks, bookingId  } = req.body;
             if (!amount || !spaceId || !bookingDate) {
               res.status(400).json({ 
                 error: 'Missing required fields' 
@@ -68,7 +68,8 @@ export class BookingController implements IBookingController{
                 spaceId,
                 bookingDate,
                 numberOfDesks,
-                clientId
+                clientId,
+                bookingId
             });
             res.status(200).json({
                 success: true,
