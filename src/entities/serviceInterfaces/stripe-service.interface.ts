@@ -8,4 +8,5 @@ export interface IStripeService {
   retrievePaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent>;
   capturePaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent>;
   cancelPaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent>;
+  refundPaymentIntent(paymentIntentId: string): Promise<Stripe.Refund>;
 }

@@ -34,6 +34,10 @@ export class StripeService implements IStripeService {
     return await this.stripe.paymentIntents.cancel(paymentIntentId);
   }
 
+  async refundPaymentIntent(paymentIntentId: string) {
+  return await this.stripe.refunds.create({ payment_intent: paymentIntentId,});
+ }
+
   
 } 
 
