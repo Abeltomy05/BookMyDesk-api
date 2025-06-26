@@ -6,4 +6,5 @@ export interface IBookingController{
     confirmPayment(req: Request, res: Response): Promise<void>;
     getBookings(req: Request, res: Response): Promise<void>;
     getBookingDetails(req: Request, res: Response): Promise<void>;
+    cancelBooking(req: Request, res: Response): Promise<void>;
 }

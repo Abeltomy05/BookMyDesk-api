@@ -10,6 +10,7 @@ export interface IBookingEntity{
     bookingDate: Date;
     numberOfDesks?: number;
     totalPrice?: number;
+    cancellationReason?: string;
     
     status?: BookingStatus;
     paymentStatus?: PaymentStatus;

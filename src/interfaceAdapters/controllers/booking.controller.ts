@@ -7,6 +7,7 @@ import { ICreatePaymentIntentUseCase } from "../../entities/usecaseInterfaces/bo
 import { IConfirmPaymentUseCase } from "../../entities/usecaseInterfaces/booking/confirm-payment-usecase.interface";
 import { IGetBookingsUseCase } from "../../entities/usecaseInterfaces/booking/get-booking-usecase.interface";
 import { IGetBookingDetailsUseCase } from "../../entities/usecaseInterfaces/booking/single-booking-details-usecase.interface";
+import { ICancelBookingUseCase } from "../../entities/usecaseInterfaces/booking/cancel-booking-usecase.interface";
 
 @injectable()
 export class BookingController implements IBookingController{
@@ -20,7 +21,9 @@ export class BookingController implements IBookingController{
        @inject("IGetBookingsUseCase")
        private _getBookings: IGetBookingsUseCase,
        @inject("IGetBookingDetailsUseCase")
-       private _getBookingDetailsUseCase: IGetBookingDetailsUseCase
+       private _getBookingDetailsUseCase: IGetBookingDetailsUseCase,
+       @inject("ICancelBookingUseCase")
+       private _cancelBookingUseCase: ICancelBookingUseCase,
     ){}
 
     async getBookingPageData(req:Request, res: Response): Promise<void>{
@@ -185,6 +188,40 @@ export class BookingController implements IBookingController{
             message: error.message || "Something went wrong while fetching booking details.",
         });
         
+      }
+    }
+
+    async cancelBooking(req: Request, res: Response): Promise<void> {
+      try {
+        const {bookingId, reason} = req.body;
+        if (!bookingId || !reason) {
+          res.status(400).json({ 
+            success: false,
+            message: 'Booking ID and Reason is required to cancel booking.' 
+          });
+          return;
+        }
+        const {userId,role} = (req as CustomRequest).user;
+
+        const result = await this._cancelBookingUseCase.execute(bookingId,reason,userId,role);
+        if (result.success) {
+          res.status(200).json({
+            success: true,
+            message: "Booking cancelled successfully.",
+          });
+        } else {
+          res.status(400).json({
+            success: false,
+            message: "Failed to cancel booking.",
+          });
+        }
+
+      } catch (error:any) {
+        console.error("Error cancelling booking:", error);
+        res.status(500).json({
+            success: false,
+            message: error.message || "Something went wrong while cancelling booking.",
+        });
       }
     }
 }

@@ -171,6 +171,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                     totalPrice: totalPrice,
                     bookingDate: new Date(bookingDate),
                     transactionId: data.paymentIntentId,
+                    cancellationReason:"",
                 }
             );
    

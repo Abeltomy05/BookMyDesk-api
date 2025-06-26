@@ -9,6 +9,7 @@ export type SpaceAggregation = {
 export type BookingStatus = "pending" | "confirmed" | "cancelled" | "completed" | "failed" ;
 export type PaymentStatus = "unpaid" | "pending" | "succeeded" | "failed" | "refunded";
 export type PaymentMethod = "stripe" | "wallet";
+export type WalletTransactionTypes = "topup" | "payment" | "refund" | "withdrawal";
 
 export interface User {
   id: string;
