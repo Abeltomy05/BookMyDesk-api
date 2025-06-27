@@ -36,8 +36,8 @@ export class BookingController implements IBookingController{
             })
             return;
           }
-
-          const response = await this._getBookingPageData.execute(spaceId);
+          const { userId } = (req as CustomRequest).user;
+          const response = await this._getBookingPageData.execute(spaceId,userId);
 
           res.status(200).json({
             success: true,

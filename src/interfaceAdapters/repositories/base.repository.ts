@@ -4,8 +4,8 @@ import { Model, FilterQuery } from "mongoose";
 export class BaseRepository<T> {
     constructor(protected model: Model<T>) { }
 
-    async findOne(filter: FilterQuery<T>){
-        return this.model.findOne(filter).lean() as Promise<T>;
+    async findOne(filter: FilterQuery<T>, projection?: any){
+        return this.model.findOne(filter).select(projection).lean() as Promise<T>;
     }
 
     async find(filter: FilterQuery<T>){
