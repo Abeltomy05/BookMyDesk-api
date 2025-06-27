@@ -1,5 +1,5 @@
 export interface IWalletEntity{
-    id: string;
+    _id: string;
     userId: string;
     role: string;
     balance: number;

@@ -46,6 +46,7 @@ import { ConfirmPaymentUseCase } from "../../useCases/booking/confirm-payment.us
 import { GetBookingsUseCase } from "../../useCases/booking/bookings-get.usecase";
 import { GetBookingDetailsUseCase } from "../../useCases/booking/single-booking-details";
 import { CancelBookingUseCase } from "../../useCases/booking/cancel-booking.usecase";
+import { GetWalletDetailsUseCase } from "../../useCases/wallet/get-walletDetails.usecase";
 
 
 
@@ -150,6 +151,9 @@ export class UseCaseRegistry{
       })
       container.register("ICancelBookingUseCase",{
         useClass: CancelBookingUseCase
+      })
+      container.register("IGetWalletDetailsUseCase",{
+        useClass: GetWalletDetailsUseCase
       })
 
 

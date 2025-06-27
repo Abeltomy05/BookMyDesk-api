@@ -11,6 +11,8 @@ import { IBuildingController } from "../../entities/controllerInterfaces/others/
 import { BlockStatusMiddleware } from "../../interfaceAdapters/middlewares/blockStatus.middleware";
 import { BookingController } from "../../interfaceAdapters/controllers/booking.controller";
 import { IBookingController } from "../../entities/controllerInterfaces/others/booking-controller.interface";
+import { WalletController } from "../../interfaceAdapters/controllers/wallet.controller";
+import { IWalletController } from "../../entities/controllerInterfaces/others/wallet-controller.interface";
 
 DependencyInjection.registerAll();
 //* ====== Middleware Resolving ====== *//
@@ -30,6 +32,8 @@ export const buildingController =
             container.resolve<IBuildingController>(BuildingController);  
 
 export const bookingController = 
-            container.resolve<IBookingController>(BookingController)            
+            container.resolve<IBookingController>(BookingController);
+export const walletController = 
+            container.resolve<IWalletController>(WalletController);                       
 
 //* ====== Socket Handler Resolving ====== *//            

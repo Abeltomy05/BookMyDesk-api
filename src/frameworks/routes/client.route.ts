@@ -1,6 +1,6 @@
 import { Request, RequestHandler, Response } from "express";
 import { BaseRoute } from "./base.route";
-import { blockStatusMiddleware, authController, buildingController, usersController, bookingController } from "../di/resolver";
+import { blockStatusMiddleware, authController, buildingController, usersController, bookingController, walletController } from "../di/resolver";
 import { authorizeRole, decodeToken, verifyAuth } from "../../interfaceAdapters/middlewares/auth.middleware";
 
 export class ClientRoutes extends BaseRoute{
@@ -57,8 +57,11 @@ export class ClientRoutes extends BaseRoute{
             bookingController.getBookingDetails(req, res);
         });
 
-          this.router.post("/client/cancel-booking", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response) => {
+        this.router.post("/client/cancel-booking", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response) => {
             bookingController.cancelBooking(req, res);
+        });
+        this.router.get("/client/get-wallet-details", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response) => {
+            walletController.getWalletDetails(req, res);
         });
     }
 }
