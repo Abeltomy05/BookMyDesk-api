@@ -48,6 +48,8 @@ export const toEntityBookingWithDetails = (model: any): IBookingEntityWithDetail
   paymentStatus: model.paymentStatus,
   paymentMethod: model.paymentMethod,
   transactionId: model.transactionId,
+  cancellationReason: model.cancellationReason,
+  cancelledBy: model.cancelledBy,
   createdAt: model.createdAt,
   updatedAt: model.updatedAt,
   building: typeof model.buildingId === 'object' ? {

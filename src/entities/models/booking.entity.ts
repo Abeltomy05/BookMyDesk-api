@@ -11,6 +11,7 @@ export interface IBookingEntity{
     numberOfDesks?: number;
     totalPrice?: number;
     cancellationReason?: string;
+    cancelledBy?: "vendor" | "client";
     
     status?: BookingStatus;
     paymentStatus?: PaymentStatus;

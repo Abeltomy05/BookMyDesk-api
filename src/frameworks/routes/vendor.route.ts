@@ -60,5 +60,8 @@ export class VendorRoutes extends BaseRoute{
         this.router.get("/vendor/get-bookings",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response) => {
          bookingController.getBookings(req, res);
        });  
+       this.router.post("/vendor/cancel-booking",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response) => {
+         bookingController.cancelBooking(req, res);
+       });   
     }
 }

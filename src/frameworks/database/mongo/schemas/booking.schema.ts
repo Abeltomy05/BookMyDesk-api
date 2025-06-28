@@ -12,6 +12,7 @@ export const bookingSchema = new Schema<IBookingModel>(
     numberOfDesks:  { type: Number },
     totalPrice:     { type: Number},
     cancellationReason:  { type: String, default: "" },
+    cancelledBy: { type: String, default: "client" },
 
     status:  { type: String, enum: ["pending", "confirmed", "cancelled", "completed", "failed"], default: "pending" },
     paymentStatus:  { type: String, enum: ['unpaid', 'pending', 'succeeded', 'failed', 'refunded'], default: "unpaid" },

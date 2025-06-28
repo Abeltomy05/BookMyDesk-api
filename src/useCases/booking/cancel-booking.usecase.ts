@@ -4,6 +4,8 @@ import { IWalletRepository } from "../../entities/repositoryInterfaces/wallet/wa
 import { IWalletTransactionRepository } from "../../entities/repositoryInterfaces/wallet/walletTrasaction-repository.interface";
 import mongoose, { Types } from 'mongoose';
 import { ICancelBookingUseCase } from "../../entities/usecaseInterfaces/booking/cancel-booking-usecase.interface";
+import { ISpaceRepository } from "../../entities/repositoryInterfaces/building/space-repository.interface";
+import { IBuildingRepository } from "../../entities/repositoryInterfaces/building/building-repository.interface";
 
 @injectable()
 export class CancelBookingUseCase implements ICancelBookingUseCase {
@@ -14,9 +16,13 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
         private _walletRepository: IWalletRepository,
         @inject("IWalletTransactionRepository")
         private _walletTransactionRepository: IWalletTransactionRepository,
+        @inject("ISpaceRepository")
+        private _spaceRepository: ISpaceRepository,
+        @inject("IBuildingRepository")
+        private _buildingRepository: IBuildingRepository,
     ){}
 
-    async execute(bookingId: string, reason:string, userId:string, role:string): Promise<{ success: boolean}> {
+    async execute(bookingId: string, reason:string, userId:string, role:'client' | 'vendor'): Promise<{ success: boolean}> {
          const booking = await this._bookingRepository.findOne({_id:bookingId});
         if(!booking) {
             throw new Error("Booking not found");
@@ -25,6 +31,16 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
         if(booking.status === "cancelled") {
             throw new Error("Booking is already cancelled");
         }
+
+        if (role === 'client' && booking.clientId.toString() !== userId) {
+          throw new Error("You are not allowed to cancel this booking.");
+        }
+
+        if (role === 'vendor' && booking.vendorId.toString() !== userId) {
+          throw new Error("You are not allowed to cancel this booking.");
+        }
+
+
 
         //refund
          const refundAmount = booking.totalPrice ?? 0;
@@ -68,7 +84,46 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
             status: "cancelled",
             paymentStatus: "refunded",
             cancellationReason: reason,
+            cancelledBy: role,
         });
+
+        if (booking.spaceId && booking.numberOfDesks) {
+            const space = await this._spaceRepository.findOne({_id:booking.spaceId});
+            if (space && typeof space.capacity === 'number') {
+                await this._spaceRepository.update(
+                    {_id: space._id}, 
+                    { $inc: { capacity: booking.numberOfDesks } }    
+                );
+                console.log(`[Space Capacity Restored] Space ${space._id} updated `);
+            }
+        }
+
+        if (booking.buildingId && booking.spaceId && typeof booking.numberOfDesks === 'number') {
+            const numberOfDesks = booking.numberOfDesks;
+            const building = await this._buildingRepository.findOne({_id: booking.buildingId});
+            const space = await this._spaceRepository.findOne({_id: booking.spaceId});
+
+            if (building && space && building.summarizedSpaces && space.name) {
+                const updatedSummarizedSpaces = building.summarizedSpaces.map(s => {
+                    if (s.name === space.name) {
+                        return {
+                            ...s,
+                            count: s.count + numberOfDesks
+                        };
+                    }
+                    return s;
+                });
+
+                await this._buildingRepository.update(
+                    {_id: building._id}, 
+                    {summarizedSpaces: updatedSummarizedSpaces}
+                );
+
+                console.log(`[Building Summary Updated] ${booking.buildingId} → ${space.name} count increased by ${booking.numberOfDesks}`);
+            }
+        }
+
+        console.log(`[Booking Cancelled] by ${role}(${userId}) for booking ${bookingId}`);
 
          return { success: true };
     }

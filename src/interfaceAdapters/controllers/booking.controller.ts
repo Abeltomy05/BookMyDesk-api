@@ -224,4 +224,6 @@ export class BookingController implements IBookingController{
         });
       }
     }
+
+
 }
