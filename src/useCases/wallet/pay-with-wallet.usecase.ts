@@ -40,6 +40,7 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
 
        const building = await this._buildingRepository.findOne({ _id: space.buildingId });
        if (!building) throw new Error("Building not found for this space.");
+
        const vendorId = building.vendorId;
 
         const wallet = await this._walletRepository.findOne({ userId }, { balance: 1 });
@@ -102,6 +103,34 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
                 );
             }
         }
+
+        const platformFee = Math.round(totalPrice * 0.05);
+        const vendorAmount = totalPrice - platformFee;
+        
+        const vendorWalletResult = await this._walletRepository.updateOrCreateWalletBalance(vendorId.toString(), 'Vendor', vendorAmount);
+            await this._walletTransactionRepository.save({
+            walletId: new Types.ObjectId(vendorWalletResult.wallet._id),
+            type: 'booking-income',
+            amount: vendorAmount,
+            description: `Booking income from wallet payment (Amount: ${vendorAmount})`,
+            balanceBefore: vendorWalletResult.balanceBefore,
+            balanceAfter: vendorWalletResult.balanceAfter,
+        });
+
+        const adminId = process.env.ADMIN_ID;
+        if (!adminId) {
+            throw new Error("Admin ID not configured in environment");
+        }
+
+        const adminWalletResult = await this._walletRepository.updateOrCreateWalletBalance(adminId, 'Admin', platformFee);
+        await this._walletTransactionRepository.save({
+            walletId: new Types.ObjectId(adminWalletResult.wallet._id),
+            type: 'platform-fee',
+            amount: platformFee,
+            description: `Platform fee from wallet booking (5%)`,
+            balanceBefore: adminWalletResult.balanceBefore,
+            balanceAfter: adminWalletResult.balanceAfter,
+        });
 
         return {
             success: true,

@@ -7,6 +7,8 @@ import { IStripeService } from "../../entities/serviceInterfaces/stripe-service.
 import { BookingStatus, PaymentMethod, PaymentStatus } from "../../shared/types/types";
 import { ISpaceRepository } from "../../entities/repositoryInterfaces/building/space-repository.interface";
 import { IBuildingRepository } from "../../entities/repositoryInterfaces/building/building-repository.interface";
+import { IWalletRepository } from "../../entities/repositoryInterfaces/wallet/wallet-repository.interface";
+import { IWalletTransactionRepository } from "../../entities/repositoryInterfaces/wallet/walletTrasaction-repository.interface";
 
 @injectable()
 export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
@@ -19,6 +21,10 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
        private _spaceRepository: ISpaceRepository,
        @inject("IBuildingRepository")
        private _buildingRepository: IBuildingRepository, 
+       @inject("IWalletRepository")
+       private _walletRepository: IWalletRepository,
+       @inject("IWalletTransactionRepository")
+       private _walletTransactionRepository: IWalletTransactionRepository,
     ){}
 
     private async handleFailedBooking(metadata:{
@@ -184,6 +190,37 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                      });   
                 throw new Error('Failed to capture payment');
             }
+
+            //processing vendor amount and platform fee
+            const platformFee = Math.round(totalPrice * 0.05);
+            const vendorAmount = totalPrice - platformFee;
+
+            const vendorWalletResult = await this._walletRepository.updateOrCreateWalletBalance(vendorId, 'Vendor', vendorAmount);
+
+            await this._walletTransactionRepository.save({
+                walletId: new Types.ObjectId(vendorWalletResult.wallet._id),
+                type: 'booking-income',
+                amount: vendorAmount,
+                description: `Booking income for booking via Stripe (Amount: ${vendorAmount})`,
+                balanceBefore: vendorWalletResult.balanceBefore,
+                balanceAfter: vendorWalletResult.balanceAfter,
+            });
+
+            const adminId = process.env.ADMIN_ID;
+            if (!adminId) {
+                throw new Error("Admin ID not configured in environment");
+            }
+            const adminWalletResult = await this._walletRepository.updateOrCreateWalletBalance(adminId, 'Admin', platformFee);
+
+            await this._walletTransactionRepository.save({
+                walletId: new Types.ObjectId(adminWalletResult.wallet._id),
+                type: 'platform-fee',
+                amount: platformFee,
+                description: `Platform fee for booking via Stripe (5%)`,
+                balanceBefore: adminWalletResult.balanceBefore,
+                balanceAfter: adminWalletResult.balanceAfter,
+            });
+
 
             const building = await this._buildingRepository.findOne({ _id: buildingId });
             if (building && building.summarizedSpaces) {

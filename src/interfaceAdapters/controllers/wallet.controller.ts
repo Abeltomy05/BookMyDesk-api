@@ -22,9 +22,10 @@ export class WalletController implements IWalletController {
 
             const { userId, role } = (req as CustomRequest).user; 
             const roleToSend = role === "vendor" ? "Vendor" : role === "client" ? "Client" : "Admin";
+            console.log("Wallet fetch → userId:", userId, "role:", roleToSend);
 
             const walletDetails = await this._getWalletDetailsUseCase.execute(userId, roleToSend, page, limit);
-
+            console.log(walletDetails)
             res.status(StatusCodes.OK).json({
                 success: true,
                 message: "Wallet details retrieved successfully",

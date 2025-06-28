@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { authController, buildingController, usersController } from "../di/resolver";
+import { authController, buildingController, usersController, walletController } from "../di/resolver";
 import { BaseRoute } from "./base.route";
 import { authorizeRole, verifyAuth } from "../../interfaceAdapters/middlewares/auth.middleware";
 
@@ -30,6 +30,10 @@ export class AdminRoutes extends BaseRoute{
 
          this.router.get("/admin/get-pending-buildings",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response) => {
             buildingController.getBuildingsForVerification(req, res);
+        });
+
+          this.router.get("/admin/get-wallet-details",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response) => {
+            walletController.getWalletDetails(req, res);
         });
 
     }

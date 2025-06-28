@@ -4,7 +4,7 @@ export interface WalletDetailsDTO{
     createdAt: Date;
     transactions: {
         _id: string;
-        type: "topup" | "payment" | "refund" | "withdrawal";
+        type: "topup" | "payment" | "refund" | "withdrawal" | 'platform-fee' | 'booking-income';
         amount: number;
         description?: string;
         balanceBefore: number;

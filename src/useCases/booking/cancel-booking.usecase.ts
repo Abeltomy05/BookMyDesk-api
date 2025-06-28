@@ -44,34 +44,19 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
 
         //refund
          const refundAmount = booking.totalPrice ?? 0;
-         let wallet = await this._walletRepository.findOne({userId:booking.clientId,role:'Client'});
 
-         let balanceBefore = 0;
-         let balanceAfter = 0;
-
-          if (!wallet) {
-                balanceBefore = 0;
-                balanceAfter = refundAmount;
-
-                wallet = await this._walletRepository.save({
-                userId: new Types.ObjectId(booking.clientId),
-                role: 'Client',
-                balance: balanceAfter,
-             });
-            } else {
-                balanceBefore = wallet.balance;
-                balanceAfter = balanceBefore + refundAmount;
-
-                await this._walletRepository.update({_id:wallet._id}, {
-                    balance: balanceAfter,
-                });
-            }
+         const { wallet, balanceBefore, balanceAfter } =
+            await this._walletRepository.updateOrCreateWalletBalance(
+            booking.clientId.toString(),
+            'Client',
+            refundAmount
+        );
 
 
         // Create wallet transaction
 
         await this._walletTransactionRepository.save({
-            walletId: wallet._id,
+            walletId: new Types.ObjectId(wallet._id),
             type: "refund",
             amount: refundAmount,
             description: `Refund for booking ${bookingId}`,

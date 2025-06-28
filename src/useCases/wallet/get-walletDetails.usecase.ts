@@ -3,6 +3,7 @@ import { IWalletRepository } from "../../entities/repositoryInterfaces/wallet/wa
 import { IWalletTransactionRepository } from "../../entities/repositoryInterfaces/wallet/walletTrasaction-repository.interface";
 import { WalletDetailsDTO } from "../../shared/dtos/wallet.dto";
 import { IGetWalletDetailsUseCase } from "../../entities/usecaseInterfaces/wallet/get-walletDetails-usecase.interface";
+import { Types } from "mongoose";
 
 @injectable()
 export class GetWalletDetailsUseCase implements IGetWalletDetailsUseCase {
@@ -17,10 +18,27 @@ export class GetWalletDetailsUseCase implements IGetWalletDetailsUseCase {
         if (!userId || !role) {
             throw new Error("User ID and role are required");
         }
-
-        const wallet = await this._walletRepository.findOne({userId, role});
+       console.log("Looking for wallet:", {
+        userId: new Types.ObjectId(userId).toHexString(),
+        role
+       });
+        const wallet = await this._walletRepository.findOne({
+            userId: new Types.ObjectId(userId),
+            role
+        });
         if (!wallet) {
-            throw new Error("Wallet not found");
+             return {
+                walletId: "",
+                balance: 0,
+                createdAt: new Date(),
+                transactions: [],
+                pagination: {
+                    total: 0,
+                    page,
+                    limit,
+                    pages: 0,
+                }
+            };
         }
 
         const skip = (page - 1) * limit;
