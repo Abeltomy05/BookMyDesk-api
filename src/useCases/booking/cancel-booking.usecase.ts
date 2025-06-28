@@ -43,26 +43,39 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
 
 
         //refund
-         const refundAmount = booking.totalPrice ?? 0;
+        const totalPrice =  booking.totalPrice || 0;
+        const platformFee = Math.round(totalPrice * 0.05);
+        const refundAmount = totalPrice - platformFee;
 
-         const { wallet, balanceBefore, balanceAfter } =
-            await this._walletRepository.updateOrCreateWalletBalance(
+       const vendorWalletResult = await this._walletRepository.updateOrCreateWalletBalance(
+         booking.vendorId.toString(),
+         'Vendor',
+         -refundAmount
+        );
+
+       await this._walletTransactionRepository.save({
+        walletId: new Types.ObjectId(vendorWalletResult.wallet._id),
+        type: "booking-refund",
+        amount: -refundAmount,
+        description: `Deducted for cancellation of booking ${bookingId}`,
+        balanceBefore: vendorWalletResult.balanceBefore,
+        balanceAfter: vendorWalletResult.balanceAfter,
+       }); 
+
+       const clientWalletResult = await this._walletRepository.updateOrCreateWalletBalance(
             booking.clientId.toString(),
             'Client',
             refundAmount
         );
 
-
-        // Create wallet transaction
-
-        await this._walletTransactionRepository.save({
-            walletId: new Types.ObjectId(wallet._id),
+       await this._walletTransactionRepository.save({
+            walletId: new Types.ObjectId(clientWalletResult.wallet._id),
             type: "refund",
             amount: refundAmount,
-            description: `Refund for booking ${bookingId}`,
-            balanceBefore: balanceBefore,
-            balanceAfter: balanceAfter,
-        });
+            description: `95% refund for booking ${bookingId}`,
+            balanceBefore: clientWalletResult.balanceBefore,
+            balanceAfter: clientWalletResult.balanceAfter,
+        }); 
 
         // Update booking status to cancelled and payment status to refunded
         await this._bookingRepository.update({_id:bookingId}, {
