@@ -73,5 +73,17 @@ export class BuildingRepository extends BaseRepository<IBuildingModel> implement
   ]);
 
   return { items, total };
+ }
+
+async getNamesAndCount(): Promise<{ names: { _id: string; buildingName: string }[]; count: number }> {
+  const buildings = await BuildingModel.find({}, { _id: 1, buildingName: 1 }).lean()
+  const mapped = buildings.map((b) => ({
+    _id: b._id.toString(), 
+    buildingName: b.buildingName,
+  }))
+  return {
+    names: mapped,
+    count: mapped.length,
+  }
 }
 }

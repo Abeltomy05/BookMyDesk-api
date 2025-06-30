@@ -10,6 +10,7 @@ import { IUpdateUserProfileUseCase } from "../../entities/usecaseInterfaces/user
 import { IUpdateUserPasswordUseCase } from "../../entities/usecaseInterfaces/users/update-password.interface";
 import { IGetUserDataUseCase } from "../../entities/usecaseInterfaces/users/get-user-data-usecase.interface";
 import { userSchemas } from "./auth/validations/user-signup.validation.schema";
+import { IGetVendorsAndBuildingsUseCase } from "../../entities/usecaseInterfaces/users/get-vendorAndBuilding-usecase.interface";
 
 @injectable()
 export class UsersController implements IUsersController{
@@ -26,6 +27,8 @@ export class UsersController implements IUsersController{
        private _updateUserPasswordUseCase: IUpdateUserPasswordUseCase,
        @inject("IGetUserDataUseCase")
        private _getUserDataUseCase: IGetUserDataUseCase,
+       @inject("IGetVendorsAndBuildingsUseCase")
+       private _getVendorsAndBuildingsUseCase: IGetVendorsAndBuildingsUseCase,
     ){}
     
     async getAllUsers(req: Request, res: Response): Promise<void> {
@@ -167,4 +170,15 @@ export class UsersController implements IUsersController{
         });
     }
    }
+
+  async getVendorsAndBuildings(req: Request, res: Response): Promise<void>{
+     try {
+    const result = await this._getVendorsAndBuildingsUseCase.execute();
+    res.status(200).json({ success: true, data: result });
+   } catch (error) {
+    console.error("Error in getEntitiesSummary:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch summary." });
+   }
+  }
+
 }

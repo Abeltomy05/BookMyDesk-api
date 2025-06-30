@@ -8,6 +8,7 @@ import { IConfirmPaymentUseCase } from "../../entities/usecaseInterfaces/booking
 import { IGetBookingsUseCase } from "../../entities/usecaseInterfaces/booking/get-booking-usecase.interface";
 import { IGetBookingDetailsUseCase } from "../../entities/usecaseInterfaces/booking/single-booking-details-usecase.interface";
 import { ICancelBookingUseCase } from "../../entities/usecaseInterfaces/booking/cancel-booking-usecase.interface";
+import { IGetBookingsForAdmin } from "../../entities/usecaseInterfaces/booking/get-booking-for-admin-usecase.interface";
 
 @injectable()
 export class BookingController implements IBookingController{
@@ -24,6 +25,8 @@ export class BookingController implements IBookingController{
        private _getBookingDetailsUseCase: IGetBookingDetailsUseCase,
        @inject("ICancelBookingUseCase")
        private _cancelBookingUseCase: ICancelBookingUseCase,
+       @inject("IGetBookingsForAdmin")
+       private _GetBookingsForAdminUseCase: IGetBookingsForAdmin,
     ){}
 
     async getBookingPageData(req:Request, res: Response): Promise<void>{
@@ -225,5 +228,24 @@ export class BookingController implements IBookingController{
       }
     }
 
+    async getBookingsForAdmin(req: Request, res: Response): Promise<void>{
+      try {
+        const {page="1",limit="5",vendorId, buildingId, status} = req.query;
+        const result = await this._GetBookingsForAdminUseCase.execute({
+          page: parseInt(page as string),
+          limit: parseInt(limit as string),
+          vendorId: vendorId as string,
+          buildingId: buildingId as string,
+          status: status as string,
+        })
+
+         res.status(200).json({
+          success: true,
+          data: result,
+        });
+      } catch (error) {
+        
+      }
+    }
 
 }

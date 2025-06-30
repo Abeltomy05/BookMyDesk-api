@@ -1,6 +1,7 @@
 import { FilterQuery } from "mongoose";
 import { IBookingModel } from "../../../frameworks/database/mongo/models/booking.model";
 import { IBaseRepository } from "../base-repository.interface";
+import { IGetAdminBookingsFilter, IGetAdminBookingsResult } from "../../../shared/dtos/booking.dto";
 
 export interface IBookingRepository extends IBaseRepository<IBookingModel>{
   findAllWithDetails(
@@ -15,4 +16,6 @@ export interface IBookingRepository extends IBaseRepository<IBookingModel>{
   }>;
 
   findOneWithDetails(filter: FilterQuery<IBookingModel>):Promise<IBookingModel | null>;
+
+ getAdminBookings(filters: IGetAdminBookingsFilter): Promise<IGetAdminBookingsResult>;
 }

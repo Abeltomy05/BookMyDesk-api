@@ -48,6 +48,8 @@ import { GetBookingDetailsUseCase } from "../../useCases/booking/single-booking-
 import { CancelBookingUseCase } from "../../useCases/booking/cancel-booking.usecase";
 import { GetWalletDetailsUseCase } from "../../useCases/wallet/get-walletDetails.usecase";
 import { PayWithWalletUseCase } from "../../useCases/wallet/pay-with-wallet.usecase";
+import { GetBookingsForAdmin } from "../../useCases/booking/get-bookings-for-admin";
+import { GetVendorsAndBuildingsUseCase } from "../../useCases/users/getVendorsAndBuilding";
 
 
 
@@ -159,7 +161,12 @@ export class UseCaseRegistry{
       container.register("IPayWithWalletUseCase",{
         useClass: PayWithWalletUseCase
       })
-
+      container.register("IGetBookingsForAdmin",{
+        useClass: GetBookingsForAdmin
+      })
+      container.register("IGetVendorsAndBuildingsUseCase",{
+        useClass: GetVendorsAndBuildingsUseCase
+      })
 
 
         //* ====== Register Bcrypts ====== *//

@@ -60,3 +60,35 @@ export interface IBookingEntityWithDetails extends IBookingEntity {
   };
 }
 
+//admin booking
+
+export interface IGetAdminBookingsFilterDTO {
+  page?: number;
+  limit?: number;
+  vendorId?: string;
+  buildingId?: string;
+  status?: string;
+}
+
+
+export interface IAdminBooking {
+  _id: string;
+  bookingDate: Date;
+  totalPrice: number;
+  status: string;
+  clientName: string;
+  clientEmail: string;
+  vendorName: string;
+  vendorEmail: string;
+  buildingName: string;
+  spaceName: string;
+}
+
+export interface IGetAdminBookingsResultDTO {
+  bookings: IAdminBooking[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
