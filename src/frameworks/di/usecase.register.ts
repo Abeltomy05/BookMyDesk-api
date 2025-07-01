@@ -51,6 +51,8 @@ import { PayWithWalletUseCase } from "../../useCases/wallet/pay-with-wallet.usec
 import { GetBookingsForAdmin } from "../../useCases/booking/get-bookings-for-admin";
 import { GetVendorsAndBuildingsUseCase } from "../../useCases/users/getVendorsAndBuilding";
 import { GetVendorHomeData } from "../../useCases/vendor/get-home-data.usecase";
+import { CreateTopUpPaymentIntentUseCase } from "../../useCases/wallet/create-topup-payment-intent.usecase";
+import { ConfirmTopupPaymentUseCase } from "../../useCases/wallet/confirm-topup-payment.usecase";
 
 
 
@@ -170,6 +172,12 @@ export class UseCaseRegistry{
       })
       container.register("IGetVendorHomeData",{
         useClass: GetVendorHomeData
+      })
+      container.register("ICreateTopUpPaymentIntentUseCase",{
+        useClass: CreateTopUpPaymentIntentUseCase
+      })
+      container.register("IConfirmTopupPaymentUseCase",{
+        useClass: ConfirmTopupPaymentUseCase
       })
 
 

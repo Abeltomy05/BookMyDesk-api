@@ -66,5 +66,11 @@ export class ClientRoutes extends BaseRoute{
         this.router.post("/client/pay-with-wallet", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response) => {
             walletController.payWithWallet(req, res);
         });
+        this.router.post("/client/create-topup-payment-intent", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response) => {
+            walletController.createTopupIntent(req, res);
+        });
+         this.router.post("/client/confirm-topup-payment", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response) => {
+            walletController.confirmTopupPayment(req, res);
+        });
     }
 }

@@ -24,7 +24,7 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
 
     async execute(bookingId: string, reason:string, userId:string, role:'client' | 'vendor'): Promise<{ success: boolean}> {
          const booking = await this._bookingRepository.findOne({_id:bookingId});
-        if(!booking) {
+        if(!booking || !booking.totalPrice) {
             throw new Error("Booking not found");
         }
 
@@ -40,12 +40,14 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
           throw new Error("You are not allowed to cancel this booking.");
         }
 
-
-
         //refund
-        const totalPrice =  booking.totalPrice || 0;
-        const platformFee = Math.round(totalPrice * 0.05);
-        const refundAmount = totalPrice - platformFee;
+        let refundAmount = booking.totalPrice;
+        let platformFee = 0;
+
+        if (role === 'client') {
+           platformFee = Math.round(booking.totalPrice * 0.05);
+           refundAmount = booking.totalPrice - platformFee;
+        }
 
        const vendorWalletResult = await this._walletRepository.updateOrCreateWalletBalance(
          booking.vendorId.toString(),
@@ -72,7 +74,10 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
             walletId: new Types.ObjectId(clientWalletResult.wallet._id),
             type: "refund",
             amount: refundAmount,
-            description: `95% refund for booking ${bookingId}`,
+            description:
+                role === 'client'
+                    ? `95% refund for booking ${bookingId}`
+                    : `100% refund for booking ${bookingId} (vendor cancelled)`,
             balanceBefore: clientWalletResult.balanceBefore,
             balanceAfter: clientWalletResult.balanceAfter,
         }); 

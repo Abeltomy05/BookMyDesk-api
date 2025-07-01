@@ -9,6 +9,7 @@ import { IGetBookingsUseCase } from "../../entities/usecaseInterfaces/booking/ge
 import { IGetBookingDetailsUseCase } from "../../entities/usecaseInterfaces/booking/single-booking-details-usecase.interface";
 import { ICancelBookingUseCase } from "../../entities/usecaseInterfaces/booking/cancel-booking-usecase.interface";
 import { IGetBookingsForAdmin } from "../../entities/usecaseInterfaces/booking/get-booking-for-admin-usecase.interface";
+import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class BookingController implements IBookingController{
@@ -77,14 +78,14 @@ export class BookingController implements IBookingController{
                 clientId,
                 bookingId
             });
-            res.status(200).json({
+            res.status(StatusCodes.OK).json({
                 success: true,
                 data:result,
                 message: "Payment intent created successfully."
             });
         } catch (error: any) {
             console.error("Error creating payment intent:", error);
-            res.status(500).json({
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: error.message || "Something went wrong while creating payment intent.",
             });

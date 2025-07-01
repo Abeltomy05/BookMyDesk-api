@@ -73,7 +73,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
     }
     }
 
-    async execute(data: ConfirmPaymentDTO): Promise<{}> {
+    async execute(data: ConfirmPaymentDTO){
        try {
         const paymentIntent = await this._stripeService.retrievePaymentIntent(data.paymentIntentId);
 

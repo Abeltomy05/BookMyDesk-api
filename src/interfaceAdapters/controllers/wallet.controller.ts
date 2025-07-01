@@ -5,6 +5,8 @@ import { inject, injectable } from "tsyringe";
 import { IGetWalletDetailsUseCase } from "../../entities/usecaseInterfaces/wallet/get-walletDetails-usecase.interface";
 import { IPayWithWalletUseCase } from "../../entities/usecaseInterfaces/wallet/pay-with-wallet-usecase.interface";
 import { StatusCodes } from "http-status-codes";
+import { ICreateTopUpPaymentIntentUseCase } from "../../entities/usecaseInterfaces/wallet/create-topup-payment-intent-usecase.interface";
+import { IConfirmTopupPaymentUseCase } from "../../entities/usecaseInterfaces/wallet/confirm-topup-payment-usecase.interface";
 
 @injectable()
 export class WalletController implements IWalletController {
@@ -13,6 +15,10 @@ export class WalletController implements IWalletController {
      private _getWalletDetailsUseCase: IGetWalletDetailsUseCase,
      @inject("IPayWithWalletUseCase")
      private _payWithWalletUseCase: IPayWithWalletUseCase,  
+     @inject("ICreateTopUpPaymentIntentUseCase")
+     private _createTopupPaymentIntentUseCase: ICreateTopUpPaymentIntentUseCase, 
+     @inject("IConfirmTopupPaymentUseCase")
+     private _confirmTopupPaymentUseCase: IConfirmTopupPaymentUseCase, 
   ) {}
 
     async getWalletDetails(req: Request, res: Response): Promise<void>{
@@ -71,6 +77,62 @@ export class WalletController implements IWalletController {
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: error.message || "Failed to book the space with wallet",
+            });
+        }
+    }
+
+    async createTopupIntent(req: Request, res: Response): Promise<void>{
+        try {
+            const {amount,currency} = req.body;
+            if(!amount || !currency){
+               res.status(StatusCodes.BAD_REQUEST).json({
+                success: false,
+                message: "Credentials missing for creating topup intent."
+            }); 
+            }
+            const {userId,role} = (req as CustomRequest).user;
+            const response = await this._createTopupPaymentIntentUseCase.execute(amount,currency,userId,role);
+            res.status(200).json({
+                success: true,
+                data: response,
+                message: "Payment intent created successfully."
+            });
+        } catch (error:any) {
+            console.error("Error create top up payment intent:", error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: error.message || "Failed to create top up payment intent",
+            });
+        }
+    }
+
+    async confirmTopupPayment(req: Request, res: Response): Promise<void>{
+        try {
+            const { paymentIntentId } = req.body;
+            if (!paymentIntentId) {
+            res.status(400).json({ 
+                success: false,
+                message: 'Missing required fields: paymentIntentId' 
+            });
+            return;
+            }
+
+            const result = await this._confirmTopupPaymentUseCase.execute(paymentIntentId); 
+
+            if (result.success) {
+            res.status(200).json({
+                success: true,
+                data:result.data,
+                message: "Payment confirmed successfully.",
+            });
+            } else {
+            res.status(400).json(result);
+            }
+        } catch (error:any) {
+            console.error("Error confirm top up payment:", error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: error.message || "Failed to confirm top up payment",
             });
         }
     }
