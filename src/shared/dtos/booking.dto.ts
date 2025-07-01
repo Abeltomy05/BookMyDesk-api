@@ -93,11 +93,11 @@ export interface IGetAdminBookingsResultDTO {
 }
 
 export interface VendorHomeDataResultDTO {
-  totalBuildings: number;
-  totalSpaces: number;
+  totalBuildings?: number;
+  totalSpaces?: number;
   completedBookingsCount: number;
-  totalRevenue: number;
-  monthlyBookings: {
+  totalRevenue?: number;
+  monthlyBookings?: {
     month:string;
     revenue:number;
     bookings:number;

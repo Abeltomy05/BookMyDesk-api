@@ -20,29 +20,29 @@ export class GetVendorHomeData implements IGetVendorHomeData{
        private _walletTxnRepo: IWalletTransactionRepository
     ){}
 
-    async execute(vendorId: string, page = 1, limit = 10):Promise<VendorHomeDataResultDTO>{
+    async execute(vendorId: string, page = 1, limit = 10, onlyTable=false):Promise<VendorHomeDataResultDTO>{
        const skip = (page - 1) * limit;
 
-        const [buildings, wallet, walletTxns, completedBookingsPaginated] = await Promise.all([
-            this._buildingRepo.find({vendorId}),
-            this._walletRepo.findOne({userId:vendorId}),
-            this._walletTxnRepo.getMonthlyBookingIncome(vendorId),
-            this._bookingRepo.findAllWithDetails(
-                { vendorId, status: "completed" },
-                skip,
-                limit,
-                { createdAt: -1 },
-                'vendor',
-            ),
-        ]);
+       let buildings: any[] = [];
+       let wallet: any = null;
+       let walletTxns: any[] = [];
 
-         const totalBuildings = buildings.length;
-         const totalSpaces = buildings.reduce((acc, b) =>
-            acc + (b.summarizedSpaces?.reduce((sum, s) => sum + (s.count || 0), 0) || 0), 0
-          );
+        if (!onlyTable) {
+            [buildings, wallet, walletTxns] = await Promise.all([
+                this._buildingRepo.find({ vendorId }),
+                this._walletRepo.findOne({ userId: vendorId }),
+                this._walletTxnRepo.getMonthlyBookingIncome(vendorId),
+            ]);
+        }
 
-        const totalRevenue = wallet?.balance || 0;
-        const monthlyBookings = walletTxns;
+        const completedBookingsPaginated = await this._bookingRepo.findAllWithDetails(
+            { vendorId, status: "completed" },
+            skip,
+            limit,
+            { createdAt: -1 },
+            "vendor"
+        );
+
 
         const completedBookings = completedBookingsPaginated.items.map((b:any) => ({
         ...b,
@@ -66,18 +66,28 @@ export class GetVendorHomeData implements IGetVendorHomeData{
             } : undefined
         }));
 
-        return {
-            totalBuildings,
-            totalSpaces,
-            completedBookingsCount: completedBookingsPaginated.total,
-            totalRevenue,
-            monthlyBookings,
+         return {
+            totalBuildings: onlyTable ? undefined : buildings.length,
+            totalSpaces: onlyTable
+            ? undefined
+            : buildings.reduce(
+                (acc, b) =>
+                    acc +
+                    (b.summarizedSpaces?.reduce(
+                    (sum: number, s: any) => sum + (s.count || 0),
+                    0
+                    ) || 0),
+                0
+                ),
+            totalRevenue: onlyTable ? undefined : wallet?.balance || 0,
+            monthlyBookings: onlyTable ? undefined : walletTxns,
             completedBookings,
+            completedBookingsCount: completedBookingsPaginated.total,
             pagination: {
-                totalItems: completedBookingsPaginated.total,
-                currentPage: page,
-                totalPages: Math.ceil(completedBookingsPaginated.total / limit),
-            }
-        } 
+            totalItems: completedBookingsPaginated.total,
+            currentPage: page,
+            totalPages: Math.ceil(completedBookingsPaginated.total / limit),
+            },
+        };
 }
 }
