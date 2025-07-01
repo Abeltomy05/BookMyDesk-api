@@ -111,11 +111,8 @@ export class VendorController implements IVendorController{
     async vendorHomeData(req: Request, res: Response): Promise<void>{
       try {
         const vendorId = (req as CustomRequest).user.userId;
-        const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 5;
-        // const onlyTable = req.query.onlyTable === 'true';
 
-        const response = await this._getVendorHomeDataUseCase.execute(vendorId, page, limit,);
+        const response = await this._getVendorHomeDataUseCase.execute(vendorId);
          res.status(200).json({
           success: true,
           data: response,

@@ -103,10 +103,5 @@ export interface VendorHomeDataResultDTO {
     bookings:number;
   }[];
   completedBookings: IBookingEntityWithDetails[];
-  pagination: {
-    totalItems: number;
-    currentPage: number;
-    totalPages: number;
-  };
 }
 

@@ -20,8 +20,7 @@ export class GetVendorHomeData implements IGetVendorHomeData{
        private _walletTxnRepo: IWalletTransactionRepository
     ){}
 
-    async execute(vendorId: string, page = 1, limit = 10):Promise<VendorHomeDataResultDTO>{
-       const skip = (page - 1) * limit;
+    async execute(vendorId: string):Promise<VendorHomeDataResultDTO>{
 
         const [buildings, wallet, walletTxns, completedBookingsPaginated] = await Promise.all([
             this._buildingRepo.find({vendorId}),
@@ -29,8 +28,8 @@ export class GetVendorHomeData implements IGetVendorHomeData{
             this._walletTxnRepo.getMonthlyBookingIncome(vendorId),
             this._bookingRepo.findAllWithDetails(
                 { vendorId, status: "completed" },
-                skip,
-                limit,
+                0,
+                5,
                 { createdAt: -1 },
                 'vendor',
             ),
@@ -73,11 +72,6 @@ export class GetVendorHomeData implements IGetVendorHomeData{
             totalRevenue,
             monthlyBookings,
             completedBookings,
-            pagination: {
-                totalItems: completedBookingsPaginated.total,
-                currentPage: page,
-                totalPages: Math.ceil(completedBookingsPaginated.total / limit),
-            }
         } 
 }
 }
