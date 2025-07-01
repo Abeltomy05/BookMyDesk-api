@@ -50,6 +50,7 @@ import { GetWalletDetailsUseCase } from "../../useCases/wallet/get-walletDetails
 import { PayWithWalletUseCase } from "../../useCases/wallet/pay-with-wallet.usecase";
 import { GetBookingsForAdmin } from "../../useCases/booking/get-bookings-for-admin";
 import { GetVendorsAndBuildingsUseCase } from "../../useCases/users/getVendorsAndBuilding";
+import { GetVendorHomeData } from "../../useCases/vendor/get-home-data.usecase";
 
 
 
@@ -166,6 +167,9 @@ export class UseCaseRegistry{
       })
       container.register("IGetVendorsAndBuildingsUseCase",{
         useClass: GetVendorsAndBuildingsUseCase
+      })
+      container.register("IGetVendorHomeData",{
+        useClass: GetVendorHomeData
       })
 
 

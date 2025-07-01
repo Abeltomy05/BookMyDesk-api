@@ -67,5 +67,13 @@ export class VendorRoutes extends BaseRoute{
        this.router.get("/vendor/get-wallet-details",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response) => {
          walletController.getWalletDetails(req, res);
        });  
+
+       this.router.get("/vendor/get-vendor-home-data",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response) => {
+         vendorController.vendorHomeData(req, res);
+       });  
+
+       this.router.get("/vendor/completed-bookings",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response) => {
+         vendorController.vendorHomeData(req, res);
+       });  
     }
 }

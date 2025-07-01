@@ -92,3 +92,21 @@ export interface IGetAdminBookingsResultDTO {
   totalPages: number;
 }
 
+export interface VendorHomeDataResultDTO {
+  totalBuildings: number;
+  totalSpaces: number;
+  completedBookingsCount: number;
+  totalRevenue: number;
+  monthlyBookings: {
+    month:string;
+    revenue:number;
+    bookings:number;
+  }[];
+  completedBookings: IBookingEntityWithDetails[];
+  pagination: {
+    totalItems: number;
+    currentPage: number;
+    totalPages: number;
+  };
+}
+

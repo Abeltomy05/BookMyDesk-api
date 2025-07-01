@@ -6,6 +6,7 @@ import { CustomRequest } from "../middlewares/auth.middleware";
 import { IUploadIdProofUseCase } from "../../entities/usecaseInterfaces/vendor/uploadIdProof-usecase.interface";
 import { IGetRetryDataUseCase } from "../../entities/usecaseInterfaces/vendor/get-retry-data.interface";
 import { IRetryRegistration } from "../../entities/usecaseInterfaces/vendor/retry-registration.interface";
+import { IGetVendorHomeData } from "../../entities/usecaseInterfaces/vendor/get-vendor-home-data-usecase.interface";
 
 @injectable()
 export class VendorController implements IVendorController{
@@ -16,6 +17,8 @@ export class VendorController implements IVendorController{
         private _getRetryDataUseCase: IGetRetryDataUseCase,
         @inject("IRetryRegistration")
         private _retryRegistration: IRetryRegistration,
+        @inject("IGetVendorHomeData")
+        private _getVendorHomeDataUseCase: IGetVendorHomeData,
     ){}
 
     async uploadIdProof(req: Request, res: Response): Promise<void> {
@@ -105,6 +108,26 @@ export class VendorController implements IVendorController{
       }
     }
 
+    async vendorHomeData(req: Request, res: Response): Promise<void>{
+      try {
+        const vendorId = (req as CustomRequest).user.userId;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 5;
+        // const onlyTable = req.query.onlyTable === 'true';
+
+        const response = await this._getVendorHomeDataUseCase.execute(vendorId, page, limit,);
+         res.status(200).json({
+          success: true,
+          data: response,
+        });
+      } catch (error) {
+        console.error("Error retry vendor registration:", error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Failed in retry vendor registration",
+        });
+      }
+    }
 
 
 }
