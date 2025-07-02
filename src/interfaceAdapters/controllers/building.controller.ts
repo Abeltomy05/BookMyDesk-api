@@ -200,7 +200,34 @@ export class BuildingController implements IBuildingController{
        const page = parseInt(req.query.page as string) || 1;
        const limit = parseInt(req.query.limit as string) || 5;
 
-      const result = await this._fetchBuildingUseCase.execute(page, limit);
+       const locationName = req.query.locationName as string;
+       const type = req.query.type as string;
+       const priceRangeStr = req.query.priceRange as string;
+
+       let minPrice: number | undefined;
+       let maxPrice: number | undefined;
+
+        if (priceRangeStr) {
+            const decodedPriceRange = decodeURIComponent(priceRangeStr);
+            if (decodedPriceRange.endsWith('+')) {
+              minPrice = parseInt(decodedPriceRange.replace('+', ''));
+              maxPrice = undefined;
+            } else if (decodedPriceRange.includes('-')) {
+              const [min, max] = decodedPriceRange.split('-').map(Number);
+              minPrice = min; 
+              maxPrice = max;
+            }
+          }
+        const filters = {
+          locationName,
+          type,
+          minPrice,
+          maxPrice,
+        };
+
+        console.log('Filters applied:', filters);
+
+      const result = await this._fetchBuildingUseCase.execute(page, limit, filters);
        res.status(200).json({
       success: true,
       data: result.items,

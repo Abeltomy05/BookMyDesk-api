@@ -39,6 +39,21 @@ import { GetBuildingsForVerification } from "../../useCases/building/get-buildin
 import { EditBuildingUsecase } from "../../useCases/building/edit-building.usecase";
 import { GetSingleBuilding } from "../../useCases/building/get-single-building.usecase";
 import { FetchBuildingUseCase } from "../../useCases/building/fetch-building.usecase";
+import { GetBookingPageDataUseCase } from "../../useCases/booking/get-booking-page-data.usecase";
+import { StripeService } from "../../interfaceAdapters/services/stripe.service";
+import { CreatePaymentIntentUseCase } from "../../useCases/booking/create-payment-intent.usecase";
+import { ConfirmPaymentUseCase } from "../../useCases/booking/confirm-payment.usecase";
+import { GetBookingsUseCase } from "../../useCases/booking/bookings-get.usecase";
+import { GetBookingDetailsUseCase } from "../../useCases/booking/single-booking-details";
+import { CancelBookingUseCase } from "../../useCases/booking/cancel-booking.usecase";
+import { GetWalletDetailsUseCase } from "../../useCases/wallet/get-walletDetails.usecase";
+import { PayWithWalletUseCase } from "../../useCases/wallet/pay-with-wallet.usecase";
+import { GetBookingsForAdmin } from "../../useCases/booking/get-bookings-for-admin";
+import { GetVendorsAndBuildingsUseCase } from "../../useCases/users/getVendorsAndBuilding";
+import { GetVendorHomeData } from "../../useCases/vendor/get-home-data.usecase";
+import { CreateTopUpPaymentIntentUseCase } from "../../useCases/wallet/create-topup-payment-intent.usecase";
+import { ConfirmTopupPaymentUseCase } from "../../useCases/wallet/confirm-topup-payment.usecase";
+import { GetSingleVendorData } from "../../useCases/vendor/get-single-vendor-data.usecase";
 
 
 
@@ -126,7 +141,48 @@ export class UseCaseRegistry{
       container.register("IFetchBuildingUseCase",{
         useClass : FetchBuildingUseCase
       })
-
+      container.register("IGetBookingPageDataUseCase",{
+        useClass: GetBookingPageDataUseCase
+      })
+      container.register("ICreatePaymentIntentUseCase",{
+        useClass: CreatePaymentIntentUseCase
+      })
+      container.register("IConfirmPaymentUseCase",{
+        useClass: ConfirmPaymentUseCase
+      })
+      container.register("IGetBookingsUseCase",{
+        useClass: GetBookingsUseCase
+      })
+      container.register("IGetBookingDetailsUseCase",{
+        useClass: GetBookingDetailsUseCase
+      })
+      container.register("ICancelBookingUseCase",{
+        useClass: CancelBookingUseCase
+      })
+      container.register("IGetWalletDetailsUseCase",{
+        useClass: GetWalletDetailsUseCase
+      })
+      container.register("IPayWithWalletUseCase",{
+        useClass: PayWithWalletUseCase
+      })
+      container.register("IGetBookingsForAdmin",{
+        useClass: GetBookingsForAdmin
+      })
+      container.register("IGetVendorsAndBuildingsUseCase",{
+        useClass: GetVendorsAndBuildingsUseCase
+      })
+      container.register("IGetVendorHomeData",{
+        useClass: GetVendorHomeData
+      })
+      container.register("ICreateTopUpPaymentIntentUseCase",{
+        useClass: CreateTopUpPaymentIntentUseCase
+      })
+      container.register("IConfirmTopupPaymentUseCase",{
+        useClass: ConfirmTopupPaymentUseCase
+      })
+      container.register("IGetSingleVendorData",{
+        useClass: GetSingleVendorData
+      })
 
 
         //* ====== Register Bcrypts ====== *//
@@ -157,7 +213,10 @@ export class UseCaseRegistry{
 
         container.register<IJwtService>("IJwtService",{
             useClass: JwtService
-        }) 
+        })
+        container.register("IStripeService",{
+          useClass: StripeService
+        })
 
     }
 }

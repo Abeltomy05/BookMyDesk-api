@@ -18,6 +18,10 @@ export interface CustomRequest extends Request {
 	user: CustomJwtPayload;
 }
 
+                    /* ==============================  */
+                         /* Verify Auth Middleware*/ 
+                    /* ==============================  */
+
 export const verifyAuth = async(req:Request,res:Response,next:NextFunction)=>{
        try{
           const token = extractToken(req);
@@ -136,4 +140,25 @@ export const decodeToken = async (req: Request,res: Response,next: NextFunction)
 			error: error?.message || "An unknown error occurred",
 		});
 	}
+};
+
+
+                    /* ==============================  */
+                         /* Authorize Role Middleware*/ 
+                    /* ==============================  */
+
+export const authorizeRole = (allowedRole:string[])=>{
+	return (req: Request, res: Response, next: NextFunction) =>{
+		const user = (req as CustomRequest).user;
+		if(!user || !allowedRole.includes(user.role)){
+			res.status(StatusCodes.FORBIDDEN).json({
+				success: false,
+				message: `Unauthorized access: this route is restricted to ${user.role} users.`,
+				data: user ? user.role : "none"
+			})
+			return;
+		}
+		console.log("Authorized Role",user.role)
+		next();
+	};
 };

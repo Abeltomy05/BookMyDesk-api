@@ -7,5 +7,6 @@ export interface IUsersController{
     updateEntityStatus(req: Request, res: Response): Promise<void>;
     getUserCount(req: Request, res: Response): Promise<void>;
     updateUserProfile(req: Request, res: Response): Promise<void>;
-    updateUserPassword(req: Request, res: Response): Promise<void>
+    updateUserPassword(req: Request, res: Response): Promise<void>;
+    getVendorsAndBuildings(req: Request, res: Response): Promise<void>;
 }

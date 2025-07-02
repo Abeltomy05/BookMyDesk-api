@@ -36,7 +36,7 @@ export class LoginUserUseCase implements ILoginUserUseCase{
 
        const userData = await repository.findOne({email: user.email});
        if(!userData){
-            throw new Error("User not found");
+            throw new Error("Invalid email. Please try again with another email");
         }
 
         if(user.password){

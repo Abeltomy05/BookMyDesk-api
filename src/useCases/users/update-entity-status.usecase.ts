@@ -6,6 +6,8 @@ import { Types } from "mongoose";
 import { IEmailService } from "../../entities/serviceInterfaces/email-service.interface";
 import { IJwtService } from "../../entities/serviceInterfaces/jwt-service.interface";
 import { IBuildingRepository } from "../../entities/repositoryInterfaces/building/building-repository.interface";
+import { IBookingRepository } from "../../entities/repositoryInterfaces/booking/booking-repository.interface";
+import { hasEmail } from "../../shared/helper/hasEmail";
 
 
 
@@ -18,6 +20,8 @@ export class UpdateEntityStatusUseCase  implements IUpdateEntityStatusUseCase {
 		private _vendorRepository: IVendorRepository,
 		@inject("IBuildingRepository")
 		private _buildingRepository: IBuildingRepository,
+		@inject("IBookingRepository")
+		private _bookingRepository: IBookingRepository,
 		@inject("IEmailService")
 	    private _emailService: IEmailService, 
 		@inject("IJwtService")
@@ -39,6 +43,9 @@ export class UpdateEntityStatusUseCase  implements IUpdateEntityStatusUseCase {
 			case "building":
 			repo = this._buildingRepository;
 			break;
+			case "booking":
+			repo = this._bookingRepository;
+			break;
 
 			default:
 			throw new Error("Unsupported entity type");
@@ -51,12 +58,12 @@ export class UpdateEntityStatusUseCase  implements IUpdateEntityStatusUseCase {
 
 		await repo.update({ _id: entityId },{ status });
 
-		  if (entityType === "vendor" && status === "rejected" && reason && entity.email) {
+		  if (entityType === "vendor" && status === "rejected" && reason && hasEmail(entity)) {
             await this._handleVendorRejection(entity.email, reason);
         }
 
 
-		 if (entityType === "building" && status === "rejected" && reason && entity.email) {
+		 if (entityType === "building" && status === "rejected" && reason && hasEmail(entity)) {
             await this._handleBuildingRejection(entity.email, reason);
         }
 	}

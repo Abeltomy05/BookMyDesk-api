@@ -29,6 +29,7 @@
     "passport-google-oauth20": "^2.0.0",
     "redis": "^5.0.1",
     "reflect-metadata": "^0.2.2",
+    "stripe": "^18.2.1",
     "tsyringe": "^4.10.0",
     "zod": "^3.24.4"
   },

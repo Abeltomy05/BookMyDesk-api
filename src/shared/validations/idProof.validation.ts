@@ -4,6 +4,6 @@ export const idProofSchema = z
   .string()
   .url({ message: "Invalid URL format for ID proof." })
   .refine(url =>
-    url.startsWith("https://res.cloudinary.com/"), {
-      message: "ID proof must be a Cloudinary URL.",
+    /^https:\/\/(res\.cloudinary\.com|utfs\.io|uploadthing-prod.*|.+\.ufs\.sh)/.test(url), {
+      message: "ID proof must be a valid file URL.",
   });

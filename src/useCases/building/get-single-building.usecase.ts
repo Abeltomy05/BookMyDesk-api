@@ -23,7 +23,9 @@ export class GetSingleBuilding implements IGetSingleBuilding{
     }
  
     const buildingEntity = toEntityBuilding(buildingModel);
-    const spaceModels = await this.spaceRepository.find({ buildingId: id });
+    const spaceModels = await this.spaceRepository.find({ 
+           buildingId: id,
+          });
 
     const spaceEntities = spaceModels.map(toEntitySpace); 
 

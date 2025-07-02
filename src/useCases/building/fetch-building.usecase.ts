@@ -12,9 +12,14 @@ export class FetchBuildingUseCase implements IFetchBuildingUseCase{
     private _buildingRepository: IBuildingRepository,
     ){}
 
-        async execute(page: number, limit: number): Promise<{ items: IBuildingEntity[]; total: number }> {
+  async execute(page: number, limit: number,filters: {
+        locationName?: string;
+        type?: string;
+        minPrice?: number;
+        maxPrice?: number;
+    } ): Promise<{ items: IBuildingEntity[]; total: number }> {
         const skip = (page - 1) * limit;
-        const { items, total } = await this._buildingRepository.findAll({}, skip, limit, { createdAt: -1 });
+        const { items, total } = await this._buildingRepository.searchBuildings(filters, skip, limit, { createdAt: -1 });
 
         return {
         items: items.map(toEntityBuilding),
