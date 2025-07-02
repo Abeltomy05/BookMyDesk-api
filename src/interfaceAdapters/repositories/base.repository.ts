@@ -8,7 +8,7 @@ export class BaseRepository<T> {
         return this.model.findOne(filter).select(projection).lean() as Promise<T>;
     }
 
-    async find(filter: FilterQuery<T>){
+    async find(filter: FilterQuery<T>, projection?: any){
         return this.model.find(filter);
     }
 

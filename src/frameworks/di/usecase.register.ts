@@ -53,6 +53,7 @@ import { GetVendorsAndBuildingsUseCase } from "../../useCases/users/getVendorsAn
 import { GetVendorHomeData } from "../../useCases/vendor/get-home-data.usecase";
 import { CreateTopUpPaymentIntentUseCase } from "../../useCases/wallet/create-topup-payment-intent.usecase";
 import { ConfirmTopupPaymentUseCase } from "../../useCases/wallet/confirm-topup-payment.usecase";
+import { GetSingleVendorData } from "../../useCases/vendor/get-single-vendor-data.usecase";
 
 
 
@@ -178,6 +179,9 @@ export class UseCaseRegistry{
       })
       container.register("IConfirmTopupPaymentUseCase",{
         useClass: ConfirmTopupPaymentUseCase
+      })
+      container.register("IGetSingleVendorData",{
+        useClass: GetSingleVendorData
       })
 
 

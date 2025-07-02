@@ -5,4 +5,5 @@ export interface IVendorController {
     getRetryData(req: Request, res: Response): Promise<void>;
     retryRegistration(req: Request, res: Response): Promise<void>;
     vendorHomeData(req: Request, res: Response): Promise<void>;
+    singleVendorData(req: Request, res: Response): Promise<void>;
 }

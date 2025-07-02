@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { authController, bookingController, buildingController, usersController, walletController } from "../di/resolver";
+import { authController, bookingController, buildingController, usersController, vendorController, walletController } from "../di/resolver";
 import { BaseRoute } from "./base.route";
 import { authorizeRole, verifyAuth } from "../../interfaceAdapters/middlewares/auth.middleware";
 
@@ -40,6 +40,9 @@ export class AdminRoutes extends BaseRoute{
         });
         this.router.get("/admin/get-vendor-buildings",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response) => {
             usersController.getVendorsAndBuildings(req, res);
+        });
+        this.router.get("/admin/get-single-vendor/:vendorId",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response) => {
+            vendorController.singleVendorData(req, res);
         });
 
     }

@@ -7,6 +7,7 @@ import { IUploadIdProofUseCase } from "../../entities/usecaseInterfaces/vendor/u
 import { IGetRetryDataUseCase } from "../../entities/usecaseInterfaces/vendor/get-retry-data.interface";
 import { IRetryRegistration } from "../../entities/usecaseInterfaces/vendor/retry-registration.interface";
 import { IGetVendorHomeData } from "../../entities/usecaseInterfaces/vendor/get-vendor-home-data-usecase.interface";
+import { IGetSingleVendorData } from "../../entities/usecaseInterfaces/vendor/get-single-vendorData-usecase.interface";
 
 @injectable()
 export class VendorController implements IVendorController{
@@ -19,6 +20,8 @@ export class VendorController implements IVendorController{
         private _retryRegistration: IRetryRegistration,
         @inject("IGetVendorHomeData")
         private _getVendorHomeDataUseCase: IGetVendorHomeData,
+        @inject("IGetSingleVendorData")
+        private _getsingleVendorDataUseCase: IGetSingleVendorData,
     ){}
 
     async uploadIdProof(req: Request, res: Response): Promise<void> {
@@ -122,6 +125,25 @@ export class VendorController implements IVendorController{
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Failed in retry vendor registration",
+        });
+      }
+    }
+
+    async singleVendorData(req: Request, res: Response): Promise<void>{
+      try {
+        const vendorId = req.params.vendorId;
+        console.log("VendorId is:",vendorId)
+        const result = await this._getsingleVendorDataUseCase.execute(vendorId);
+        console.log("vendor Data",result);
+        res.status(StatusCodes.OK).json({
+          success:true,
+          data:result,
+        })
+      } catch (error) {
+          console.error("Error getting vendor data in admin side:", error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Failed in getting vendor data in admin side",
         });
       }
     }

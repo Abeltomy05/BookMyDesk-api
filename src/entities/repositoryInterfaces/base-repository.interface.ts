@@ -1,5 +1,5 @@
 export interface IBaseRepository<T> {
-  find(filter: any): Promise<T[]>;
+  find(filter: any,projection?: any): Promise<T[]>;
   findAll(
     filter: any,
     skip: number,
