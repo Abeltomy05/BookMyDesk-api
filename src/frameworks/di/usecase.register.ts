@@ -54,6 +54,11 @@ import { GetVendorHomeData } from "../../useCases/vendor/get-home-data.usecase";
 import { CreateTopUpPaymentIntentUseCase } from "../../useCases/wallet/create-topup-payment-intent.usecase";
 import { ConfirmTopupPaymentUseCase } from "../../useCases/wallet/confirm-topup-payment.usecase";
 import { GetSingleVendorData } from "../../useCases/vendor/get-single-vendor-data.usecase";
+import { FetchBuildingsForVendorUseCase } from "../../useCases/vendor/fetch-buildings-vendor.usecase";
+import { FetchSpacesForBuilding } from "../../useCases/vendor/fetch-spaces-building.usecase";
+import { FetchAllOffersUseCase } from "../../useCases/offer/fetch-all-offers.usecase";
+import { CreateOfferUseCase } from "../../useCases/offer/create-offer.usecase";
+import { DeleteEntityUseCase } from "../../useCases/users/delete-entity.usecase";
 
 
 
@@ -182,6 +187,21 @@ export class UseCaseRegistry{
       })
       container.register("IGetSingleVendorData",{
         useClass: GetSingleVendorData
+      })
+      container.register("IFetchBuildingsForVendorUseCase",{
+        useClass: FetchBuildingsForVendorUseCase
+      })
+      container.register("IFetchSpacesForBuilding",{
+        useClass: FetchSpacesForBuilding
+      })
+      container.register("IFetchAllOffersUseCase",{
+        useClass: FetchAllOffersUseCase
+      })
+      container.register("ICreateOfferUseCase",{
+        useClass: CreateOfferUseCase
+      })
+      container.register("IDeleteEntityUseCase",{
+        useClass: DeleteEntityUseCase
       })
 
 

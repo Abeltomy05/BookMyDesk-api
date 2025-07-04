@@ -8,6 +8,7 @@ export type SpaceAggregation = {
 };
 export type BookingStatus = "pending" | "confirmed" | "cancelled" | "completed" | "failed" ;
 export type PaymentStatus = "unpaid" | "pending" | "succeeded" | "failed" | "refunded";
+export type OfferStatus = "ongoing" | "upcoming" | "expired";
 export type PaymentMethod = "stripe" | "wallet";
 export type WalletTransactionTypes = "topup" | "payment" | "refund" | "withdrawal" | 'platform-fee' | 'booking-income' | "booking-refund";
 

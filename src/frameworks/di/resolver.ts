@@ -13,6 +13,8 @@ import { BookingController } from "../../interfaceAdapters/controllers/booking.c
 import { IBookingController } from "../../entities/controllerInterfaces/others/booking-controller.interface";
 import { WalletController } from "../../interfaceAdapters/controllers/wallet.controller";
 import { IWalletController } from "../../entities/controllerInterfaces/others/wallet-controller.interface";
+import { IOfferController } from "../../entities/controllerInterfaces/others/offer-controller.interface";
+import { OfferController } from "../../interfaceAdapters/controllers/offer.controller";
 
 DependencyInjection.registerAll();
 //* ====== Middleware Resolving ====== *//
@@ -35,5 +37,6 @@ export const bookingController =
             container.resolve<IBookingController>(BookingController);
 export const walletController = 
             container.resolve<IWalletController>(WalletController);                       
-
+export const offerController = 
+            container.resolve<IOfferController>(OfferController); 
 //* ====== Socket Handler Resolving ====== *//            

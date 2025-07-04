@@ -11,6 +11,7 @@ import './frameworks/passport/google.strategy'
 import { ClientRoutes } from './frameworks/routes/client.route';
 import { VendorRoutes } from './frameworks/routes/vendor.route';
 import { AdminRoutes } from './frameworks/routes/admin.route';
+import { startOfferCleanupJob } from "./shared/cron/offer-cleanup.cron";
 
 
 dotenv.config();
@@ -30,6 +31,8 @@ app.use(cors({
     allowedHeaders: ['Content-Type'],
     credentials: true, 
 }));
+
+startOfferCleanupJob();
 
 // app.use((req, res, next) => {
 //   console.log("➡️ Incoming request:", req.method, req.url);

@@ -9,4 +9,5 @@ export interface IUsersController{
     updateUserProfile(req: Request, res: Response): Promise<void>;
     updateUserPassword(req: Request, res: Response): Promise<void>;
     getVendorsAndBuildings(req: Request, res: Response): Promise<void>;
+    deleteEntity(req:Request, res: Response): Promise<void>;
 }

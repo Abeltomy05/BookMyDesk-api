@@ -6,4 +6,6 @@ export interface IVendorController {
     retryRegistration(req: Request, res: Response): Promise<void>;
     vendorHomeData(req: Request, res: Response): Promise<void>;
     singleVendorData(req: Request, res: Response): Promise<void>;
+    fetchBuildingsForVendor(req: Request, res: Response): Promise<void>
+    fetchSpaceForBuilding(req: Request, res: Response): Promise<void>
 }

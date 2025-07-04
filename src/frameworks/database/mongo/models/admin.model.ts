@@ -2,7 +2,7 @@ import { IAdminEntity } from "../../../../entities/models/admin.entity";
 import { Document, model, ObjectId } from "mongoose";
 import { adminSchema } from "../schemas/admin.schema";
 
-export interface IAdminModel extends IAdminEntity,Document{
+export interface IAdminModel extends Omit<IAdminEntity,'_id'>,Document{
     _id: ObjectId;
 }
 

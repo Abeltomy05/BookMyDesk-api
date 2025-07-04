@@ -13,6 +13,7 @@ import { SpaceRepository } from "../../interfaceAdapters/repositories/building/s
 import { BookingRepository } from "../../interfaceAdapters/repositories/booking/booking.repository";
 import { WalletRepository } from "../../interfaceAdapters/repositories/wallet/wallet.repository";
 import { WalletTransactionRepository } from "../../interfaceAdapters/repositories/wallet/walletTransaction.repository";
+import { OfferRepository } from "../../interfaceAdapters/repositories/offer/offer.repository";
 
 export class RepositoryRegistry{
     static registerRepositories():void{
@@ -50,6 +51,9 @@ export class RepositoryRegistry{
         })
         container.register("IWalletTransactionRepository", {
             useClass: WalletTransactionRepository
+        })
+        container.register("IOfferRepository",{
+            useClass: OfferRepository
         })
         
     }

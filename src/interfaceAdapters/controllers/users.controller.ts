@@ -11,6 +11,7 @@ import { IUpdateUserPasswordUseCase } from "../../entities/usecaseInterfaces/use
 import { IGetUserDataUseCase } from "../../entities/usecaseInterfaces/users/get-user-data-usecase.interface";
 import { userSchemas } from "./auth/validations/user-signup.validation.schema";
 import { IGetVendorsAndBuildingsUseCase } from "../../entities/usecaseInterfaces/users/get-vendorAndBuilding-usecase.interface";
+import { IDeleteEntityUseCase } from "../../entities/usecaseInterfaces/users/delete-entity-usecase.interface";
 
 @injectable()
 export class UsersController implements IUsersController{
@@ -29,6 +30,8 @@ export class UsersController implements IUsersController{
        private _getUserDataUseCase: IGetUserDataUseCase,
        @inject("IGetVendorsAndBuildingsUseCase")
        private _getVendorsAndBuildingsUseCase: IGetVendorsAndBuildingsUseCase,
+       @inject("IDeleteEntityUseCase")
+       private _deleteEntityUseCase: IDeleteEntityUseCase,
     ){}
     
     async getAllUsers(req: Request, res: Response): Promise<void> {
@@ -180,5 +183,33 @@ export class UsersController implements IUsersController{
     res.status(500).json({ success: false, message: "Failed to fetch summary." });
    }
   }
+
+  async deleteEntity(req:Request, res: Response): Promise<void>{
+        try {
+            const entityId = req.query.entityId as string;
+            const entityType = req.query.entityType as string;
+            
+            const response = await this._deleteEntityUseCase.execute( entityId, entityType );
+            if(response.success){
+                res.status(StatusCodes.OK).json({
+                    success:true,
+                    message: `${entityType} deleted successfully`,
+                })
+                return;
+            }else{
+                 res.status(StatusCodes.BAD_REQUEST).json({
+                    success:true,
+                    message: `${entityType} deletion not successful. Please try again.`,
+                })
+                return;
+            }
+        } catch (error) {
+           const message = error instanceof Error ? error.message : "Unexpected error during deletion";
+            res.status(StatusCodes.BAD_REQUEST).json({
+            success: false,
+            message,
+            });
+        }
+    }
 
 }

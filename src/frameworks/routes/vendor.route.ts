@@ -1,6 +1,6 @@
 import { Request, RequestHandler, Response } from "express";
 import { BaseRoute } from "./base.route";
-import { blockStatusMiddleware, authController,buildingController,usersController,vendorController, bookingController, walletController } from "../di/resolver";
+import { blockStatusMiddleware, authController,buildingController,usersController,vendorController, bookingController, walletController, offerController } from "../di/resolver";
 import { authorizeRole, decodeToken, verifyAuth } from "../../interfaceAdapters/middlewares/auth.middleware";
 
 export class VendorRoutes extends BaseRoute{
@@ -71,9 +71,23 @@ export class VendorRoutes extends BaseRoute{
        this.router.get("/vendor/get-vendor-home-data",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response) => {
          vendorController.vendorHomeData(req, res);
        });  
-
        this.router.get("/vendor/completed-bookings",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response) => {
          vendorController.vendorHomeData(req, res);
        });  
+       this.router.get("/vendor/buildings-for-vendor",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response) => {
+         vendorController.fetchBuildingsForVendor(req, res);
+       });  
+       this.router.get("/vendor/spaces-for-buildings/:buildingId",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response) => {
+         vendorController.fetchSpaceForBuilding(req, res);
+       }); 
+        this.router.get("/vendor/get-offers",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response) => {
+         offerController.fetchAllOffers(req, res);
+       }); 
+        this.router.post("/vendor/create-offer",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response) => {
+         offerController.createOffer(req, res);
+       }); 
+         this.router.delete("/vendor/delete-offer",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response) => {
+         usersController.deleteEntity(req, res);
+       }); 
     }
 }

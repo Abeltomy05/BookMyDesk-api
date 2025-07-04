@@ -8,6 +8,8 @@ import { IGetRetryDataUseCase } from "../../entities/usecaseInterfaces/vendor/ge
 import { IRetryRegistration } from "../../entities/usecaseInterfaces/vendor/retry-registration.interface";
 import { IGetVendorHomeData } from "../../entities/usecaseInterfaces/vendor/get-vendor-home-data-usecase.interface";
 import { IGetSingleVendorData } from "../../entities/usecaseInterfaces/vendor/get-single-vendorData-usecase.interface";
+import { IFetchBuildingsForVendorUseCase } from "../../entities/usecaseInterfaces/vendor/fetch-building-vendor-usecase.interface";
+import { IFetchSpacesForBuilding } from "../../entities/usecaseInterfaces/vendor/fetch-space-building-usecase.interface";
 
 @injectable()
 export class VendorController implements IVendorController{
@@ -22,6 +24,10 @@ export class VendorController implements IVendorController{
         private _getVendorHomeDataUseCase: IGetVendorHomeData,
         @inject("IGetSingleVendorData")
         private _getsingleVendorDataUseCase: IGetSingleVendorData,
+        @inject("IFetchBuildingsForVendorUseCase")
+        private _fetchBuildingsForVendorUseCase: IFetchBuildingsForVendorUseCase,
+        @inject("IFetchSpacesForBuilding")
+        private _fetchSpacesForBuildingUseCase: IFetchSpacesForBuilding,
     ){}
 
     async uploadIdProof(req: Request, res: Response): Promise<void> {
@@ -144,6 +150,40 @@ export class VendorController implements IVendorController{
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Failed in getting vendor data in admin side",
+        });
+      }
+    }
+
+    async fetchBuildingsForVendor(req: Request, res: Response): Promise<void>{
+      try {
+        const vendorId = (req as CustomRequest).user.userId;
+        const result = await this._fetchBuildingsForVendorUseCase.execute(vendorId);
+        res.status(StatusCodes.OK).json({
+          success: true,
+          data: result,
+        })
+      } catch (error) {
+         console.error("Error fetching buildings of a vendor:", error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Failed fetching buildings of a vendor",
+        });
+      }
+    }
+
+    async fetchSpaceForBuilding(req: Request, res: Response): Promise<void>{
+      try {
+        const buildingId = req.params.buildingId;
+        const response = await this._fetchSpacesForBuildingUseCase.execute(buildingId);
+        res.status(StatusCodes.OK).json({
+          success: true,
+          data: response,
+        })
+      } catch (error) {
+         console.error("Error fetching space of a building:", error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Failed fetching space of a building",
         });
       }
     }
