@@ -12,8 +12,21 @@ export const clientSchema = new Schema<IClientModel>(
     avatar: { type: String },
     googleId: { type: String },
     walletBalance: { type: Number, default: 0 },
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point"
+      },
+      name: { type: String },
+      displayName: { type: String },
+      zipCode: { type: String },
+      coordinates: { type: [Number], default: [0, 0] }
+    },
   },
   {
     timestamps: true,
   }
 );
+
+clientSchema.index({ "location.coordinates": "2dsphere" });

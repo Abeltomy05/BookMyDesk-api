@@ -3,6 +3,19 @@ import { IClientRepository } from "../../entities/repositoryInterfaces/users/cli
 import { IVendorRepository } from "../../entities/repositoryInterfaces/users/vendor-repository.interface"
 import { IUpdateUserProfileUseCase } from "../../entities/usecaseInterfaces/users/update-user-profile.interface"
 
+interface UpdateProfileData {
+    username?: string;
+    email?: string;
+    phone?: string;
+    avatar?: string;
+    location?: {
+        type?: string;
+        name?: string;
+        displayName?: string;
+        zipCode?: string;
+        coordinates?: number[];
+    };
+}
 
 @injectable()
 export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase{
@@ -13,7 +26,8 @@ export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase{
         private _vendorRepository: IVendorRepository,
     ) {}
 
-    async execute(userId: string, role: string, data: any): Promise<any> {
+
+    async execute(userId: string, role: string, data: UpdateProfileData): Promise<any> {
         if (role === 'client') {
          const updatedUser = await this._clientRepository.update({ _id: userId }, data);
         if (!updatedUser) throw new Error("User not found");
@@ -27,5 +41,6 @@ export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase{
         } 
 
         throw new Error("Invalid role for profile update.");
+
     }
 }

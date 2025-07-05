@@ -138,6 +138,27 @@ export class UsersController implements IUsersController{
          const {userId,role} = (req as CustomRequest).user; 
          const data = req.body;
  
+          if (data.location) {
+             if (!data.location.name || !data.location.coordinates ||
+                !Array.isArray(data.location.coordinates) || 
+                data.location.coordinates.length !== 2) {
+                res.status(400).json({
+                    success: false,
+                    message: "Invalid location data format",
+                });
+                return;
+            }
+
+            const [lng, lat] = data.location.coordinates;
+            if (typeof lng !== 'number' || typeof lat !== 'number') {
+                res.status(400).json({
+                    success: false,
+                    message: "Invalid coordinates format",
+                });
+                return;
+            }
+           }
+           
          const updatedData  = await this._updateUserProfileUseCase.execute(userId,role, data);
          res.status(StatusCodes.OK).json({
             success: true,
