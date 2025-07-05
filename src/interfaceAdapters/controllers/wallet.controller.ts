@@ -49,7 +49,7 @@ export class WalletController implements IWalletController {
 
     async payWithWallet(req: Request, res: Response): Promise<void>{
         try {
-            const {spaceId,bookingDate,numberOfDesks,totalPrice} = req.body;
+            const {spaceId,bookingDate,numberOfDesks,totalPrice,discountAmount} = req.body;
             if(!spaceId || !bookingDate || !numberOfDesks || !totalPrice){
                 res.status(StatusCodes.BAD_REQUEST).json({
                     success:false,
@@ -59,7 +59,7 @@ export class WalletController implements IWalletController {
             }
 
             const {userId} = (req as CustomRequest).user;
-            const response = await this._payWithWalletUseCase.execute(spaceId,bookingDate,numberOfDesks,totalPrice,userId);
+            const response = await this._payWithWalletUseCase.execute(spaceId,bookingDate,numberOfDesks,totalPrice,userId,discountAmount);
             if(response.success && response.bookingId){
                 res.status(StatusCodes.OK).json({
                     success: true,

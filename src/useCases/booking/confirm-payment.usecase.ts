@@ -36,11 +36,12 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
         bookingDate: string;
         numberOfDesks: number;
         totalPrice: number;
+        discountAmount?: number;
         paymentIntentId: string;
     }){
         const {
           bookingId, spaceId, clientId, vendorId, buildingId,
-          bookingDate, numberOfDesks, totalPrice, paymentIntentId,
+          bookingDate, numberOfDesks, totalPrice, discountAmount, paymentIntentId,
         } = metadata;
 
          if (bookingId) {
@@ -65,6 +66,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
             bookingDate: new Date(bookingDate),
             numberOfDesks,
             totalPrice,
+            discountAmount: discountAmount || 0,
             status: 'failed' as BookingStatus,
             paymentStatus: 'failed' as PaymentStatus,
             paymentMethod: 'stripe' as PaymentMethod,
@@ -88,6 +90,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
             const bookingDate = paymentIntent.metadata.bookingDate;
             const numberOfDesks = parseInt(paymentIntent.metadata.numberOfDesks);
             const totalPrice = parseFloat(paymentIntent.metadata.totalPrice);
+            const discountAmount = parseFloat(paymentIntent.metadata.discountAmount) || 0; 
             const bookingId = paymentIntent.metadata.bookingId;
             
              const space = await this._spaceRepository.findOne({_id: spaceId});
@@ -102,6 +105,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                             bookingDate,
                             numberOfDesks,
                             totalPrice,
+                            discountAmount,
                             paymentIntentId: data.paymentIntentId,
                         });
                         throw new Error('Space not found');
@@ -118,6 +122,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                             bookingDate,
                             numberOfDesks,
                             totalPrice,
+                            discountAmount,
                             paymentIntentId: data.paymentIntentId,
                   });
                 throw new Error('Space is no longer available');
@@ -134,11 +139,11 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                             bookingDate,
                             numberOfDesks,
                             totalPrice,
+                            discountAmount,
                             paymentIntentId: data.paymentIntentId,
                     });
                 throw new Error(`Insufficient capacity. Only ${space.capacity || 0} desks available`);
             }
-
 
             const updatedSpace = await this._spaceRepository.update(
                 {
@@ -161,6 +166,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                     bookingDate,
                     numberOfDesks,
                     totalPrice,
+                    discountAmount,
                     paymentIntentId: data.paymentIntentId,
                 });
                 throw new Error('Failed to update space capacity');
@@ -186,6 +192,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                             bookingDate,
                             numberOfDesks,
                             totalPrice,
+                            discountAmount,
                             paymentIntentId: data.paymentIntentId,
                      });   
                 throw new Error('Failed to capture payment');
@@ -260,6 +267,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
 
                     numberOfDesks: numberOfDesks,
                     totalPrice: totalPrice,
+                    discountAmount: discountAmount,
                     bookingDate: new Date(bookingDate),
                     transactionId: data.paymentIntentId,
                     paymentMethod: 'stripe' as PaymentMethod,
@@ -295,6 +303,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
             bookingDate: new Date(bookingDate),
             numberOfDesks: numberOfDesks,
             totalPrice: totalPrice,
+            discountAmount: discountAmount,
             status: 'confirmed' as BookingStatus,
             paymentStatus: 'succeeded' as PaymentStatus,
             paymentMethod: 'stripe' as PaymentMethod,

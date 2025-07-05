@@ -5,6 +5,8 @@ import { toEntitySpace } from "../../interfaceAdapters/mappers/space.mapper";
 import { ISpaceEntity } from "../../entities/models/space.entity";
 import { IGetBookingPageDataUseCase } from "../../entities/usecaseInterfaces/booking/booking-page-data-usecase.interface";
 import { IWalletRepository } from "../../entities/repositoryInterfaces/wallet/wallet-repository.interface";
+import { IOfferRepository } from "../../entities/repositoryInterfaces/offer/offer-repository.interface";
+import { off, title } from "process";
 
 
 @injectable()
@@ -16,6 +18,8 @@ export class GetBookingPageDataUseCase implements IGetBookingPageDataUseCase{
     private _spaceRepository: ISpaceRepository,
     @inject("IWalletRepository")
     private _walletRepository: IWalletRepository,
+    @inject("IOfferRepository")
+    private _offerRepository: IOfferRepository,
     ){}
 
     async execute(spaceId:string,userId:string):Promise<{
@@ -27,11 +31,20 @@ export class GetBookingPageDataUseCase implements IGetBookingPageDataUseCase{
         wallet:{
             _id:string | undefined,
             balance:number | undefined
-        }}>{
+        },
+        offer?:{
+                title?: string,
+                description?: string,
+                startDate?: Date,
+                endDate?: Date,
+                discountPercentage?: number
+            },}>{
         const spaceModel = await this._spaceRepository.findOne({ _id: spaceId });
         if (!spaceModel) {
         throw new Error("Space not found");
         }
+
+        const offer = await this._offerRepository.findOne({spaceId});
 
        const spaceEntity = toEntitySpace(spaceModel);
 
@@ -53,6 +66,13 @@ export class GetBookingPageDataUseCase implements IGetBookingPageDataUseCase{
             wallet:{
               _id:wallet?._id.toString(),
               balance:wallet?.balance,
+            },
+            offer:{
+                title: offer?.title,
+                description: offer?.description,
+                startDate: offer?.startDate,
+                endDate: offer?.endDate,
+                discountPercentage: offer?.discountPercentage
             },
         };
 

@@ -3,7 +3,7 @@ import { container } from "tsyringe";
 import { DeleteExpiredOffersUseCase } from "../../useCases/offer/delete-expired-offers.usecase";
 
 export const startOfferCleanupJob = () => {
-  cron.schedule("0 0 * * *", async () => {
+  cron.schedule("0 10 * * *", async () => {
     console.log(`[CRON] ${new Date().toISOString()} - Running offer cleanup...`);
 
     const useCase = container.resolve(DeleteExpiredOffersUseCase);

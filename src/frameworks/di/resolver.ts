@@ -38,5 +38,5 @@ export const bookingController =
 export const walletController = 
             container.resolve<IWalletController>(WalletController);                       
 export const offerController = 
-            container.resolve<IOfferController>(OfferController); 
+            container.resolve<IOfferController>(OfferController);         
 //* ====== Socket Handler Resolving ====== *//            

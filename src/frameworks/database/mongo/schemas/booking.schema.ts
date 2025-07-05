@@ -11,6 +11,7 @@ export const bookingSchema = new Schema<IBookingModel>(
     bookingDate:   { type: Date, required: true },
     numberOfDesks:  { type: Number },
     totalPrice:     { type: Number},
+    discountAmount: { type: Number, default: 0 },
     cancellationReason:  { type: String, default: "" },
     cancelledBy: { type: String, default: "client" },
 

@@ -1,7 +1,8 @@
-import { inject } from "tsyringe";
+import { inject, injectable } from "tsyringe";
 import { IOfferRepository } from "../../entities/repositoryInterfaces/offer/offer-repository.interface";
 import { IDeleteExpiredOffersUseCase } from "../../entities/usecaseInterfaces/offer/delete-expired-offer-usecase.interface";
 
+@injectable()
 export class DeleteExpiredOffersUseCase implements IDeleteExpiredOffersUseCase{
     constructor(
         @inject("IOfferRepository")

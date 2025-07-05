@@ -44,6 +44,7 @@ export const toEntityBookingWithDetails = (model: any): IBookingEntityWithDetail
   bookingDate: model.bookingDate,
   numberOfDesks: model.numberOfDesks,
   totalPrice: model.totalPrice,
+  discountAmount: model.discountAmount,
   status: model.status,
   paymentStatus: model.paymentStatus,
   paymentMethod: model.paymentMethod,

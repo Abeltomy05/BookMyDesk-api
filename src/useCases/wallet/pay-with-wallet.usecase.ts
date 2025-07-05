@@ -28,7 +28,8 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
         bookingDate:Date,
         numberOfDesks:number,
         totalPrice:number,
-        userId:string
+        userId:string,
+        discountAmount?: number
     ):Promise<{ success: boolean; bookingId: string }>{
        const space = await this._spaceRepository.findOne({_id:spaceId});
 
@@ -77,6 +78,7 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
             bookingDate: new Date(bookingDate),
             numberOfDesks,
             totalPrice,
+            discountAmount: discountAmount || 0,
             status: 'confirmed',
             paymentStatus: 'succeeded',
             paymentMethod: 'wallet',

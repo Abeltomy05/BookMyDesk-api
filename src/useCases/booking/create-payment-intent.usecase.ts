@@ -56,6 +56,7 @@ export class CreatePaymentIntentUseCase implements ICreatePaymentIntentUseCase{
                 bookingDate: new Date(data.bookingDate).toISOString(),
                 numberOfDesks: (data.numberOfDesks ?? 1).toString(),
                 totalPrice: (data.amount / 100).toString(),
+                discountAmount: (data.discountAmount || 0).toString(),
                 bookingId: data.bookingId || '',
             },
             description: `Booking payment for ${data.numberOfDesks || 1} desk(s)`,

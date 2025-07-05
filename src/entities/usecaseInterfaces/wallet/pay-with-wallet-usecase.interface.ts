@@ -4,6 +4,7 @@ export interface IPayWithWalletUseCase{
         bookingDate:Date,
         numberOfDesks:number,
         totalPrice:number,
-        userId:string
+        userId:string,
+        discountAmount?: number
     ):Promise<{ success: boolean; bookingId: string }>;
 }

@@ -28,4 +28,4 @@ passport.use(
   )
 );
 
-console.log("Registered strategies:", Object.keys((passport as any)._strategies));
+// console.log("Registered strategies:", Object.keys((passport as any)._strategies));
