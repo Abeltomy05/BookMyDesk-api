@@ -7,5 +7,6 @@ export const loginSchema = z.object({
     password:passwordSchema,
     role: z.enum(["client", "admin", "vendor"],{
         message: "Invalid role",
-    })
+    }),
+    fcmToken: z.string().optional(),
 })

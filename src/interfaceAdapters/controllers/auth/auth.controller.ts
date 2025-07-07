@@ -24,6 +24,7 @@ import { StatusCodes } from "http-status-codes";
 import { ZodError } from "zod";
 import { IRefreshTokenUseCase } from "../../../entities/usecaseInterfaces/auth/refresh-token-usecase.interface";
 import { IVendorModel } from "../../../frameworks/database/mongo/models/vendor.model";
+import { ISaveFcmTokenUseCase } from "../../../entities/usecaseInterfaces/auth/save-fcm-token-usecase.interface";
 
 
 @injectable()
@@ -52,7 +53,9 @@ export class AuthController implements IAuthController {
           @inject("IRevokeRefreshTokenUseCase")
           private _revokeRefreshTokenUseCase: IRevokeRefreshTokenUseCase,
           @inject("IRefreshTokenUseCase")
-          private _refreshTokenUseCase: IRefreshTokenUseCase
+          private _refreshTokenUseCase: IRefreshTokenUseCase,
+          @inject("ISaveFcmTokenUseCase")
+          private _saveFcmTokenUseCase: ISaveFcmTokenUseCase,
      ){}
 
    async register(req: Request, res: Response): Promise<void> {
@@ -290,6 +293,24 @@ export class AuthController implements IAuthController {
           res.status(500).json({ success: false, message: "Something went wrong" });
           }
      } 
+
+    async saveFcmToken(req: Request, res: Response): Promise<void>{
+          try {
+         const {fcmToken, userId, role} = req.body;
+  
+     if (!fcmToken || !userId || !role) {
+        res.status(400).json({ success: false, message: "Missing data" });
+        return;
+     }
+
+     await this._saveFcmTokenUseCase.execute(fcmToken, userId, role);
+
+     res.json({ success: true });
+     } catch (error) {
+     console.error("Failed to save FCM token:", error);
+     res.status(500).json({ success: false, message: "Internal server error" });
+     }
+    }
 
      async sendOtp(req:Request, res:Response):Promise<void>{
           try {

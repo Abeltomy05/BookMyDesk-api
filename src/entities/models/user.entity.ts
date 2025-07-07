@@ -6,6 +6,7 @@ export interface IUserEntity {
   phone: string;
   role?: string;
   avatar?: string;
+  fcmToken?:string;
   createdAt?: Date;
   updatedAt?: Date;
 }

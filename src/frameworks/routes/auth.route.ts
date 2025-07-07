@@ -24,6 +24,9 @@ export class AuthRoutes extends BaseRoute{
          this.router.post("/login", (req: Request, res: Response) => {
             authController.login(req, res);
          });
+         this.router.post("/save-fcm-token", (req: Request, res: Response) => {
+            authController.saveFcmToken(req, res);
+         });
 
          this.router.get("/google",(req,res,next) => {
              const roleParam = req.query.role;

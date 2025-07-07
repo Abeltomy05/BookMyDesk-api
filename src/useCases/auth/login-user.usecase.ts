@@ -46,6 +46,11 @@ export class LoginUserUseCase implements ILoginUserUseCase{
             }
         }
 
+        if (user.fcmToken) {
+            await repository.update(userData._id, { fcmToken: user.fcmToken });
+            userData.fcmToken = user.fcmToken;
+        }
+
         return userData;
     }
 }

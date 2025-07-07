@@ -23,6 +23,7 @@ export const clientSchema = new Schema<IClientModel>(
       zipCode: { type: String },
       coordinates: { type: [Number], default: [0, 0] }
     },
+    fcmToken:{type: String}
   },
   {
     timestamps: true,

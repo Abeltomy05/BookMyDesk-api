@@ -59,6 +59,7 @@ import { FetchSpacesForBuilding } from "../../useCases/vendor/fetch-spaces-build
 import { FetchAllOffersUseCase } from "../../useCases/offer/fetch-all-offers.usecase";
 import { CreateOfferUseCase } from "../../useCases/offer/create-offer.usecase";
 import { DeleteEntityUseCase } from "../../useCases/users/delete-entity.usecase";
+import { SaveFcmTokenUseCase } from "../../useCases/auth/save-fcm-token.usecase";
 
 
 
@@ -202,6 +203,9 @@ export class UseCaseRegistry{
       })
       container.register("IDeleteEntityUseCase",{
         useClass: DeleteEntityUseCase
+      })
+      container.register("ISaveFcmTokenUseCase",{
+        useClass: SaveFcmTokenUseCase
       })
 
 

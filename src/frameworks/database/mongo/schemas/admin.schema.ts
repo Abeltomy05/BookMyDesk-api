@@ -10,6 +10,7 @@ export const adminSchema = new Schema<IAdminModel>(
     role:      { type: String, default: "admin" },
     avatar:    { type: String },
     status:    { type: String, default: "active" },
+    fcmToken:{type: String}
   },
   { timestamps: true }
 );

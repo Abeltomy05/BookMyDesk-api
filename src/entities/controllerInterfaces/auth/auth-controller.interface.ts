@@ -11,4 +11,5 @@ export interface IAuthController {
     getMe(req: Request, res: Response): Promise<void>;
     logout(req: Request, res: Response): Promise<void>;
     handleTokenRefresh(req: Request, res: Response): Promise<void>;
+    saveFcmToken(req: Request, res: Response): Promise<void>;
 }

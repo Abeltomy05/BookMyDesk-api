@@ -17,6 +17,7 @@ export const vendorSchema = new Schema<IVendorModel>(
     description: { type: String },
     status: { type: String, enum: ["pending", "approved", "rejected","blocked"], default: 'pending' },
     idProof: { type: String },
+    fcmToken:{type: String}
     },
     {
         timestamps: true,
