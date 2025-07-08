@@ -7,6 +7,7 @@ import { IRegisterBuildingUsecase } from "../../entities/usecaseInterfaces/build
 import { BuildingRegistrationData } from "../../shared/validations/register-building.validation";
 import { ISpaceRepository } from "../../entities/repositoryInterfaces/building/space-repository.interface";
 import { ISpaceEntity } from "../../entities/models/space.entity";
+import { INotificationService } from "../../entities/serviceInterfaces/notification-service.interface";
 
 
 
@@ -16,7 +17,9 @@ export class RegisterBuildingUsecase implements IRegisterBuildingUsecase{
        @inject("IBuildingRepository")
        private _buildingRepository:IBuildingRepository,
        @inject("ISpaceRepository")
-       private _spaceRepository: ISpaceRepository
+       private _spaceRepository: ISpaceRepository,
+       @inject("INotificationService")
+       private _notificationService: INotificationService,
     ){}
 
     async execute(data: BuildingRegistrationData, vendorId: string): Promise<IBuildingEntity>{
@@ -114,6 +117,21 @@ export class RegisterBuildingUsecase implements IRegisterBuildingUsecase{
     }));
 
     await this._spaceRepository.bulkInsert(spaceEntities);
+
+    const adminId = process.env.ADMIN_ID;
+    if (!adminId) {
+      throw new Error("ADMIN_ID is not defined in environment variables. Please contact support.");
+    }
+    await this._notificationService.sendToUser(
+      adminId,
+      'admin',
+      'New Building Awaiting Approval!',
+      `A new building "${newBuilding.buildingName}" has been registered and is pending your approval.`,
+      {
+       buildingId: newBuilding._id.toString(),
+       buildingName: newBuilding.buildingName,
+      }
+    );
 
     return {
       buildingName: newBuilding.buildingName,
