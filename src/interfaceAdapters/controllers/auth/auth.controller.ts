@@ -445,7 +445,7 @@ export class AuthController implements IAuthController {
      async handleTokenRefresh(req: Request, res: Response): Promise<void> {
 		try {
 			const refreshCookies  = req.cookies;
-               console.log("Refresh Cookies:", refreshCookies);
+               // console.log("Refresh Cookies:", refreshCookies);
                const refreshTokenKey = Object.keys(refreshCookies).find((key) =>
 				key.endsWith("_refresh_token")
 			);

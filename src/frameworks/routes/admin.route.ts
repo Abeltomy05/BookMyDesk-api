@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { authController, bookingController, buildingController, usersController, vendorController, walletController } from "../di/resolver";
+import { authController, bookingController, buildingController, notifiactionController, usersController, vendorController, walletController } from "../di/resolver";
 import { BaseRoute } from "./base.route";
 import { authorizeRole, verifyAuth } from "../../interfaceAdapters/middlewares/auth.middleware";
 
@@ -43,6 +43,12 @@ export class AdminRoutes extends BaseRoute{
         });
         this.router.get("/admin/get-single-vendor/:vendorId",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response) => {
             vendorController.singleVendorData(req, res);
+        });
+        this.router.get("/admin/get-notifications",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response) => {
+            notifiactionController.getNotifications(req, res);
+        });
+        this.router.patch("/admin/mark-as-read/:id",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response) => {
+            notifiactionController.markAsRead(req, res);
         });
 
     }

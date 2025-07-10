@@ -148,6 +148,16 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
                 type: 'success'
              }
         )
+        await this._notificationService.saveNotification(
+            vendorId.toString(), 'Vendor', 
+            'New Booking Received!', 
+            `You received a booking for ${space.name} in ${building.buildingName}. Total: ₹${totalPrice}`,
+             {
+                bookingId: booking._id.toString(),
+                buildingName: building.buildingName,
+                spaceName: space.name,
+             }
+        )
 
         await this._notificationService.sendToUser(
             adminId,
@@ -159,6 +169,17 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
                 buildingName: building.buildingName,
                 spaceName: space.name,
                 type: 'success'
+            }
+        );
+        await this._notificationService.saveNotification(
+            adminId,
+            'Admin',
+            'Platform Fee Collected',
+            `A new booking was made for ${space.name} in ${building.buildingName}. Platform fee earned: ₹${platformFee}`,
+            {
+                bookingId: booking._id.toString(),
+                buildingName: building.buildingName,
+                spaceName: space.name,
             }
         );
 

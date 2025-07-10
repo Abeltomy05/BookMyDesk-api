@@ -5,6 +5,7 @@ import { IWalletTransactionRepository } from "../../entities/repositoryInterface
 import { IVendorRepository } from "../../entities/repositoryInterfaces/users/vendor-repository.interface";
 import { IClientRepository } from "../../entities/repositoryInterfaces/users/client-repository.interface";
 import { IConfirmTopupPaymentUseCase } from "../../entities/usecaseInterfaces/wallet/confirm-topup-payment-usecase.interface";
+import { Types } from "mongoose";
 
 @injectable()
 export class ConfirmTopupPaymentUseCase implements IConfirmTopupPaymentUseCase{
@@ -34,38 +35,37 @@ export class ConfirmTopupPaymentUseCase implements IConfirmTopupPaymentUseCase{
          throw new Error("Missing metadata. Please contact support.");
         }
 
-         let wallet;
             if (role === "client") {
             const client = await this._clientRepository.findOne({ _id: userId });
             if (!client) throw new Error("Client not found");
-            wallet = await this._walletRepository.findOne({userId: client._id});
+
             } else if (role === "vendor") {
             const vendor = await this._vendorRepository.findOne({ _id: userId });
             if (!vendor) throw new Error("Vendor not found");
-            wallet = await this._walletRepository.findOne({userId: vendor._id});
+
             } else {
             throw new Error("Invalid role in metadata");
           }
 
-           if (!wallet) throw new Error("Wallet not found");
-             
-            const oldBalance = wallet.balance;
-            const newBalance = wallet.balance + amountInRupees;
-            await this._walletRepository.update({_id:wallet._id},{balance:newBalance});
+           const { wallet, balanceBefore, balanceAfter } = await this._walletRepository.updateOrCreateWalletBalance(
+               userId,
+               role === "vendor" ? "Vendor" : "Client",
+               amountInRupees
+            );
 
              await this._walletTransactionRepository.save({
-                walletId: wallet._id,
+                walletId: new Types.ObjectId(wallet._id),
                 amount: amountInRupees,
                 type: "topup",
                 description: `Topuped ${amountInRupees} via stripe.`,
-                balanceBefore: oldBalance,
-                balanceAfter: newBalance,
+                balanceBefore,
+                balanceAfter,
              });
 
              return {
                 success: true,
                 data: {
-                    walletBalance: newBalance,
+                    walletBalance: balanceAfter,
                 },
               };
     }

@@ -4,6 +4,8 @@ import { IVendorRepository } from "../../entities/repositoryInterfaces/users/ven
 import { IAdminRepository } from "../../entities/repositoryInterfaces/users/admin-repository.interface";
 import { messaging } from "../../shared/config/firebaseAdmin";
 import { INotificationService } from "../../entities/serviceInterfaces/notification-service.interface";
+import { INotificationRepository } from "../../entities/repositoryInterfaces/notification/notification-repository.interface";
+import { Types } from "mongoose";
 
 @injectable()
 export class NotificationService implements INotificationService {
@@ -14,6 +16,8 @@ export class NotificationService implements INotificationService {
      private _vendorRepo: IVendorRepository,
      @inject("IAdminRepository")
      private _adminRepo: IAdminRepository,
+     @inject("INotificationRepository")
+     private _notificationRepository: INotificationRepository,
   ){}
 
   async sendToUser(
@@ -57,5 +61,22 @@ export class NotificationService implements INotificationService {
         console.warn(`Cleaned up invalid FCM token for ${role} ${userId}`);
       }
     }
+  }
+
+  async saveNotification(
+    userId:string,
+    role:string,
+    title: string,
+    body: string,
+    metaData: object,
+  ){
+     await this._notificationRepository.save({
+      userId: new Types.ObjectId(userId),
+      role,
+      title,
+      body,
+      isRead: false,
+      metaData,
+     })
   }
 }

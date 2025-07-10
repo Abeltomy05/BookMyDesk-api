@@ -1,6 +1,6 @@
 import { Request, RequestHandler, Response } from "express";
 import { BaseRoute } from "./base.route";
-import { blockStatusMiddleware, authController,buildingController,usersController,vendorController, bookingController, walletController, offerController } from "../di/resolver";
+import { blockStatusMiddleware, authController,buildingController,usersController,vendorController, bookingController, walletController, offerController, notifiactionController } from "../di/resolver";
 import { authorizeRole, decodeToken, verifyAuth } from "../../interfaceAdapters/middlewares/auth.middleware";
 
 export class VendorRoutes extends BaseRoute{
@@ -88,6 +88,12 @@ export class VendorRoutes extends BaseRoute{
        }); 
          this.router.delete("/vendor/delete-offer",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response) => {
          usersController.deleteEntity(req, res);
+       }); 
+          this.router.get("/vendor/get-notifications",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response) => {
+         notifiactionController.getNotifications(req, res);
+       }); 
+          this.router.patch("/vendor/mark-as-read/:id",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response) => {
+         notifiactionController.markAsRead(req, res);
        }); 
     }
 }

@@ -133,6 +133,17 @@ export class RegisterBuildingUsecase implements IRegisterBuildingUsecase{
       }
     );
 
+    await this._notificationService.saveNotification(
+      adminId,
+      'Admin',
+      'New Building Awaiting Approval!',
+      `A new building "${newBuilding.buildingName}" has been registered and is pending your approval.`,
+      {
+       buildingId: newBuilding._id.toString(),
+       buildingName: newBuilding.buildingName,
+      }
+    )
+
     return {
       buildingName: newBuilding.buildingName,
       vendorId: newBuilding.vendorId.toHexString(),

@@ -1,6 +1,6 @@
 import { Request, RequestHandler, Response } from "express";
 import { BaseRoute } from "./base.route";
-import { blockStatusMiddleware, authController, buildingController, usersController, bookingController, walletController } from "../di/resolver";
+import { blockStatusMiddleware, authController, buildingController, usersController, bookingController, walletController, notifiactionController } from "../di/resolver";
 import { authorizeRole, decodeToken, verifyAuth } from "../../interfaceAdapters/middlewares/auth.middleware";
 
 export class ClientRoutes extends BaseRoute{
@@ -71,6 +71,12 @@ export class ClientRoutes extends BaseRoute{
         });
          this.router.post("/client/confirm-topup-payment", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response) => {
             walletController.confirmTopupPayment(req, res);
+        });
+         this.router.get("/client/get-notifications", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response) => {
+            notifiactionController.getNotifications(req, res);
+        });
+          this.router.patch("/client/mark-as-read/:id", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response) => {
+            notifiactionController.markAsRead(req, res);
         });
     }
 }
