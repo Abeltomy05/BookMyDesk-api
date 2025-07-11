@@ -6,6 +6,7 @@ import mongoose, { Types } from 'mongoose';
 import { ICancelBookingUseCase } from "../../entities/usecaseInterfaces/booking/cancel-booking-usecase.interface";
 import { ISpaceRepository } from "../../entities/repositoryInterfaces/building/space-repository.interface";
 import { IBuildingRepository } from "../../entities/repositoryInterfaces/building/building-repository.interface";
+import { INotificationService } from "../../entities/serviceInterfaces/notification-service.interface";
 
 @injectable()
 export class CancelBookingUseCase implements ICancelBookingUseCase {
@@ -20,6 +21,8 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
         private _spaceRepository: ISpaceRepository,
         @inject("IBuildingRepository")
         private _buildingRepository: IBuildingRepository,
+        @inject("INotificationService")
+        private _notificationService: INotificationService,
     ){}
 
     async execute(bookingId: string, reason:string, userId:string, role:'client' | 'vendor'): Promise<{ success: boolean}> {
@@ -89,6 +92,31 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
             cancellationReason: reason,
             cancelledBy: role,
         });
+
+        const space = await this._spaceRepository.findOne({_id:booking.spaceId});
+        if(!space) throw new Error("No space found for cancelling.")
+
+        if (role === 'vendor') {
+        await this._notificationService.sendToUser(
+            booking.clientId.toString(),
+            'client',
+            'Booking Cancelled by Vendor',
+            `Your booking for space ${space.name} has been cancelled by the vendor. Refunded: ₹${refundAmount}`,
+            {
+            bookingId: booking._id.toString(),
+            }
+        );
+
+        await this._notificationService.saveNotification(
+            booking.clientId.toString(),
+            'Client',
+            'Booking Cancelled by Vendor',
+            `Your booking for space ${space.name} has been cancelled by the vendor. Refunded: ₹${refundAmount}`,
+            {
+            bookingId: booking._id.toString(),
+            }
+        )
+        }
 
         if (booking.spaceId && booking.numberOfDesks) {
             const space = await this._spaceRepository.findOne({_id:booking.spaceId});

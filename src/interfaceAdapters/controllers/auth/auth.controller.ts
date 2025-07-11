@@ -25,6 +25,7 @@ import { ZodError } from "zod";
 import { IRefreshTokenUseCase } from "../../../entities/usecaseInterfaces/auth/refresh-token-usecase.interface";
 import { IVendorModel } from "../../../frameworks/database/mongo/models/vendor.model";
 import { ISaveFcmTokenUseCase } from "../../../entities/usecaseInterfaces/auth/save-fcm-token-usecase.interface";
+import { IRemoveFcmTokenUseCase } from "../../../entities/usecaseInterfaces/auth/remove-fcm-token-usecase.interface";
 
 
 @injectable()
@@ -56,6 +57,8 @@ export class AuthController implements IAuthController {
           private _refreshTokenUseCase: IRefreshTokenUseCase,
           @inject("ISaveFcmTokenUseCase")
           private _saveFcmTokenUseCase: ISaveFcmTokenUseCase,
+          @inject("IRemoveFcmTokenUseCase")
+          private _removeFcmTokenUseCase: IRemoveFcmTokenUseCase,
      ){}
 
    async register(req: Request, res: Response): Promise<void> {
@@ -406,6 +409,8 @@ export class AuthController implements IAuthController {
 
              await this._revokeRefreshTokenUseCase.execute((req as CustomRequest).user.refresh_token);
 
+             await this._removeFcmTokenUseCase.execute((req as CustomRequest).user.userId,(req as CustomRequest).user.role);
+
              const user = (req as CustomRequest).user;
 		   const accessTokenName = `${user.role}_access_token`;
 		   const refreshTokenName = `${user.role}_refresh_token`;
@@ -440,7 +445,7 @@ export class AuthController implements IAuthController {
      async handleTokenRefresh(req: Request, res: Response): Promise<void> {
 		try {
 			const refreshCookies  = req.cookies;
-               console.log("Refresh Cookies:", refreshCookies);
+               // console.log("Refresh Cookies:", refreshCookies);
                const refreshTokenKey = Object.keys(refreshCookies).find((key) =>
 				key.endsWith("_refresh_token")
 			);

@@ -15,6 +15,8 @@ import { WalletController } from "../../interfaceAdapters/controllers/wallet.con
 import { IWalletController } from "../../entities/controllerInterfaces/others/wallet-controller.interface";
 import { IOfferController } from "../../entities/controllerInterfaces/others/offer-controller.interface";
 import { OfferController } from "../../interfaceAdapters/controllers/offer.controller";
+import { NotificationController } from "../../interfaceAdapters/controllers/notification.controller";
+import { INotificationController } from "../../entities/controllerInterfaces/others/notification-controller.interface";
 
 DependencyInjection.registerAll();
 //* ====== Middleware Resolving ====== *//
@@ -38,5 +40,7 @@ export const bookingController =
 export const walletController = 
             container.resolve<IWalletController>(WalletController);                       
 export const offerController = 
-            container.resolve<IOfferController>(OfferController);         
+            container.resolve<IOfferController>(OfferController);  
+export const notifiactionController = 
+            container.resolve<INotificationController>(NotificationController);                    
 //* ====== Socket Handler Resolving ====== *//            

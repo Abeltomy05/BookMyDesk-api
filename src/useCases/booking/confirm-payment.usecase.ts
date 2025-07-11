@@ -9,6 +9,8 @@ import { ISpaceRepository } from "../../entities/repositoryInterfaces/building/s
 import { IBuildingRepository } from "../../entities/repositoryInterfaces/building/building-repository.interface";
 import { IWalletRepository } from "../../entities/repositoryInterfaces/wallet/wallet-repository.interface";
 import { IWalletTransactionRepository } from "../../entities/repositoryInterfaces/wallet/walletTrasaction-repository.interface";
+import { INotificationService } from "../../entities/serviceInterfaces/notification-service.interface";
+import { INotificationRepository } from "../../entities/repositoryInterfaces/notification/notification-repository.interface";
 
 @injectable()
 export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
@@ -25,7 +27,10 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
        private _walletRepository: IWalletRepository,
        @inject("IWalletTransactionRepository")
        private _walletTransactionRepository: IWalletTransactionRepository,
+       @inject("INotificationService")
+       private _notificationService: INotificationService,
     ){}
+
 
     private async handleFailedBooking(metadata:{
         bookingId?: string;
@@ -321,6 +326,54 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
             );
             throw new Error('Failed to create booking');
         }
+
+
+
+         await this._notificationService.sendToUser(
+            vendorId.toString(), 'vendor', 
+            'New Booking Received!', 
+            `You received a booking for ${space.name} in ${building?.buildingName}. Total: ₹${totalPrice}`,
+             {
+                bookingId: newBooking._id.toString(),
+                buildingName: building?.buildingName || "",
+                spaceName: space.name,
+                type: 'success'
+             }
+        )
+
+         await this._notificationService.saveNotification(
+            vendorId.toString(), 'Vendor',
+            'New Booking Received!',
+            `You received a booking for ${space.name} in ${building?.buildingName}. Total: ₹${totalPrice}`,
+            {
+                bookingId: newBooking._id.toString(),
+                buildingName: building?.buildingName || "",
+                spaceName: space.name,
+            }
+        );
+
+        await this._notificationService.sendToUser(
+             adminId, 'admin', 
+            'Platform Fee Collected!', 
+            `A new booking was made for ${space.name} in ${building?.buildingName}. Platform fee earned: ₹${platformFee}`,
+             {
+                bookingId: newBooking._id.toString(),
+                buildingName: building?.buildingName || "",
+                spaceName: space.name,
+                type: 'success'
+             }
+        )
+
+        await this._notificationService.saveNotification(
+            adminId, 'Admin',
+            'Platform Fee Collected!',
+            `A new booking was made for ${space.name} in ${building?.buildingName}. Platform fee earned: ₹${platformFee}`,
+            {
+                bookingId: newBooking._id.toString(),
+                buildingName: building?.buildingName || "",
+                spaceName: space.name,
+            }
+        );
 
         return {
             success: true,

@@ -60,6 +60,10 @@ import { FetchAllOffersUseCase } from "../../useCases/offer/fetch-all-offers.use
 import { CreateOfferUseCase } from "../../useCases/offer/create-offer.usecase";
 import { DeleteEntityUseCase } from "../../useCases/users/delete-entity.usecase";
 import { SaveFcmTokenUseCase } from "../../useCases/auth/save-fcm-token.usecase";
+import { RemoveFcmTokenUseCase } from "../../useCases/auth/remove-fcm-token.usecase";
+import { NotificationService } from "../../interfaceAdapters/services/notification.service";
+import { GetNotificationsUseCase } from "../../useCases/notification/get-notification.usecase";
+import { MarkAsReadUseCase } from "../../useCases/notification/mark-as-read.usecase";
 
 
 
@@ -207,6 +211,15 @@ export class UseCaseRegistry{
       container.register("ISaveFcmTokenUseCase",{
         useClass: SaveFcmTokenUseCase
       })
+      container.register("IRemoveFcmTokenUseCase",{
+        useClass: RemoveFcmTokenUseCase
+      })
+      container.register("IGetNotificationsUseCase",{
+        useClass: GetNotificationsUseCase
+      })
+      container.register("IMarkAsReadUseCase",{
+        useClass: MarkAsReadUseCase
+      })
 
 
         //* ====== Register Bcrypts ====== *//
@@ -240,6 +253,9 @@ export class UseCaseRegistry{
         })
         container.register("IStripeService",{
           useClass: StripeService
+        })
+        container.register("INotificationService",{
+          useClass: NotificationService
         })
 
     }
