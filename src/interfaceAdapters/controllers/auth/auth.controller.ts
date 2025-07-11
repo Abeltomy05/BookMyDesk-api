@@ -120,7 +120,7 @@ export class AuthController implements IAuthController {
           }
           const user = await this._loginUserUseCase.execute(validatedData);
 
-          console.log("User status:", user.status, user._id, user.email, user.role);
+          // console.log("User status:", user.status, user._id, user.email, user.role);
 
           if (!user) {
                res.status(401).json({

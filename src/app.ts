@@ -3,6 +3,7 @@ import express from 'express';
 import morgan from 'morgan';
 import passport from "passport";
 import cors from 'cors';
+import http from 'http';
 import dotenv from 'dotenv';
 import cookieParser from "cookie-parser";
 import { connectDB } from './frameworks/database/db';
@@ -12,11 +13,14 @@ import { ClientRoutes } from './frameworks/routes/client.route';
 import { VendorRoutes } from './frameworks/routes/vendor.route';
 import { AdminRoutes } from './frameworks/routes/admin.route';
 import { startOfferCleanupJob } from "./shared/cron/offer-cleanup.cron";
-
+import { initSocketIO } from './shared/config/socket';
 
 dotenv.config();
 
 const app= express();
+const server = http.createServer(app);
+
+initSocketIO(server);
 
 app.use(passport.initialize());
 app.use(morgan("dev"))
@@ -24,7 +28,7 @@ app.use(morgan("dev"))
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-console.log('CORS origin:', process.env.CORS_ORIGIN);
+// console.log('CORS origin:', process.env.CORS_ORIGIN);
 app.use(cors({
     origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
@@ -50,8 +54,9 @@ const PORT = process.env.PORT || 3000;
 const startServer = async () => {
   try {
     await connectDB();
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`✅ Server is running on port ${PORT}`);
+      console.log(`💻 Socket.IO server is ready`);
     });
   } catch (error) {
     console.error('❌ Failed to connect to MongoDB. Server not started.');
