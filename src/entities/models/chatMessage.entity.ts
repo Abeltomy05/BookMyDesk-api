@@ -6,12 +6,11 @@ export interface IChatMessageEntity{
     receiverId: string;
     receiverModel: string;
 
-    roomId: string;
+    sessionId: string;
 
-    type: string;
-    content: string;
+    text: string | null;
+    image: string | null;
     isDeletedFor?: string[];
-    readBy?: string[];
 
     createdAt?: Date;
     updatedAt?: Date;

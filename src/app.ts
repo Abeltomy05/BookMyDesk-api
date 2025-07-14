@@ -13,14 +13,19 @@ import { ClientRoutes } from './frameworks/routes/client.route';
 import { VendorRoutes } from './frameworks/routes/vendor.route';
 import { AdminRoutes } from './frameworks/routes/admin.route';
 import { startOfferCleanupJob } from "./shared/cron/offer-cleanup.cron";
-import { initSocketIO } from './shared/config/socket';
+import { ChatSocketHandler  } from './shared/config/socket';
+import { container } from 'tsyringe';
+import { IChatUseCase } from './entities/usecaseInterfaces/chat/chat-usecase.interface';
 
 dotenv.config();
 
 const app= express();
 const server = http.createServer(app);
 
-initSocketIO(server);
+const chatUseCase = container.resolve<IChatUseCase>("IChatUseCase");
+
+const chatSocketHandler = new ChatSocketHandler(server, chatUseCase);
+chatSocketHandler.initialize();
 
 app.use(passport.initialize());
 app.use(morgan("dev"))

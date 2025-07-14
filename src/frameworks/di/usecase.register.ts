@@ -64,6 +64,10 @@ import { RemoveFcmTokenUseCase } from "../../useCases/auth/remove-fcm-token.usec
 import { NotificationService } from "../../interfaceAdapters/services/notification.service";
 import { GetNotificationsUseCase } from "../../useCases/notification/get-notification.usecase";
 import { MarkAsReadUseCase } from "../../useCases/notification/mark-as-read.usecase";
+import { CreateSessionUseCase } from "../../useCases/chat/create-session.usecase";
+import { GetChatsUseCase } from "../../useCases/chat/get-chats.usecase";
+import { GetMessagesUseCase } from "../../useCases/chat/get-messages.usecase";
+import { ChatUseCase } from "../../useCases/chat/chat.usecase";
 
 
 
@@ -220,7 +224,18 @@ export class UseCaseRegistry{
       container.register("IMarkAsReadUseCase",{
         useClass: MarkAsReadUseCase
       })
-
+      container.register("ICreateSessionUseCase",{
+        useClass: CreateSessionUseCase
+      })
+      container.register("IGetChatsUseCase",{
+        useClass: GetChatsUseCase
+      })
+      container.register("IGetMessagesUseCase",{
+        useClass: GetMessagesUseCase
+      })
+      container.register("IChatUseCase",{
+        useClass: ChatUseCase
+      })
 
         //* ====== Register Bcrypts ====== *//
         container.register<IBcrypt>("IPasswordBcrypt",{

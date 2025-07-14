@@ -9,7 +9,7 @@ export class BaseRepository<T> {
     }
 
     async find(filter: FilterQuery<T>, projection?: any){
-        return this.model.find(filter);
+        return this.model.find(filter,projection).lean();
     }
 
     async findAll(filter: FilterQuery<T> = {}, skip = 0, limit = 10, sort: Record<string, 1 | -1> = {}) {
@@ -40,5 +40,33 @@ export class BaseRepository<T> {
 
   async countDocuments(filter: FilterQuery<T> = {}) {
     return this.model.countDocuments(filter);
+  }
+
+  async findFields<K extends keyof T>(filter: FilterQuery<T>,fields: K[]): Promise<Pick<T, K> | undefined> {
+    const projection = fields.reduce((acc, key) => {
+      acc[key as string] = 1;
+      return acc;
+    }, {} as Record<string, 1>);
+
+    return this.model.findOne(filter).select(projection).lean() as Promise<Pick<T, K> | undefined>;
+  }
+
+  //  async findManyFields<K extends keyof T>(filter: FilterQuery<T>,fields: K[]): Promise<Pick<T, K> | undefined> {
+  //   const projection = fields.reduce((acc, key) => {
+  //     acc[key as string] = 1;
+  //     return acc;
+  //   }, {} as Record<string, 1>);
+
+  //   return this.model.findOne(filter).select(projection).lean() as Promise<Pick<T, K> | undefined>;
+  // }
+
+  async findWithPopulate(filter: FilterQuery<T>,populateFields: { path: string; select?: string }[]): Promise<T[]> {
+    let query = this.model.find(filter);
+
+    for (const { path, select } of populateFields) {
+      query = query.populate(path, select);
+    }
+
+    return query.lean() as Promise<T[]>;
   }
 }

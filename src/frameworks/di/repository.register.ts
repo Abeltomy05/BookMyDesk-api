@@ -15,6 +15,8 @@ import { WalletRepository } from "../../interfaceAdapters/repositories/wallet/wa
 import { WalletTransactionRepository } from "../../interfaceAdapters/repositories/wallet/walletTransaction.repository";
 import { OfferRepository } from "../../interfaceAdapters/repositories/offer/offer.repository";
 import { NotificationRepository } from "../../interfaceAdapters/repositories/notification/notification.repository";
+import { ChatMessageRepository } from "../../interfaceAdapters/repositories/chat/chat-message.repository";
+import { ChatSessionRepository } from "../../interfaceAdapters/repositories/chat/chat-session.repository";
 
 export class RepositoryRegistry{
     static registerRepositories():void{
@@ -58,6 +60,12 @@ export class RepositoryRegistry{
         })
         container.register("INotificationRepository",{
             useClass: NotificationRepository
+        })
+        container.register("IChatMessageRepository",{
+            useClass: ChatMessageRepository
+        })
+        container.register("IChatSessionRepository",{
+            useClass: ChatSessionRepository
         })
         
     }

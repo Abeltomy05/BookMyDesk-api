@@ -1,8 +1,7 @@
 export interface IChatSessionEntity{
     _id:string;
     clientId: string,
-    vendorId: string,
-    bookingId: string,
+    buildingId: string,
 
     lastMessage?: string,
     lastMessageAt?: Date,

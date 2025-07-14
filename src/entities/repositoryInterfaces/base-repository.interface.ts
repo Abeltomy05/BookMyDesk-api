@@ -1,3 +1,5 @@
+import { FilterQuery } from "mongoose";
+
 export interface IBaseRepository<T> {
   find(filter: any,projection?: any): Promise<T[]>;
   findAll(
@@ -12,4 +14,7 @@ export interface IBaseRepository<T> {
   delete(filter: any): Promise<T | null>;
   deleteAll(filter: any): Promise<void>;
   countDocuments(filter?: any): Promise<number>;
+  findFields<K extends keyof T>(filter: FilterQuery<T>,fields: K[]): Promise<Pick<T, K> | undefined>
+  findWithPopulate(filter: FilterQuery<T>,populateFields: { path: string; select?: string }[]): Promise<T[]>
+  // findManyFields<K extends keyof T>(filter: FilterQuery<T>,fields: K[]): Promise<Pick<T, K> | undefined>
 }
