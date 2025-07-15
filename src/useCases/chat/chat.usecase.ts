@@ -36,10 +36,25 @@ export class ChatUseCase implements IChatUseCase{
             receiverModel: savedMessage.receiverModel,
             text: savedMessage.text,
             image: savedMessage.image,
-            isDeletedFor: savedMessage.isDeletedFor,
+            isDeleted: savedMessage.isDeleted,
             createdAt: savedMessage.createdAt,
             updatedAt: savedMessage.updatedAt,
         };
 
+    }
+
+    async deleteMessage(data:{messageId: string, sessionId: string},userId: string){
+      if(!userId){
+        throw new Error("Cannot delete message without user Id.");
+      }
+
+      await this._chatMessageRepo.update(
+        {_id: data.messageId, sessionId:data.sessionId},
+        { isDeleted:true }
+    );
+    }
+
+    async clearChat(sessionId:string){
+        
     }
 }

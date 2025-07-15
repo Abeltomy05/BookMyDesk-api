@@ -6,7 +6,7 @@ export interface IChatSessionEntity{
     lastMessage?: string,
     lastMessageAt?: Date,
 
-    isClearedBy?: string[],
+    clearedAtBy?: { [userId: string]: Date };
 
     createdAt?: Date,
     updatedAt?: Date

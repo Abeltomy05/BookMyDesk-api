@@ -6,7 +6,7 @@ import http from 'http';
 
 export class ChatSocketHandler {
   private io: IOServer;
-  private onlineUsers = new Map<string, { socketId: string, userType: 'client' | 'vendor' }>();
+  private onlineUsers = new Map<string, { socketId: string, userType: 'client' | 'building' }>();
 
   constructor(httpServer: http.Server, private _chatUseCase: IChatUseCase) {
     this.io = new IOServer(httpServer, {
@@ -49,6 +49,8 @@ export class ChatSocketHandler {
     }
 
     this.onlineUsers.set(socket.userId, { socketId: socket.id, userType: socket.userType });
+    this.io.emit("userOnline", { userId: socket.userId });
+    socket.emit("onlineUsers", Array.from(this.onlineUsers.keys()));
     // console.log("Current online users:", this.onlineUsers);
 
     socket.on("joinRoom", (sessionId: string) => {
@@ -66,15 +68,18 @@ export class ChatSocketHandler {
       socket.to(sessionId).emit("typing", { sessionId });
     });
 
-    socket.on("stopTyping", (sessionId) => {
+    socket.on("stopTyping", ({sessionId}) => {
       socket.to(sessionId).emit("stopTyping", { sessionId });
     });
+
+    socket.on("deleteMessage", (data: {messageId: string, sessionId: string}) => this.handleDeleteMessage(socket, data));
   }
 
   private handleDisconnect(socket: CustomSocket) {
     const user  = this.onlineUsers.get(socket.userId);
     if (user && user.socketId === socket.id) {
       this.onlineUsers.delete(socket.userId);
+      this.io.emit("userOffline", { userId: socket.userId });
     }
     console.log("User disconnected:", socket.id);
   }
@@ -108,6 +113,24 @@ export class ChatSocketHandler {
       console.log(`Message sent and saved in session ${sessionId}`);
     } catch (error) {
       console.error("Error handling sendMessage:", error);
+    }
+  }
+
+  private async handleDeleteMessage(socket: CustomSocket, data:{messageId: string, sessionId: string}){
+    try {
+      const {messageId, sessionId} = data;
+      if(!messageId || !sessionId){
+        console.warn("Invalid message payload:", data);
+        return;
+      }
+
+      await this._chatUseCase.deleteMessage(data,socket.userId);
+      this.io.to(data.sessionId).emit("messageDeleted", {
+        messageId: data.messageId,
+        deletedFor: socket.userType,
+      });
+    } catch (error) {
+       console.error("Error deleting message:", error);
     }
   }
 }

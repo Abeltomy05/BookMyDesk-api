@@ -10,7 +10,7 @@ export interface IChatMessageEntity{
 
     text: string | null;
     image: string | null;
-    isDeletedFor?: string[];
+    isDeleted?: boolean;
 
     createdAt?: Date;
     updatedAt?: Date;

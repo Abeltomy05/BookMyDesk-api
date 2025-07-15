@@ -9,7 +9,7 @@ export const chatSessionSchema = new Schema<IChatSessionModel>(
     lastMessage: {type: String},
     lastMessageAt: {type: Date},
 
-    isClearedBy: [{ type: String, enum: ['client', 'vendor'] }],
+    clearedAtBy: { type: Map, of: Date, default:{} },
   },
   { timestamps: true }
 );

@@ -6,6 +6,7 @@ import { CustomRequest } from "../middlewares/auth.middleware";
 import { ICreateSessionUseCase } from "../../entities/usecaseInterfaces/chat/create-session-usecase.interface";
 import { IGetChatsUseCase } from "../../entities/usecaseInterfaces/chat/get-chat-usecase.interface";
 import { IGetMessagesUseCase } from "../../entities/usecaseInterfaces/chat/get-messages-usecase.interface";
+import { IClearChatUseCase } from "../../entities/usecaseInterfaces/chat/clear-chat-usecase.interface";
 
 @injectable()
 export class ChatController implements IChatController{
@@ -16,6 +17,8 @@ export class ChatController implements IChatController{
    private _getChatsUseCase: IGetChatsUseCase,
    @inject("IGetMessagesUseCase")
    private _getMessagesUseCase: IGetMessagesUseCase,
+   @inject("IClearChatUseCase")
+   private _clearChatUseCase: IClearChatUseCase,
   ){}
 
   async createSession(req:Request, res: Response): Promise<void>{
@@ -112,6 +115,39 @@ export class ChatController implements IChatController{
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Failed to get messages for the session.",
+    });
+    }
+  }
+
+  async clearChat(req:Request, res: Response): Promise<void>{
+    try {
+      const {sessionId} = req.body;
+      if(!sessionId){
+        res.status(StatusCodes.BAD_REQUEST).json({
+          success: false,
+          message: "SessionId missing."
+        })
+        return;
+      }
+
+      const userId = (req as CustomRequest).user.userId;
+      await this._clearChatUseCase.execute(sessionId,userId);
+      res.status(StatusCodes.OK).json({
+        success: true,
+        message: "Chat cleared successfully."
+      })
+    } catch (error) {
+       if (error instanceof Error) {
+        res.status(StatusCodes.BAD_REQUEST).json({
+            success: false,
+            message: error.message,
+        });
+        return 
+        }
+        console.error("Error clearing chats:", error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: "Failed to clear chats.",
     });
     }
   }

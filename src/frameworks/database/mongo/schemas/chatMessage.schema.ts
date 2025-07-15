@@ -14,7 +14,7 @@ export const chatMessageSchema = new Schema<IChatMessageModel>(
     text: { type: String },
     image: { type: String, },
 
-    isDeletedFor: [{ type: String, enum: ['client', 'vendor'] }],
+    isDeleted: { type: Boolean, default:false},
   },
   { timestamps: true }
 );

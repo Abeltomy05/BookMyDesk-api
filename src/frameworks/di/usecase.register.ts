@@ -68,6 +68,7 @@ import { CreateSessionUseCase } from "../../useCases/chat/create-session.usecase
 import { GetChatsUseCase } from "../../useCases/chat/get-chats.usecase";
 import { GetMessagesUseCase } from "../../useCases/chat/get-messages.usecase";
 import { ChatUseCase } from "../../useCases/chat/chat.usecase";
+import { ClearChatUseCase } from "../../useCases/chat/clear-chat.usecase";
 
 
 
@@ -235,6 +236,9 @@ export class UseCaseRegistry{
       })
       container.register("IChatUseCase",{
         useClass: ChatUseCase
+      })
+      container.register("IClearChatUseCase",{
+        useClass: ClearChatUseCase
       })
 
         //* ====== Register Bcrypts ====== *//
