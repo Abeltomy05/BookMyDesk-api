@@ -7,6 +7,7 @@ import { ICreateSessionUseCase } from "../../entities/usecaseInterfaces/chat/cre
 import { IGetChatsUseCase } from "../../entities/usecaseInterfaces/chat/get-chat-usecase.interface";
 import { IGetMessagesUseCase } from "../../entities/usecaseInterfaces/chat/get-messages-usecase.interface";
 import { IClearChatUseCase } from "../../entities/usecaseInterfaces/chat/clear-chat-usecase.interface";
+import { getErrorMessage } from "../../shared/error/errorHandler";
 
 @injectable()
 export class ChatController implements IChatController{
@@ -40,18 +41,12 @@ export class ChatController implements IChatController{
         message: "Session created successfully.",
         data: result,
       })
-    } catch (error) {
-        if (error instanceof Error) {
-        res.status(StatusCodes.BAD_REQUEST).json({
-            success: false,
-            message: error.message,
-        });
-        return 
-        }
+    } catch (error:unknown) {
+       const message = getErrorMessage(error);
         console.error("Error creating session:", error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Failed creating session.",
+        message,
     });
     }
   }
@@ -71,18 +66,12 @@ export class ChatController implements IChatController{
         success: true,
         data: result,
        })
-    } catch (error) {
-         if (error instanceof Error) {
-        res.status(StatusCodes.BAD_REQUEST).json({
-            success: false,
-            message: error.message,
-        });
-        return 
-        }
+    } catch (error:unknown) {
+       const message = getErrorMessage(error);
         console.error("Error getting chats:", error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Failed to get chats.",
+        message,
     });
   }
   }
@@ -103,18 +92,12 @@ export class ChatController implements IChatController{
         success:true,
         data:result,
       })
-    } catch (error) {
-       if (error instanceof Error) {
-        res.status(StatusCodes.BAD_REQUEST).json({
-            success: false,
-            message: error.message,
-        });
-        return 
-        }
+    } catch (error:unknown) {
+       const message = getErrorMessage(error);
         console.error("Error getting messages:", error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Failed to get messages for the session.",
+        message,
     });
     }
   }
@@ -136,18 +119,12 @@ export class ChatController implements IChatController{
         success: true,
         message: "Chat cleared successfully."
       })
-    } catch (error) {
-       if (error instanceof Error) {
-        res.status(StatusCodes.BAD_REQUEST).json({
-            success: false,
-            message: error.message,
-        });
-        return 
-        }
+    } catch (error:unknown) {
+        const message = getErrorMessage(error);
         console.error("Error clearing chats:", error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Failed to clear chats.",
+        message,
     });
     }
   }

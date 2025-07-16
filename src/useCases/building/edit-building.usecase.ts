@@ -7,7 +7,7 @@ import { toEntitySpace, toModelSpace } from "../../interfaceAdapters/mappers/spa
 import { toEntityBuilding } from "../../interfaceAdapters/mappers/building.mapper";
 import { IEditBuildingUsecase } from "../../entities/usecaseInterfaces/building/edit-building-usecase.interface";
 import mongoose from "mongoose";
-import { SpaceAggregation } from "../../shared/types/types";
+import { SpaceAggregation } from "../../shared/types/user.types";
 
 @injectable()
 export class EditBuildingUsecase implements IEditBuildingUsecase{

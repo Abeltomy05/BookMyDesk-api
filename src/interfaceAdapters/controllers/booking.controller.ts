@@ -10,6 +10,7 @@ import { IGetBookingDetailsUseCase } from "../../entities/usecaseInterfaces/book
 import { ICancelBookingUseCase } from "../../entities/usecaseInterfaces/booking/cancel-booking-usecase.interface";
 import { IGetBookingsForAdmin } from "../../entities/usecaseInterfaces/booking/get-booking-for-admin-usecase.interface";
 import { StatusCodes } from "http-status-codes";
+import { getErrorMessage } from "../../shared/error/errorHandler";
 
 @injectable()
 export class BookingController implements IBookingController{
@@ -47,12 +48,13 @@ export class BookingController implements IBookingController{
             success: true,
             data: response,
           });
-        } catch (error:any) {
+        } catch (error:unknown) {
+            const message = getErrorMessage(error);
             console.error("Error fetching booking page data:", error);
 
              res.status(500).json({
                 success: false,
-                message: error.message || "Something went wrong while fetching booking data.",
+                message: message,
               });
         }
 
@@ -84,11 +86,12 @@ export class BookingController implements IBookingController{
                 data:result,
                 message: "Payment intent created successfully."
             });
-        } catch (error: any) {
+        } catch (error: unknown) {
+           const message = getErrorMessage(error);
             console.error("Error creating payment intent:", error);
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: error.message || "Something went wrong while creating payment intent.",
+                message: message,
             });
         }
     }
@@ -117,11 +120,12 @@ export class BookingController implements IBookingController{
         } else {
           res.status(400).json(result);
         }
-      } catch (error:any) {
+      } catch (error:unknown) {
+        const message = getErrorMessage(error);
         console.error("Error confirming payment:", error);
         res.status(500).json({
             success: false,
-            message: error.message || "Something went wrong while confirming payment.",
+            message: message,
         });
       }
     }
@@ -153,11 +157,12 @@ export class BookingController implements IBookingController{
                 totalItems: result.totalItems,
                 message: "Bookings fetched successfully."
             });
-        } catch (error:any) {
+        } catch (error:unknown) {
+           const message = getErrorMessage(error);
             console.error("Error fetching bookings:", error);
             res.status(500).json({
                 success: false,
-                message: error.message || "Something went wrong while fetching bookings.",
+                message: message,
             });
         }
     }
@@ -186,11 +191,12 @@ export class BookingController implements IBookingController{
           data: booking,
           message: 'Booking fetched successfully.'
         });
-      } catch (error:any) {
+      } catch (error:unknown) {
+         const message = getErrorMessage(error);
         console.error("Error fetching booking details:", error);
         res.status(500).json({
             success: false,
-            message: error.message || "Something went wrong while fetching booking details.",
+            message: message,
         });
         
       }
@@ -221,11 +227,12 @@ export class BookingController implements IBookingController{
           });
         }
 
-      } catch (error:any) {
+      } catch (error:unknown) {
+        const message = getErrorMessage(error);
         console.error("Error cancelling booking:", error);
         res.status(500).json({
             success: false,
-            message: error.message || "Something went wrong while cancelling booking.",
+            message: message,
         });
       }
     }
@@ -245,8 +252,13 @@ export class BookingController implements IBookingController{
           success: true,
           data: result,
         });
-      } catch (error) {
-        
+      } catch (error:unknown) {
+         const message = getErrorMessage(error);
+         console.log("Error when getting booking:",error)
+         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: message,
+         })
       }
     }
 

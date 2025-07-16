@@ -5,6 +5,7 @@ import { INotificationController } from "../../entities/controllerInterfaces/oth
 import { inject, injectable } from "tsyringe";
 import { IGetNotificationsUseCase } from "../../entities/usecaseInterfaces/notification/get-notification-usecase.interface";
 import { IMarkAsReadUseCase } from "../../entities/usecaseInterfaces/notification/mark-as-read-usecase.interface";
+import { getErrorMessage } from "../../shared/error/errorHandler";
 
 @injectable()
 export class NotificationController implements INotificationController{
@@ -28,18 +29,12 @@ export class NotificationController implements INotificationController{
                 success:true,
                 data:response,
             })
-        } catch (error) {
-          if (error instanceof Error) {
-            res.status(StatusCodes.BAD_REQUEST).json({
-                success: false,
-                message: error.message,
-            });
-            return 
-           }
+        } catch (error:unknown) {
+          const message = getErrorMessage(error);
            console.error("Error fetching notifications:", error);
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: "Failed fetching notifications.",
+            message,
         });
         }
     }
@@ -56,18 +51,12 @@ export class NotificationController implements INotificationController{
             res.status(StatusCodes.OK).json({
                 success:true
             })
-        } catch (error) {
-           if (error instanceof Error) {
-            res.status(StatusCodes.BAD_REQUEST).json({
-                success: false,
-                message: error.message,
-            });
-            return 
-           }
+        } catch (error:unknown) {
+            const message = getErrorMessage(error);
            console.error("Error fetching notifications:", error);
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: "Failed fetching notifications.",
+            message,
         }); 
         }
     }

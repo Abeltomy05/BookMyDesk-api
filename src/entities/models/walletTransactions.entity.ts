@@ -1,4 +1,4 @@
-import { WalletTransactionTypes } from "../../shared/types/types";
+import { WalletTransactionTypes } from "../../shared/types/user.types";
 
 export interface IWalletTransactionEntity {
     _id: string;

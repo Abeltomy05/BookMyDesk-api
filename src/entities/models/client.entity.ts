@@ -1,4 +1,4 @@
-import { ClientStatus } from "../../shared/types/types";
+import { ClientStatus } from "../../shared/types/user.types";
 import { IUserEntity } from "./user.entity";
 
 export interface IClientEntity extends IUserEntity {

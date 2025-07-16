@@ -10,6 +10,7 @@ import { IGetVendorHomeData } from "../../entities/usecaseInterfaces/vendor/get-
 import { IGetSingleVendorData } from "../../entities/usecaseInterfaces/vendor/get-single-vendorData-usecase.interface";
 import { IFetchBuildingsForVendorUseCase } from "../../entities/usecaseInterfaces/vendor/fetch-building-vendor-usecase.interface";
 import { IFetchSpacesForBuilding } from "../../entities/usecaseInterfaces/vendor/fetch-space-building-usecase.interface";
+import { getErrorMessage } from "../../shared/error/errorHandler";
 
 @injectable()
 export class VendorController implements IVendorController{
@@ -63,11 +64,12 @@ export class VendorController implements IVendorController{
         message: "ID proof uploaded successfully",
         data: vendor,
         });
-      } catch (error) {
-          console.error("Error uploading ID proof:", error);
+      } catch (error:unknown) {
+         const message = getErrorMessage(error);
+        console.error("Error uploading ID proof:", error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Failed to upload ID proof",
+        message,
         });
       }
     }
@@ -86,11 +88,12 @@ export class VendorController implements IVendorController{
              success: true,
              data: vendor,
           })
-      } catch (error) {
+      } catch (error:unknown) {
+         const message = getErrorMessage(error);
          console.error("Error getting retry data:", error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: "Failed to get retry data",
+          success: false,
+          message,
         });
       }
     }
@@ -108,11 +111,12 @@ export class VendorController implements IVendorController{
           success: true,
           message: "Your application has been retried with the updated details. Please wait while the admin reviews and approves it.",
         });
-      } catch (error) {
+      } catch (error:unknown) {
+         const message = getErrorMessage(error);
            console.error("Error retry vendor registration:", error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Failed in retry vendor registration",
+        message,
         });
       }
     }
@@ -126,11 +130,12 @@ export class VendorController implements IVendorController{
           success: true,
           data: response,
         });
-      } catch (error) {
+      } catch (error:unknown) {
+         const message = getErrorMessage(error);
         console.error("Error retry vendor registration:", error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Failed in retry vendor registration",
+        message,
         });
       }
     }
@@ -145,11 +150,12 @@ export class VendorController implements IVendorController{
           success:true,
           data:result,
         })
-      } catch (error) {
+      } catch (error:unknown) {
+         const message = getErrorMessage(error);
           console.error("Error getting vendor data in admin side:", error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: "Failed in getting vendor data in admin side",
+          success: false,
+          message,
         });
       }
     }
@@ -162,11 +168,12 @@ export class VendorController implements IVendorController{
           success: true,
           data: result,
         })
-      } catch (error) {
+      } catch (error:unknown) {
+         const message = getErrorMessage(error);
          console.error("Error fetching buildings of a vendor:", error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: "Failed fetching buildings of a vendor",
+            success: false,
+            message,
         });
       }
     }
@@ -179,11 +186,12 @@ export class VendorController implements IVendorController{
           success: true,
           data: response,
         })
-      } catch (error) {
+      } catch (error:unknown) {
+         const message = getErrorMessage(error);
          console.error("Error fetching space of a building:", error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
-        message: "Failed fetching space of a building",
+        message,
         });
       }
     }

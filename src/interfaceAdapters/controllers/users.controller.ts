@@ -12,6 +12,7 @@ import { IGetUserDataUseCase } from "../../entities/usecaseInterfaces/users/get-
 import { userSchemas } from "./auth/validations/user-signup.validation.schema";
 import { IGetVendorsAndBuildingsUseCase } from "../../entities/usecaseInterfaces/users/get-vendorAndBuilding-usecase.interface";
 import { IDeleteEntityUseCase } from "../../entities/usecaseInterfaces/users/delete-entity-usecase.interface";
+import { getErrorMessage } from "../../shared/error/errorHandler";
 
 @injectable()
 export class UsersController implements IUsersController{
@@ -66,13 +67,13 @@ export class UsersController implements IUsersController{
 			totalPages,
 			currentPage: pageNumber,
 		 });
-        } catch (error) {
+        } catch (error:unknown) {
+             const message = getErrorMessage(error);
              console.error("Error fetching users:", error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to fetch users. Please try again later.",
-            error: error instanceof Error ? error.message : String(error),
-        });
+            res.status(500).json({
+                success: false,
+                message,
+            });
         }
     }
 
@@ -87,11 +88,12 @@ export class UsersController implements IUsersController{
                 message: "User data fetched successfully",
                 data: userData,
             });
-        } catch (error) {
+        } catch (error:unknown) {
+            const message = getErrorMessage(error);
             console.error("Error fetching user data:", error);
             res.status(500).json({ 
                 success: false, 
-                message: "Failed to fetch user data" 
+                message,
             });
         }
     }
@@ -106,9 +108,10 @@ export class UsersController implements IUsersController{
                 success: true,
                 message: `${entityType} status updated successfully`
             });
-        } catch (error) {
+        } catch (error:unknown) {
+             const message = getErrorMessage(error);
             console.error("Error updating user status:", error);
-            res.status(500).json({ success: false, message: "Failed to update user status" });
+            res.status(500).json({ success: false, message,});
         }
     }
 
@@ -124,11 +127,12 @@ export class UsersController implements IUsersController{
             vendors
         }
       });
-    }catch(error:any){
+    }catch(error:unknown){
+         const message = getErrorMessage(error);
         console.error("Error fetching user count:", error);
         res.status(500).json({
             success: false,
-            message: error.message || "Failed to fetch user count",
+            message,
         });
     }
    }
@@ -165,11 +169,12 @@ export class UsersController implements IUsersController{
             message: "User profile updated successfully",
             data: updatedData,
          })
-     } catch (error: any) {
+     } catch (error: unknown) {
+         const message = getErrorMessage(error);
         console.error("Error updating user profile:", error);
         res.status(500).json({
             success: false,
-            message: error.message || "Failed to update user profile",
+            message,
         });
         
      }
@@ -186,11 +191,12 @@ export class UsersController implements IUsersController{
             message: "User password updated successfully",
             data: response,
         })
-    } catch (error: any) {
+    } catch (error: unknown) {
+         const message = getErrorMessage(error);
         console.error("Error updating user password:", error);
         res.status(500).json({
             success: false,
-            message: error.message || "Failed to update user password",
+            message,
         });
     }
    }
@@ -199,9 +205,10 @@ export class UsersController implements IUsersController{
      try {
     const result = await this._getVendorsAndBuildingsUseCase.execute();
     res.status(200).json({ success: true, data: result });
-   } catch (error) {
+   } catch (error:unknown) {
+     const message = getErrorMessage(error);
     console.error("Error in getEntitiesSummary:", error);
-    res.status(500).json({ success: false, message: "Failed to fetch summary." });
+    res.status(500).json({ success: false, message, });
    }
   }
 
@@ -224,9 +231,9 @@ export class UsersController implements IUsersController{
                 })
                 return;
             }
-        } catch (error) {
-           const message = error instanceof Error ? error.message : "Unexpected error during deletion";
-            res.status(StatusCodes.BAD_REQUEST).json({
+        } catch (error:unknown) {
+            const message = getErrorMessage(error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             success: false,
             message,
             });

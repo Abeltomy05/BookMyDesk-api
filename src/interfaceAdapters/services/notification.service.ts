@@ -50,15 +50,21 @@ export class NotificationService implements INotificationService {
     try {
       await messaging.send(message);
       console.log(`✅ Notification sent to ${role} (${userId})`);
-    } catch (error: any) {
-      console.error(`❌ Error sending notification to ${role} (${userId}):`, error.code, error.message);
+    } catch (error) {
+      const err = error as { code?: string; message?: string };
+
+      console.error(
+        `❌ Error sending notification to ${role} (${userId}):`,
+        err.code ?? "unknown_code",
+        err.message ?? "unknown_message"
+      );
 
       if (
-        error.code === "messaging/invalid-registration-token" ||
-        error.code === "messaging/registration-token-not-registered"
+        err.code === "messaging/invalid-registration-token" ||
+        err.code === "messaging/registration-token-not-registered"
       ) {
         await repo.update({ _id: userId }, { fcmToken: "" });
-        console.warn(`Cleaned up invalid FCM token for ${role} ${userId}`);
+        console.warn(`🧹 Cleaned up invalid FCM token for ${role} (${userId})`);
       }
     }
   }

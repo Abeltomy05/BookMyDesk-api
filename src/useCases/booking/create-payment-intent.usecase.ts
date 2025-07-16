@@ -6,7 +6,8 @@ import { ICreatePaymentIntentUseCase } from "../../entities/usecaseInterfaces/bo
 import { IStripeService } from "../../entities/serviceInterfaces/stripe-service.interface";
 import { ISpaceRepository } from "../../entities/repositoryInterfaces/building/space-repository.interface";
 import { IBuildingRepository } from "../../entities/repositoryInterfaces/building/building-repository.interface";
-import { BookingStatus, PaymentMethod, PaymentStatus } from "../../shared/types/types";
+import { BookingStatus, PaymentMethod, PaymentStatus } from "../../shared/types/user.types";
+import { getErrorMessage } from "../../shared/error/errorHandler";
 
 @injectable()
 export class CreatePaymentIntentUseCase implements ICreatePaymentIntentUseCase{
@@ -68,9 +69,10 @@ export class CreatePaymentIntentUseCase implements ICreatePaymentIntentUseCase{
         paymentIntentId: paymentIntent.id,
         publishableKey: process.env.STRIPE_PUBLIC_KEY!
       };
-       } catch (error: any) {
+       } catch (error: unknown) {
+        const message = getErrorMessage(error)
       console.error('Error in CreatePaymentIntentUseCase:', error);
-      throw new Error(error.message || 'Failed to create payment intent');
+      throw new Error(message || 'Failed to create payment intent');
     }
     }
 }

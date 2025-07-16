@@ -4,13 +4,14 @@ import { IConfirmPaymentUseCase } from "../../entities/usecaseInterfaces/booking
 import { ConfirmPaymentDTO } from "../../shared/dtos/booking.dto";
 import { IBookingRepository } from "../../entities/repositoryInterfaces/booking/booking-repository.interface";
 import { IStripeService } from "../../entities/serviceInterfaces/stripe-service.interface";
-import { BookingStatus, PaymentMethod, PaymentStatus } from "../../shared/types/types";
+import { BookingStatus, PaymentMethod, PaymentStatus } from "../../shared/types/user.types";
 import { ISpaceRepository } from "../../entities/repositoryInterfaces/building/space-repository.interface";
 import { IBuildingRepository } from "../../entities/repositoryInterfaces/building/building-repository.interface";
 import { IWalletRepository } from "../../entities/repositoryInterfaces/wallet/wallet-repository.interface";
 import { IWalletTransactionRepository } from "../../entities/repositoryInterfaces/wallet/walletTrasaction-repository.interface";
 import { INotificationService } from "../../entities/serviceInterfaces/notification-service.interface";
 import { INotificationRepository } from "../../entities/repositoryInterfaces/notification/notification-repository.interface";
+import { getErrorMessage } from "../../shared/error/errorHandler";
 
 @injectable()
 export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
@@ -386,11 +387,12 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
             }
         };
     }
-       } catch (error: any) {
+       } catch (error: unknown) {
             console.error("Error confirming payment:", error);
+            const message = getErrorMessage(error)
              return {
                 success: false,
-                message: error.message || "Something went wrong while confirming payment."
+                message: message || "Something went wrong while confirming payment."
             };
        } 
     }

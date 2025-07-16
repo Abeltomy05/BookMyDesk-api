@@ -2,7 +2,7 @@ import { inject, injectable } from "tsyringe";
 import { IBuildingRepository } from "../../entities/repositoryInterfaces/building/building-repository.interface";
 import { IBuildingEntity } from "../../entities/models/building.entity";
 import { Types } from "mongoose";
-import { BuildingStatus, SpaceAggregation } from "../../shared/types/types";
+import { BuildingStatus, SpaceAggregation } from "../../shared/types/user.types";
 import { IRegisterBuildingUsecase } from "../../entities/usecaseInterfaces/building/register-building-usecase.interface";
 import { BuildingRegistrationData } from "../../shared/validations/register-building.validation";
 import { ISpaceRepository } from "../../entities/repositoryInterfaces/building/space-repository.interface";

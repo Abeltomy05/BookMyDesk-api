@@ -13,6 +13,7 @@ import { IEditBuildingUsecase } from "../../entities/usecaseInterfaces/building/
 import { IBuildingEntity } from "../../entities/models/building.entity";
 import { IGetSingleBuilding } from "../../entities/usecaseInterfaces/building/get-single-building-usecase.interface";
 import { IFetchBuildingUseCase } from "../../entities/usecaseInterfaces/building/fetch-building-usecase.interface";
+import { getErrorMessage } from "../../shared/error/errorHandler";
 
 @injectable()
 export class BuildingController implements IBuildingController{
@@ -54,12 +55,12 @@ export class BuildingController implements IBuildingController{
           totalPages,
           currentPage: pageNumber,
         });
-      } catch (error) {
+      } catch (error:unknown) {
+         const message = getErrorMessage(error);
           console.error("Error fetching buildings:", error);
         res.status(500).json({
             success: false,
-            message: "Failed to fetch buildings. Please try again later.",
-            error: error instanceof Error ? error.message : String(error),
+            message,
         });
       }
     }
@@ -100,7 +101,7 @@ export class BuildingController implements IBuildingController{
           message:"Building registration success",
           data:returnData,
         });
-      } catch (error) {
+      } catch (error:unknown) {
           if (error instanceof Error && error.message.includes("already exists")) {
             res.status(StatusCodes.CONFLICT).json({
               success: false,
@@ -108,11 +109,11 @@ export class BuildingController implements IBuildingController{
             });
             return;
           }
+           const message = getErrorMessage(error);
            console.error("Error registering building:", error);
         res.status(500).json({
             success: false,
-            message: "Failed to register building. Please try again later.",
-            error: error instanceof Error ? error.message : String(error),
+            message,
         });
       }
     }
@@ -137,11 +138,12 @@ export class BuildingController implements IBuildingController{
       totalPages: result.totalPages,
       currentPage: result.currentPage,
     });    
-    } catch (error) {
+    } catch (error:unknown) {
+       const message = getErrorMessage(error);
        console.error("Error fetching buildings for verification:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to fetch buildings for verification.",
+      message,
     });
     }
    }
@@ -166,22 +168,15 @@ export class BuildingController implements IBuildingController{
         data: result,
       });
 
-    } catch (error) {
-       if (error instanceof ZodError) {
-        res.status(400).json({
-          success: false,
-          message: "Validation failed",
-          errors: error.errors, 
-        });
-        return
-     }
+    } catch (error:unknown) {
+      const message = getErrorMessage(error);
       console.error("Unexpected error:", error);
       res.status(500).json({
         success: false,
-        message: "Internal server error",
+        message,
       });
       return
-        }
+    }
    }
 
    async getSingleBuilding(req:Request, res: Response): Promise<void>{
@@ -189,9 +184,10 @@ export class BuildingController implements IBuildingController{
       const id = req.params.id;
       const buildingWithSpaces  = await this._getSingleBuildingUseCase.execute(id);
       res.status(200).json({ success: true, data: buildingWithSpaces });
-    } catch (error) {
-        console.error("Error getting building:", error);
-       res.status(500).json({ success: false, message: "Error retrieving building" });
+    } catch (error:unknown) {
+       const message = getErrorMessage(error);
+      console.error("Error getting building:", error);
+       res.status(500).json({ success: false, message,});
     }
    }
 
@@ -236,9 +232,10 @@ export class BuildingController implements IBuildingController{
       limit,
       totalPages: Math.ceil(result.total / limit),
     });
-    } catch (error) {
-      console.error(error);
-       res.status(500).json({ success: false, message: "Failed to fetch buildings" });
+    } catch (error:unknown) {
+       const message = getErrorMessage(error);
+      console.error("Error in fetching buildings",error);
+       res.status(500).json({ success: false, message,});
     }
    }
 

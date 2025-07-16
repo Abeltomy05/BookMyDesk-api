@@ -3,6 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import { JwtService } from "../services/jwt.service";
 import { NextFunction,Request, Response } from "express";
 import { redisClient } from "../../frameworks/cache/redis.client";
+import { hasName } from "../../shared/error/errorHandler";
 
 const tokenService = new JwtService();
 
@@ -56,20 +57,19 @@ export const verifyAuth = async(req:Request,res:Response,next:NextFunction)=>{
 			refresh_token: token.refresh_token,
 		    };
             next();
-       }catch(error: any){
-           if (error.name === "TokenExpiredError") {
-			console.log(error.name);
-			res.status(StatusCodes.UNAUTHORIZED).json({
+       }catch(error: unknown){
+          if (hasName(error) && error.name === "TokenExpiredError") {
+				console.log(error.name);
+				res.status(StatusCodes.UNAUTHORIZED).json({
 				message: "Not Authorized",
-			});
-			return;
-		   }
+				});
+				return;
+			}
 
             console.log("Invalid token response sent");
             res.status(StatusCodes.UNAUTHORIZED).json({
                 message: "Invalid Token",
             });
-            return;
        }
 }
 
@@ -131,12 +131,15 @@ export const decodeToken = async (req: Request,res: Response,next: NextFunction)
 			refresh_token: token.refresh_token,
 		};
 		next();
-	} catch (error:any) {
+	} catch (error:unknown) {
 		console.error("Error decoding token:", error);
+
+	    const message =
+           error instanceof Error ? error.message : "An unknown error occurred";
 
 		res.status(StatusCodes.UNAUTHORIZED).json({
 			message: "Invalid or expired token",
-			error: error?.message || "An unknown error occurred",
+			error: message,
 		});
 	}
 };

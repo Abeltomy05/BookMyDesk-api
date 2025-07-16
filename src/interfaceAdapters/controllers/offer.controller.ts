@@ -7,6 +7,7 @@ import { IFetchAllOffersUseCase } from "../../entities/usecaseInterfaces/offer/f
 import { CreateOfferSchema } from "../../shared/validations/create-offer.validation";
 import { z } from "zod";
 import { ICreateOfferUseCase } from "../../entities/usecaseInterfaces/offer/create-offer-usecase.interface";
+import { getErrorMessage } from "../../shared/error/errorHandler";
 
 @injectable()
 export class OfferController implements IOfferController{
@@ -27,19 +28,13 @@ export class OfferController implements IOfferController{
                 success: true,
                 data: result,
             })
-        } catch (error) {
-            if (error instanceof Error) {
-                res.status(StatusCodes.BAD_REQUEST).json({
-                    success: false,
-                    message: error.message,
-                });
-                return 
-                }
+        } catch (error:unknown) {
+          const message = getErrorMessage(error);
           console.error("Error fetching space of a building:", error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: "Failed fetching space of a building",
-        });
+          res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message,
+           });
         }
     }
     async createOffer(req:Request, res: Response): Promise<void>{
@@ -62,28 +57,13 @@ export class OfferController implements IOfferController{
                })
                return;
             }
-        } catch (error:any) {
-             if (error instanceof z.ZodError) {
-                console.log(error)
-               res.status(400).json({
-                success: false,
-                message: 'Validation failed',
-                errors: error.errors,
-                })
-                 return;
-            }
-              if (error instanceof Error) {
-                res.status(StatusCodes.BAD_REQUEST).json({
-                    success: false,
-                    message: error.message,
-                });
-                return 
-                }
-             console.error("Error fetching space of a building:", error);
+        } catch (error:unknown) {
+            const message = getErrorMessage(error);
+            console.error("Error fetching space of a building:", error);
            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-           success: false,
-           message: "Failed fetching space of a building",
-        });
+            success: false,
+            message,
+           });
         }
     }
     

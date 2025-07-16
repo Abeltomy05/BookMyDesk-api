@@ -26,6 +26,7 @@ import { IRefreshTokenUseCase } from "../../../entities/usecaseInterfaces/auth/r
 import { IVendorModel } from "../../../frameworks/database/mongo/models/vendor.model";
 import { ISaveFcmTokenUseCase } from "../../../entities/usecaseInterfaces/auth/save-fcm-token-usecase.interface";
 import { IRemoveFcmTokenUseCase } from "../../../entities/usecaseInterfaces/auth/remove-fcm-token-usecase.interface";
+import { getErrorMessage } from "../../../shared/error/errorHandler";
 
 
 @injectable()
@@ -85,26 +86,14 @@ export class AuthController implements IAuthController {
 				success: true,
 				message: "User registered successfully",
 			});
-          } catch (error) {
-            if (error instanceof ZodError) {
-               res.status(422).json({
-               success: false,
-               message: "Validation error",
-               errors: error.flatten().fieldErrors, 
-               });
-          } else if (error instanceof Error && error.message) {
-               res.status(400).json({
-               success: false,
-               message: error.message,
-               });
-          } else {
+          } catch (error:unknown) {
+             const message = getErrorMessage(error);
                console.error("Unexpected error during registration:", error);
                res.status(500).json({
-               success: false,
-               message: "Internal server error. Please try again later.",
+                success: false,
+                message,
                });
           }
-                    }
      }
 
      async login(req: Request, res: Response): Promise<void> {
@@ -190,24 +179,14 @@ export class AuthController implements IAuthController {
                     ...userWithoutPassword
                },
             })
-          }catch(error:any){
+          }catch(error:unknown){
+                const message = getErrorMessage(error);
+               console.error("Unknown error in login:", error);
 
-               if (error instanceof Error) {
-                    console.error("Error in login:", error.message);
-
-                    res.status(500).json({
-                         success: false,
-                         message: error.message,
-                         error: process.env.NODE_ENV === "development" ? error.message : undefined
-                    });
-               } else {
-                    console.error("Unknown error in login:", error);
-
-                    res.status(500).json({
-                         success: false,
-                         message:  "An unexpected error occurred.",
-                    });
-               }
+               res.status(500).json({
+                    success: false,
+                    message,
+               });
           }
      }
 
@@ -265,10 +244,11 @@ export class AuthController implements IAuthController {
 
                const redirectURL = `${process.env.FRONTEND_URL}/auth-check/${user.role}`;
                res.redirect(redirectURL);
-          } catch (error) {
+          } catch (error:unknown) {
+                const message = getErrorMessage(error);
                 console.error("Error in login:", error instanceof Error ? error.message : error);
 
-                const errorMessage = error instanceof Error ? error.message : "Unknown error";
+                const errorMessage = message;
                 const role = req.query.state;
 
                 const redirectErrorURL = `${process.env.FRONTEND_URL}${role === "client" ? "/login" : `/${role}/login`}?error=${encodeURIComponent(errorMessage)}`;
@@ -292,8 +272,10 @@ export class AuthController implements IAuthController {
            }
 
           res.json({ success: true, data: user });
-          } catch (err) {
-          res.status(500).json({ success: false, message: "Something went wrong" });
+          } catch (err:unknown) {
+           const message = getErrorMessage(err);
+           console.log("Error in get me:", err);
+          res.status(500).json({ success: false, message, });
           }
      } 
 
@@ -309,9 +291,10 @@ export class AuthController implements IAuthController {
      await this._saveFcmTokenUseCase.execute(fcmToken, userId, role);
 
      res.json({ success: true });
-     } catch (error) {
+     } catch (error:unknown) {
+           const message = getErrorMessage(error);
      console.error("Failed to save FCM token:", error);
-     res.status(500).json({ success: false, message: "Internal server error" });
+     res.status(500).json({ success: false, message});
      }
     }
 
@@ -323,19 +306,13 @@ export class AuthController implements IAuthController {
                     success: true,
                     message: "OTP sent successfully",
                });
-          } catch (error:any) {
+          } catch (error:unknown) {
+                const message = getErrorMessage(error);
                 console.error("Error sending OTP:", error);
-                if (error.name === "EmailExistsError" || error.message === "Email already exists") {
-                    res.status(400).json({
-                         success: false,
-                         message: "Email already exists",
-                    });
-                } else {
                     res.status(500).json({
                          success: false,
-                         message: "Failed to send OTP",
+                         message,
                     });
-                 }
           }
      }
 
@@ -349,10 +326,12 @@ export class AuthController implements IAuthController {
 				success: true,
 				message: "OTP verified successfully",
 			});
-		} catch (error) {
+		} catch (error:unknown) {
+                const message = getErrorMessage(error);
+                console.log("Error in verify OTP:",error);
 			res.status(500).json({
                     success: false,
-                    message: "The OTP you entered is incorrect or has expired. Please try again or request a new OTP.",
+                    message,
                });
 		}
 	}
@@ -373,8 +352,13 @@ export class AuthController implements IAuthController {
 				success: true,
 				message: "Password reset link sent to your email",
 			});
-		} catch (error) {
+		} catch (error:unknown) {
+                const message = getErrorMessage(error);
 			console.error("Error sending password reset link:", error);
+               res.status(500).json({
+				success: true,
+				message,
+			});
 		}   
      }
 
@@ -394,11 +378,12 @@ export class AuthController implements IAuthController {
 				message: "Password reset successfully",
                     data: role,
 			});
-		} catch (error) {
+		} catch (error:unknown) {
+                const message = getErrorMessage(error);
                console.error("Error resetting password:", error);
                res.status(500).json({
                     success: false,
-                    message: "Failed to reset password",
+                    message,
                });
 		}
 	}
@@ -433,11 +418,12 @@ export class AuthController implements IAuthController {
 			success: true,
 			message: "Logout successful",
 		});
-          }catch(error){
+          }catch(error:unknown){
+                const message = getErrorMessage(error);
              console.error("Logout error:", error); 
                res.status(500).json({
                     success: false,
-                    message: "Failed to logout",
+                    message,
                });
           }
      }
@@ -465,7 +451,8 @@ export class AuthController implements IAuthController {
 				success: true,
 				message: "Token refreshed successfully",
 			});
-		} catch (error) {
+		} catch (error:unknown) {
+                const message = getErrorMessage(error);
                console.error("Refresh token failed:", error);
 
 			["client", "vendor", "admin"].forEach((role) => {
@@ -474,7 +461,7 @@ export class AuthController implements IAuthController {
 			});
 
                res.status(StatusCodes.UNAUTHORIZED).json({
-				message: "Invalid refresh token",
+				message,
 			});
 		}
 	}

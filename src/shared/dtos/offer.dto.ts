@@ -1,5 +1,5 @@
 import { IOfferEntity } from "../../entities/models/offer.entity";
-import { OfferStatus } from "../types/types";
+import { OfferStatus } from "../types/user.types";
 
 interface OfferWithNamesDTO {
   _id: string;

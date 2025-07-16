@@ -7,6 +7,7 @@ import { IPayWithWalletUseCase } from "../../entities/usecaseInterfaces/wallet/p
 import { StatusCodes } from "http-status-codes";
 import { ICreateTopUpPaymentIntentUseCase } from "../../entities/usecaseInterfaces/wallet/create-topup-payment-intent-usecase.interface";
 import { IConfirmTopupPaymentUseCase } from "../../entities/usecaseInterfaces/wallet/confirm-topup-payment-usecase.interface";
+import { getErrorMessage } from "../../shared/error/errorHandler";
 
 @injectable()
 export class WalletController implements IWalletController {
@@ -37,11 +38,12 @@ export class WalletController implements IWalletController {
                 message: "Wallet details retrieved successfully",
                 data: walletDetails,
             });
-        } catch (error:any) {
+        } catch (error:unknown) {
+             const message = getErrorMessage(error);
             console.error("Error getting wallet details:", error);
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: error.message || "Failed to get wallet details",
+                message,
             });
             
         }
@@ -72,11 +74,12 @@ export class WalletController implements IWalletController {
                     message: "Booking Unsuccessfull, Please try again.",
                 });
             }
-        } catch (error:any) {
+        } catch (error:unknown) {
+             const message = getErrorMessage(error);
              console.error("Error during booking with wallet:", error);
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: error.message || "Failed to book the space with wallet",
+                message,
             });
         }
     }
@@ -97,11 +100,12 @@ export class WalletController implements IWalletController {
                 data: response,
                 message: "Payment intent created successfully."
             });
-        } catch (error:any) {
+        } catch (error:unknown) {
+             const message = getErrorMessage(error);
             console.error("Error create top up payment intent:", error);
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: error.message || "Failed to create top up payment intent",
+                message,
             });
         }
     }
@@ -128,11 +132,12 @@ export class WalletController implements IWalletController {
             } else {
             res.status(400).json(result);
             }
-        } catch (error:any) {
+        } catch (error:unknown) {
+             const message = getErrorMessage(error);
             console.error("Error confirm top up payment:", error);
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                 success: false,
-                message: error.message || "Failed to confirm top up payment",
+                message,
             });
         }
     }
