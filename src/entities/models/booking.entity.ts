@@ -7,6 +7,7 @@ export interface IBookingEntity{
     vendorId: string;
     buildingId: string;
     
+    bookingId?: string;
     bookingDate: Date;
     numberOfDesks?: number;
     totalPrice?: number;

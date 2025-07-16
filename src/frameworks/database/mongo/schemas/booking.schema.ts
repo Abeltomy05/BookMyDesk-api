@@ -8,6 +8,7 @@ export const bookingSchema = new Schema<IBookingModel>(
     vendorId:   { type: Schema.Types.ObjectId, ref: "Vendor", required: true },
     buildingId:   { type: Schema.Types.ObjectId, ref: "Building", required: true },
 
+    bookingId: { type: String },
     bookingDate:   { type: Date, required: true },
     numberOfDesks:  { type: Number },
     totalPrice:     { type: Number},

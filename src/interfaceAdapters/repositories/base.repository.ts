@@ -51,15 +51,6 @@ export class BaseRepository<T> {
     return this.model.findOne(filter).select(projection).lean() as Promise<Pick<T, K> | undefined>;
   }
 
-  //  async findManyFields<K extends keyof T>(filter: FilterQuery<T>,fields: K[]): Promise<Pick<T, K> | undefined> {
-  //   const projection = fields.reduce((acc, key) => {
-  //     acc[key as string] = 1;
-  //     return acc;
-  //   }, {} as Record<string, 1>);
-
-  //   return this.model.findOne(filter).select(projection).lean() as Promise<Pick<T, K> | undefined>;
-  // }
-
   async findWithPopulate(filter: FilterQuery<T>,populateFields: { path: string; select?: string }[]): Promise<T[]> {
     let query = this.model.find(filter);
 

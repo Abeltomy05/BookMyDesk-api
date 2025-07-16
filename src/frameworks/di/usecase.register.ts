@@ -69,6 +69,7 @@ import { GetChatsUseCase } from "../../useCases/chat/get-chats.usecase";
 import { GetMessagesUseCase } from "../../useCases/chat/get-messages.usecase";
 import { ChatUseCase } from "../../useCases/chat/chat.usecase";
 import { ClearChatUseCase } from "../../useCases/chat/clear-chat.usecase";
+import { MonthlyBookingStats } from "../../useCases/users/get-admin-page-data.usecase";
 
 
 
@@ -239,6 +240,9 @@ export class UseCaseRegistry{
       })
       container.register("IClearChatUseCase",{
         useClass: ClearChatUseCase
+      })
+      container.register('IMonthlyBookingStats',{
+        useClass: MonthlyBookingStats
       })
 
         //* ====== Register Bcrypts ====== *//

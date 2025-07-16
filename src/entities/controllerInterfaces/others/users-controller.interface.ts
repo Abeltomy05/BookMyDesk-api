@@ -10,4 +10,5 @@ export interface IUsersController{
     updateUserPassword(req: Request, res: Response): Promise<void>;
     getVendorsAndBuildings(req: Request, res: Response): Promise<void>;
     deleteEntity(req:Request, res: Response): Promise<void>;
+    getMonthlyBookingStats(req:Request, res: Response): Promise<void>;
 }

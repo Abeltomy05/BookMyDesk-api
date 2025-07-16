@@ -13,6 +13,7 @@ import { userSchemas } from "./auth/validations/user-signup.validation.schema";
 import { IGetVendorsAndBuildingsUseCase } from "../../entities/usecaseInterfaces/users/get-vendorAndBuilding-usecase.interface";
 import { IDeleteEntityUseCase } from "../../entities/usecaseInterfaces/users/delete-entity-usecase.interface";
 import { getErrorMessage } from "../../shared/error/errorHandler";
+import { IMonthlyBookingStats } from "../../entities/usecaseInterfaces/users/get-monthly-booking-stats-usecase.interface";
 
 @injectable()
 export class UsersController implements IUsersController{
@@ -33,6 +34,8 @@ export class UsersController implements IUsersController{
        private _getVendorsAndBuildingsUseCase: IGetVendorsAndBuildingsUseCase,
        @inject("IDeleteEntityUseCase")
        private _deleteEntityUseCase: IDeleteEntityUseCase,
+       @inject("IMonthlyBookingStats")
+       private _getMonthlyBookingStats: IMonthlyBookingStats,
     ){}
     
     async getAllUsers(req: Request, res: Response): Promise<void> {
@@ -239,5 +242,21 @@ export class UsersController implements IUsersController{
             });
         }
     }
+
+  async getMonthlyBookingStats(req:Request, res: Response): Promise<void>{
+    try {
+        const result = await this._getMonthlyBookingStats.execute()
+        res.status(StatusCodes.OK).json({
+            success: true,
+            data: result,
+        })
+    } catch (error:unknown) {
+         const message = getErrorMessage(error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message,
+            });
+    }
+  }
 
 }

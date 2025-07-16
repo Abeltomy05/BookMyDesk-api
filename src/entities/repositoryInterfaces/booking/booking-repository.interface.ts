@@ -18,4 +18,6 @@ export interface IBookingRepository extends IBaseRepository<IBookingModel>{
   findOneWithDetails(filter: FilterQuery<IBookingModel>):Promise<IBookingModel | null>;
 
  getAdminBookings(filters: IGetAdminBookingsFilterDTO): Promise<IGetAdminBookingsResultDTO>;
+
+ getMonthlyBookingStats(): Promise<{ month: string; totalBookings: number; totalRevenue: number }[]>;
 }

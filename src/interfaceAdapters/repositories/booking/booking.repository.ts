@@ -149,4 +149,50 @@ async getAdminBookings({
   };
 }
 
+async getMonthlyBookingStats(): Promise<{ month: string; totalBookings: number; totalRevenue: number }[]>{
+  return this.model.aggregate([
+    {
+      $match:{
+        status: "completed",
+      }
+    },
+    {
+      $group:{
+        _id: {
+          year: {$year: "$bookingDate"},
+          month: { $month: "$bookingDate" },
+        },
+        totalBookings: {$sum: 1},
+        totalRevenue: {$sum: {$ifNull: ["$totalPrice",0]}},
+      },
+    },
+    {
+      $sort: {
+        "_id.year": 1,
+        "_id.month": 1,
+      },
+    },
+     {
+      $project: {
+        _id: 0,
+        month: {
+          $concat: [
+            { $toString: "$_id.year" },
+            "-",
+            {
+              $cond: [
+                { $lt: ["$_id.month", 10] },
+                { $concat: ["0", { $toString: "$_id.month" }] },
+                { $toString: "$_id.month" },
+              ],
+            },
+          ],
+        },
+        totalBookings: 1,
+        totalRevenue: 1,
+      },
+    },
+  ])
+}
+
 }
