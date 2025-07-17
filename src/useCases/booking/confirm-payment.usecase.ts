@@ -4,7 +4,7 @@ import { IConfirmPaymentUseCase } from "../../entities/usecaseInterfaces/booking
 import { ConfirmPaymentDTO } from "../../shared/dtos/booking.dto";
 import { IBookingRepository } from "../../entities/repositoryInterfaces/booking/booking-repository.interface";
 import { IStripeService } from "../../entities/serviceInterfaces/stripe-service.interface";
-import { BookingStatus, PaymentMethod, PaymentStatus } from "../../shared/types/user.types";
+import { BookingStatus, PaymentMethod, PaymentStatus } from "../../shared/dtos/types/user.types";
 import { ISpaceRepository } from "../../entities/repositoryInterfaces/building/space-repository.interface";
 import { IBuildingRepository } from "../../entities/repositoryInterfaces/building/building-repository.interface";
 import { IWalletRepository } from "../../entities/repositoryInterfaces/wallet/wallet-repository.interface";
@@ -12,6 +12,7 @@ import { IWalletTransactionRepository } from "../../entities/repositoryInterface
 import { INotificationService } from "../../entities/serviceInterfaces/notification-service.interface";
 import { INotificationRepository } from "../../entities/repositoryInterfaces/notification/notification-repository.interface";
 import { getErrorMessage } from "../../shared/error/errorHandler";
+import { config } from "../../shared/config";
 
 @injectable()
 export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
@@ -219,7 +220,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                 balanceAfter: vendorWalletResult.balanceAfter,
             });
 
-            const adminId = process.env.ADMIN_ID;
+            const adminId = config.ADMIN_ID;
             if (!adminId) {
                 throw new Error("Admin ID not configured in environment");
             }

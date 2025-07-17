@@ -16,6 +16,7 @@ import { startOfferCleanupJob } from "./shared/cron/offer-cleanup.cron";
 import { ChatSocketHandler  } from './shared/config/socket';
 import { container } from 'tsyringe';
 import { IChatUseCase } from './entities/usecaseInterfaces/chat/chat-usecase.interface';
+import { config } from './shared/config';
 
 dotenv.config();
 
@@ -33,9 +34,9 @@ app.use(morgan("dev"))
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// console.log('CORS origin:', process.env.CORS_ORIGIN);
+
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origin: config.CORS_ORIGIN || 'http://localhost:5173',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type'],
     credentials: true, 
@@ -54,7 +55,7 @@ app.use('/api/_v', new VendorRoutes().router);
 app.use('/api/_a', new AdminRoutes().router);
 
 
-const PORT = process.env.PORT || 3000;
+const PORT = config.PORT || 3000;
 
 const startServer = async () => {
   try {

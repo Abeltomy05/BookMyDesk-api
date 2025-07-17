@@ -50,9 +50,16 @@ export class RegisterUserUseCase implements IRegisterUserUseCase {
       throw new Error("Invalid role");
     }
 
-    return await repository.save({
-      ...user,
-      password: hashedPassword ?? "",
-    });
+    const savedUser = await repository.save({
+        ...user,
+        password: hashedPassword ?? "",
+      });
+
+    const entity = {
+      ...savedUser,
+      _id: savedUser._id.toString(),
+    };
+
+     return entity;
   }
 }

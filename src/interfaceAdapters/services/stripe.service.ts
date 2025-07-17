@@ -1,17 +1,18 @@
 import Stripe from 'stripe';
 import { inject, injectable } from 'tsyringe';
 import { IStripeService } from '../../entities/serviceInterfaces/stripe-service.interface';
+import { config } from '../../shared/config';
 
 @injectable()
 export class StripeService implements IStripeService {
   private stripe: Stripe;
 
   constructor() {
-    if (!process.env.STRIPE_SECRET_KEY) {
+    if (!config.STRIPE_SECRET_KEY) {
       throw new Error('STRIPE_SECRET_KEY is not configured');
     }
     
-    this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    this.stripe = new Stripe(config.STRIPE_SECRET_KEY, {
 
     });
   }

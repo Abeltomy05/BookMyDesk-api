@@ -6,8 +6,9 @@ import { ICreatePaymentIntentUseCase } from "../../entities/usecaseInterfaces/bo
 import { IStripeService } from "../../entities/serviceInterfaces/stripe-service.interface";
 import { ISpaceRepository } from "../../entities/repositoryInterfaces/building/space-repository.interface";
 import { IBuildingRepository } from "../../entities/repositoryInterfaces/building/building-repository.interface";
-import { BookingStatus, PaymentMethod, PaymentStatus } from "../../shared/types/user.types";
+import { BookingStatus, PaymentMethod, PaymentStatus } from "../../shared/dtos/types/user.types";
 import { getErrorMessage } from "../../shared/error/errorHandler";
+import { config } from "../../shared/config";
 
 @injectable()
 export class CreatePaymentIntentUseCase implements ICreatePaymentIntentUseCase{
@@ -67,7 +68,7 @@ export class CreatePaymentIntentUseCase implements ICreatePaymentIntentUseCase{
        return {
         clientSecret: paymentIntent.client_secret!,
         paymentIntentId: paymentIntent.id,
-        publishableKey: process.env.STRIPE_PUBLIC_KEY!
+        publishableKey: config.STRIPE_PUBLIC_KEY!
       };
        } catch (error: unknown) {
         const message = getErrorMessage(error)

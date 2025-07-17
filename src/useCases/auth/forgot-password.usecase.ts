@@ -7,6 +7,7 @@ import { IForgotPasswordUseCase } from "../../entities/usecaseInterfaces/auth/fo
 import { IJwtService } from "../../entities/serviceInterfaces/jwt-service.interface";
 import { IVendorEntity } from "../../entities/models/vendor.entity";
 import { IClientEntity } from "../../entities/models/client.entity";
+import { config } from "../../shared/config";
 
 @injectable()
 export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
@@ -27,12 +28,22 @@ export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
           let user: IClientEntity | IVendorEntity | null = null;
           let role: 'client' | 'vendor' = 'client';
 
-          user = await this._clientRepository.findOne({ email });
-
-          if (!user) {
-             user = await this._vendorRepository.findOne({ email });
-             role = "vendor";
-          }
+          const rawClient = await this._clientRepository.findOne({ email });
+            if (rawClient) {
+              user = {
+                ...rawClient,
+                _id: rawClient._id.toString(),
+              };
+            } else {
+              const rawVendor = await this._vendorRepository.findOne({ email });
+              if (rawVendor) {
+                user = {
+                  ...rawVendor,
+                  _id: rawVendor._id.toString(),
+                };
+                role = 'vendor';
+              }
+            }
 
           if (!user) {
               throw new Error("User not found");
@@ -48,7 +59,7 @@ export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
         // const rolePrefix = role !== "client" ? `/${role}` : "";
 		const resetUrl = new URL(
 			`/reset-password/${resetToken}`,
-			process.env.CORS_ORIGIN
+			config.CORS_ORIGIN
 		).toString();
 
     console.log(email,role);

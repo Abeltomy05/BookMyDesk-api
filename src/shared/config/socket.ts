@@ -1,8 +1,9 @@
 import { Server as IOServer, Socket } from "socket.io";
-import { CustomSocket } from "../types/socket";
+import { CustomSocket } from "../dtos/types/socket";
 import { IChatUseCase } from "../../entities/usecaseInterfaces/chat/chat-usecase.interface";
 import { SaveMessageDTO } from "../dtos/chat.dto";
 import http from 'http';
+import { config } from "../config";
 
 export class ChatSocketHandler {
   private io: IOServer;
@@ -11,7 +12,7 @@ export class ChatSocketHandler {
   constructor(httpServer: http.Server, private _chatUseCase: IChatUseCase) {
     this.io = new IOServer(httpServer, {
       cors: {
-        origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+        origin: config.CORS_ORIGIN || 'http://localhost:5173',
         credentials: true,
       },
     });

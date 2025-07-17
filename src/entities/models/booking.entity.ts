@@ -1,4 +1,4 @@
-import { BookingStatus, PaymentMethod, PaymentStatus } from "../../shared/types/user.types";
+import { BookingStatus, PaymentMethod, PaymentStatus } from "../../shared/dtos/types/user.types";
 
 export interface IBookingEntity{
     _id: string;

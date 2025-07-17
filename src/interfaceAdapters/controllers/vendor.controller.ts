@@ -11,6 +11,7 @@ import { IGetSingleVendorData } from "../../entities/usecaseInterfaces/vendor/ge
 import { IFetchBuildingsForVendorUseCase } from "../../entities/usecaseInterfaces/vendor/fetch-building-vendor-usecase.interface";
 import { IFetchSpacesForBuilding } from "../../entities/usecaseInterfaces/vendor/fetch-space-building-usecase.interface";
 import { getErrorMessage } from "../../shared/error/errorHandler";
+import { config } from "../../shared/config";
 
 @injectable()
 export class VendorController implements IVendorController{
@@ -46,14 +47,14 @@ export class VendorController implements IVendorController{
         
         res.clearCookie(accessTokenName, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: config.NODE_ENV === "production",
         sameSite: "strict",
         path: "/", 
         });
 
         res.clearCookie(refreshTokenName, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: config.NODE_ENV === "production",
         sameSite: "strict",
         path: "/",
         });

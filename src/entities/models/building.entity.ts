@@ -1,4 +1,4 @@
-import { BuildingStatus } from "../../shared/types/user.types";
+import { BuildingStatus } from "../../shared/dtos/types/user.types";
 
 export interface IBuildingEntity{
     _id?:string;

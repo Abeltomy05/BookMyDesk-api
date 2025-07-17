@@ -1,4 +1,4 @@
-import { MonthlyBookingStatsDTO } from "../../../shared/types/booking.types";
+import { MonthlyBookingStatsDTO } from "../../../shared/dtos/types/booking.types";
 
 export interface IMonthlyBookingStats{
     execute():Promise<MonthlyBookingStatsDTO[]>;

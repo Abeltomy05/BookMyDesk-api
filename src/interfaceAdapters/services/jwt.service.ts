@@ -1,6 +1,7 @@
 import jwt, { JwtPayload, Secret } from "jsonwebtoken";
 import { IJwtService } from "../../entities/serviceInterfaces/jwt-service.interface";
 import { injectable } from "tsyringe";
+import { config } from "../../shared/config";
 
 export interface ResetTokenPayload extends JwtPayload {
 	email: string;
@@ -11,10 +12,10 @@ export class JwtService implements IJwtService {
     private _resetTokenSecret: Secret;
 
     constructor(){
-        if (!process.env.RESET_TOKEN_SECRET) {
+        if (!config.RESET_TOKEN_SECRET) {
             throw new Error("RESET_TOKEN_SECRET is not defined in environment variables");
         }
-        this._resetTokenSecret = process.env.RESET_TOKEN_SECRET
+        this._resetTokenSecret = config.RESET_TOKEN_SECRET
     }
 
     generateResetToken(email: string): string {
@@ -36,14 +37,14 @@ export class JwtService implements IJwtService {
 	}
 
     generateAccessToken(payload: object): string {
-        const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET!, {
+        const accessToken = jwt.sign(payload, config.ACCESS_TOKEN_SECRET!, {
             expiresIn: "15m",
         });
         return accessToken;
     }
 
     generateRefreshToken(payload: object): string {
-        const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET!, {
+        const refreshToken = jwt.sign(payload, config.REFRESH_TOKEN_SECRET!, {
             expiresIn: "7d",
         });
         return refreshToken;
@@ -51,7 +52,7 @@ export class JwtService implements IJwtService {
 
     verifyAccessToken(token: string): JwtPayload | null {
         try {
-            const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as JwtPayload;
+            const payload = jwt.verify(token, config.ACCESS_TOKEN_SECRET!) as JwtPayload;
             return payload;
         } catch (error) {
             console.error("Access token verification failed:", error);
@@ -61,7 +62,7 @@ export class JwtService implements IJwtService {
 
     verifyRefreshToken(token: string): JwtPayload | null {
         try {
-            const payload = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET!) as JwtPayload;
+            const payload = jwt.verify(token, config.REFRESH_TOKEN_SECRET!) as JwtPayload;
             // console.log("Refresh Token Payload:", payload);
             return payload;
         } catch (error) {

@@ -6,6 +6,7 @@ import { NextFunction, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { IBlackListTokenUseCase } from "../../entities/usecaseInterfaces/auth/blacklist-token-usecase.interface";
 import { IRevokeRefreshTokenUseCase } from "../../entities/usecaseInterfaces/auth/revoke-refreshtoken-usecase.interface";
+import { config } from "../../shared/config";
 
 @injectable()
 export class BlockStatusMiddleware{
@@ -77,14 +78,14 @@ export class BlockStatusMiddleware{
 
              res.clearCookie(accessTokenName, {
                httpOnly: true,
-               secure: process.env.NODE_ENV === "production",
+               secure: config.NODE_ENV === "production",
                sameSite: "strict",
                path: "/", 
                });
 
              res.clearCookie(refreshTokenName, {
                httpOnly: true,
-               secure: process.env.NODE_ENV === "production",
+               secure: config.NODE_ENV === "production",
                sameSite: "strict",
                path: "/",
                });

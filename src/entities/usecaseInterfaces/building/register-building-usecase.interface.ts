@@ -1,4 +1,4 @@
-import { BuildingRegistrationData } from "../../../shared/types/building.types";
+import { BuildingRegistrationData } from "../../../shared/dtos/types/building.types";
 import { IBuildingEntity } from "../../models/building.entity";
 
 export interface IRegisterBuildingUsecase{

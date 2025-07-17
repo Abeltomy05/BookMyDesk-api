@@ -36,13 +36,19 @@ export class ResetPasswordUseCase implements IResetPasswordUseCase {
          let repository: IClientRepository | IVendorRepository = this._clientRepository;
          let role: 'client' | 'vendor' = 'client';
          
-		 user = await this._clientRepository.findOne({ email });
-         repository = this._clientRepository;
+		 const clientUser = await this._clientRepository.findOne({ email });
+         if (clientUser) {
+            user = { ...clientUser, _id: clientUser._id.toString() };
+            repository = this._clientRepository;
+         }
 
          if (!user) {
-            user = await this._vendorRepository.findOne({ email });
-            repository = this._vendorRepository;
-            role = "vendor";
+           const vendorUser = await this._vendorRepository.findOne({ email });
+             if (vendorUser) {
+                    user = { ...vendorUser, _id: vendorUser._id.toString() };
+                    repository = this._vendorRepository;
+                    role = "vendor";
+                }
          }
 
           if (!user) {
