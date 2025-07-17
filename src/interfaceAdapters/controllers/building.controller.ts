@@ -196,6 +196,10 @@ export class BuildingController implements IBuildingController{
        const page = parseInt(req.query.page as string) || 1;
        const limit = parseInt(req.query.limit as string) || 5;
 
+       const latitude = parseFloat(req.query.latitude as string);
+       const longitude = parseFloat(req.query.longitude as string);
+       const radius = parseFloat(req.query.radius as string); 
+
        const locationName = req.query.locationName as string;
        const type = req.query.type as string;
        const priceRangeStr = req.query.priceRange as string;
@@ -219,6 +223,9 @@ export class BuildingController implements IBuildingController{
           type,
           minPrice,
           maxPrice,
+          latitude: isNaN(latitude) ? undefined : latitude,
+          longitude: isNaN(longitude) ? undefined : longitude,
+          radius: isNaN(radius) ? undefined : radius,
         };
 
         console.log('Filters applied:', filters);

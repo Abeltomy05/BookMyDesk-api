@@ -34,6 +34,9 @@ export class BuildingRepository extends BaseRepository<IBuildingModel> implement
       type?: string;
       minPrice?: number;
       maxPrice?: number;
+      latitude?: number;
+      longitude?: number;
+      radius?: number;
     },
     skip = 0,
     limit = 10,
@@ -65,6 +68,15 @@ export class BuildingRepository extends BaseRepository<IBuildingModel> implement
     }
 
     query["summarizedSpaces"] = { $elemMatch: summarizedSpaceQuery };
+  }
+
+  if (filters.latitude && filters.longitude && filters.radius) {
+    const radiusInRadians = filters.radius / 6378.1;
+     query["location"] = {
+      $geoWithin: {
+        $centerSphere: [[filters.longitude, filters.latitude], radiusInRadians],
+      },
+    }
   }
 
   const [items, total] = await Promise.all([
