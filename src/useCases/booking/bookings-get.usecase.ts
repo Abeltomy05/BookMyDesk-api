@@ -33,14 +33,13 @@ export class GetBookingsUseCase implements IGetBookingsUseCase {
             filterCriteria.status = status;
         }
 
-        if (search) {
-       
+        if (search && role === 'vendor') {
+            filterCriteria.search = search; 
         }
 
         const skip = (page - 1) * limit; 
-        console.log('Filter criteria:', JSON.stringify(filterCriteria, null, 2));
-        console.log('UserId type:', typeof userId, userId);
-        const result  = await this._bookingRepository.findAllWithDetails(filterCriteria, skip, limit, { createdAt: -1 },role);
+
+        const result  = await this._bookingRepository.findBookings(filterCriteria, skip, limit, { createdAt: -1 },role);
          if (result.total === 0) {
             return {
                 bookings: [],

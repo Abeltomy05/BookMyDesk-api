@@ -36,11 +36,19 @@ export const toModelBooking = (entity: IBookingEntity): Partial<IBookingModel> =
 
 // booking
 export const toEntityBookingWithDetails = (model: any): IBookingEntityWithDetails => ({
-  _id: model._id.toString(),
-  spaceId: typeof model.spaceId === 'object' ? model.spaceId._id.toString() : model.spaceId.toString(),
-  clientId: model.clientId.toString(),
-  vendorId: model.vendorId.toString(),
-  buildingId: typeof model.buildingId === 'object' ? model.buildingId._id.toString() : model.buildingId.toString(),
+  _id: model._id?.toString() ?? '',
+  spaceId: model.spaceId
+    ? typeof model.spaceId === 'object'
+      ? model.spaceId._id?.toString() ?? ''
+      : model.spaceId?.toString() ?? ''
+    : '',
+  clientId: model.clientId?._id?.toString() ?? model.clientId?.toString() ?? '',
+  vendorId: model.vendorId?.toString() ?? '',
+  buildingId: model.buildingId
+    ? typeof model.buildingId === 'object'
+      ? model.buildingId._id?.toString() ?? ''
+      : model.buildingId?.toString() ?? ''
+    : '',
   bookingDate: model.bookingDate,
   numberOfDesks: model.numberOfDesks,
   totalPrice: model.totalPrice,
@@ -53,17 +61,23 @@ export const toEntityBookingWithDetails = (model: any): IBookingEntityWithDetail
   cancelledBy: model.cancelledBy,
   createdAt: model.createdAt,
   updatedAt: model.updatedAt,
-  building: typeof model.buildingId === 'object' ? {
-    buildingName: model.buildingId.buildingName,
-    location: model.buildingId.location,
-  } : undefined,
-  space: typeof model.spaceId === 'object' ? {
-    name: model.spaceId.name,
-    pricePerDay: model.spaceId.pricePerDay,
-  } : undefined,
-   client: typeof model.spaceId === 'object' ? {
-    username: model.clientId.username,
-    email: model.clientId.email,
-    phone: model.clientId.phone,
-  } : undefined
+  building: model.buildingId && typeof model.buildingId === 'object'
+    ? {
+        buildingName: model.buildingId.buildingName,
+        location: model.buildingId.location,
+      }
+    : undefined,
+  space: model.spaceId && typeof model.spaceId === 'object'
+    ? {
+        name: model.spaceId.name,
+        pricePerDay: model.spaceId.pricePerDay,
+      }
+    : undefined,
+  client: model.clientId && typeof model.clientId === 'object'
+    ? {
+        username: model.clientId.username,
+        email: model.clientId.email,
+        phone: model.clientId.phone,
+      }
+    : undefined,
 });
