@@ -35,6 +35,12 @@ export class GetVendorHomeData implements IGetVendorHomeData{
             ),
         ]);
 
+         const buildingIdsAndName = buildings.map((b)=>{
+            return {
+                _id:b._id.toString(),
+                name: b.buildingName,
+            }
+         }) 
          const totalBuildings = buildings.length;
          const totalSpaces = buildings.reduce((acc, b) =>
             acc + (b.summarizedSpaces?.reduce((sum, s) => sum + (s.count || 0), 0) || 0), 0
@@ -72,6 +78,7 @@ export class GetVendorHomeData implements IGetVendorHomeData{
             totalRevenue,
             monthlyBookings,
             completedBookings,
+            buildingIdsAndName,
         } 
 }
 }

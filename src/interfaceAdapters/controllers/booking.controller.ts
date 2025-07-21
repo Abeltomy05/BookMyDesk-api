@@ -11,6 +11,7 @@ import { ICancelBookingUseCase } from "../../entities/usecaseInterfaces/booking/
 import { IGetBookingsForAdmin } from "../../entities/usecaseInterfaces/booking/get-booking-for-admin-usecase.interface";
 import { StatusCodes } from "http-status-codes";
 import { getErrorMessage } from "../../shared/error/errorHandler";
+import { IRevenueReportUseCase } from "../../entities/usecaseInterfaces/booking/revenue-report-usecase.interface";
 
 @injectable()
 export class BookingController implements IBookingController{
@@ -29,6 +30,8 @@ export class BookingController implements IBookingController{
        private _cancelBookingUseCase: ICancelBookingUseCase,
        @inject("IGetBookingsForAdmin")
        private _GetBookingsForAdminUseCase: IGetBookingsForAdmin,
+       @inject("IRevenueReportUseCase")
+       private _revenueReportUseCase: IRevenueReportUseCase,
     ){}
 
     async getBookingPageData(req:Request, res: Response): Promise<void>{
@@ -253,6 +256,33 @@ export class BookingController implements IBookingController{
           data: result,
         });
       } catch (error:unknown) {
+         const message = getErrorMessage(error);
+         console.log("Error when getting booking:",error)
+         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: message,
+         })
+      }
+    }
+
+    async bookingsForRevenueReport(req: Request, res: Response): Promise<void>{
+      try {
+         const rawBuildingId = req.query.buildingId;
+         const buildingId: string = Array.isArray(rawBuildingId)
+          ? String(rawBuildingId[0])
+          : rawBuildingId?.toString() ?? 'all';
+
+        const vendorId = (req as CustomRequest).user.userId;
+        const data = {
+          buildingId,
+          vendorId,
+        }
+        const result = await this._revenueReportUseCase.execute(data);
+        res.status(StatusCodes.OK).json({
+          success: true,
+          data: result,
+        });
+      } catch (error: unknown) {
          const message = getErrorMessage(error);
          console.log("Error when getting booking:",error)
          res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({

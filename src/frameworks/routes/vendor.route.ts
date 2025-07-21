@@ -104,5 +104,8 @@ export class VendorRoutes extends BaseRoute{
         this.router.post("/vendor/clear-chat",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response) => {
          chatController.clearChat(req, res);
        }); 
+        this.router.get("/vendor/revenue-report",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response) => {
+         bookingController.bookingsForRevenueReport(req, res);
+       });
     }
 }

@@ -104,5 +104,9 @@ export interface VendorHomeDataResultDTO {
     bookings:number;
   }[];
   completedBookings: IBookingEntityWithDetails[];
+  buildingIdsAndName:{
+    _id: string,
+    name: string,
+  }[];
 }
 
