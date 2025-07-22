@@ -203,9 +203,12 @@ export class BuildingController implements IBuildingController{
        const locationName = req.query.locationName as string;
        const type = req.query.type as string;
        const priceRangeStr = req.query.priceRange as string;
+       const amenitiesStr = req.query.amenities as string;
+       const amenityMatchMode = req.query.amenityMatchMode as 'any' | 'all';
 
        let minPrice: number | undefined;
        let maxPrice: number | undefined;
+       let amenities: string[] | undefined;
 
         if (priceRangeStr) {
             const decodedPriceRange = decodeURIComponent(priceRangeStr);
@@ -218,6 +221,15 @@ export class BuildingController implements IBuildingController{
               maxPrice = max;
             }
           }
+
+         if (amenitiesStr) {
+            try {
+              amenities = JSON.parse(amenitiesStr);
+            } catch (error) {
+              console.error('Error parsing amenities:', error);
+              amenities = undefined;
+            }
+          }  
         const filters = {
           locationName,
           type,
@@ -226,6 +238,8 @@ export class BuildingController implements IBuildingController{
           latitude: isNaN(latitude) ? undefined : latitude,
           longitude: isNaN(longitude) ? undefined : longitude,
           radius: isNaN(radius) ? undefined : radius,
+          amenities,
+          amenityMatchMode,
         };
 
         console.log('Filters applied:', filters);
