@@ -108,4 +108,39 @@ async getNamesAndCount(): Promise<{ names: { _id: string; buildingName: string }
     count: mapped.length,
   }
 }
+
+async fetchFilters(): Promise<{ spaceNames: string[]; prices: number[] }> {
+   const result = await this.model.aggregate([
+    {
+      $match: {status: "approved" }
+    },
+    {
+      $lookup:{
+        from: "spaces",
+        localField: "_id",
+        foreignField: "buildingId",
+        as : "spaces"
+      }
+    },
+    {
+      $unwind: "$spaces"
+    },
+    {
+      $group: {
+        _id: null,
+        spaceNames: { $addToSet: "$spaces.name" },
+        prices: { $addToSet: "$spaces.pricePerDay" }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        spaceNames: 1,
+        prices: 1
+      }
+    }
+   ])
+
+   return result[0] || { spaceNames: [], prices: [] };
+}
 }

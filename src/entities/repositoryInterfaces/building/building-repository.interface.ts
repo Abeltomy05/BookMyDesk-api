@@ -24,4 +24,5 @@ export interface IBuildingRepository extends IBaseRepository<IBuildingModel>{
   ): Promise<{ items: IBuildingModel[]; total: number }>;
 
   getNamesAndCount(): Promise<{ names: { _id: string; buildingName: string }[]; count: number }> 
+  fetchFilters(): Promise<{ spaceNames: string[]; prices: number[] }>
 }
