@@ -72,6 +72,7 @@ import { ClearChatUseCase } from "../../useCases/chat/clear-chat.usecase";
 import { MonthlyBookingStats } from "../../useCases/users/get-admin-page-data.usecase";
 import { RevenueReportUseCase } from "../../useCases/booking/revenue-report.usecase";
 import { FetchFiltersUseCase } from "../../useCases/building/fetch-filters.usecase";
+import { NotificationSocketHandler } from "../../shared/config/notificationSocket";
 
 
 
@@ -289,5 +290,6 @@ export class UseCaseRegistry{
           useClass: NotificationService
         })
 
+          //* ====== Socket Services ====== *//
     }
 }

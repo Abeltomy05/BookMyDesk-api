@@ -17,6 +17,10 @@ import { ChatSocketHandler  } from './shared/config/socket';
 import { container } from 'tsyringe';
 import { IChatUseCase } from './entities/usecaseInterfaces/chat/chat-usecase.interface';
 import { config } from './shared/config';
+import { NotificationSocketHandler } from './shared/config/notificationSocket';
+import { INotificationSocketHandler } from './entities/socketInterfaces/notification-socket-handler.interface';
+import { initializeNotificationSocket } from './shared/config/setupNotificationSocket';
+import { initializeChatSocket } from './shared/config/setupChatSocket';
 
 dotenv.config();
 
@@ -25,8 +29,9 @@ const server = http.createServer(app);
 
 const chatUseCase = container.resolve<IChatUseCase>("IChatUseCase");
 
-const chatSocketHandler = new ChatSocketHandler(server, chatUseCase);
-chatSocketHandler.initialize();
+initializeChatSocket(server, chatUseCase);
+initializeNotificationSocket(server);
+
 
 app.use(passport.initialize());
 app.use(morgan("dev"))

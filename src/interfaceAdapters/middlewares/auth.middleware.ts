@@ -160,7 +160,7 @@ export const authorizeRole = (allowedRole:string[])=>{
 			})
 			return;
 		}
-		console.log("Authorized Role",user.role)
+		// console.log("Authorized Role",user.role)
 		next();
 	};
 };

@@ -48,11 +48,14 @@ export class ChatSocketHandler {
         const existingSocket = this.io.sockets.sockets.get(existingSocketInfo.socketId);
         if (existingSocket) existingSocket.disconnect();
     }
-
+    
     this.onlineUsers.set(socket.userId, { socketId: socket.id, userType: socket.userType });
     this.io.emit("userOnline", { userId: socket.userId });
-    socket.emit("onlineUsers", Array.from(this.onlineUsers.keys()));
-    // console.log("Current online users:", this.onlineUsers);
+    console.log("Current online users:", this.onlineUsers);
+
+    socket.on("requestOnlineUsers", () => {
+      socket.emit("onlineUsers", Array.from(this.onlineUsers.keys()));
+    });
 
     socket.on("joinRoom", (sessionId: string) => {
       socket.join(sessionId);
@@ -134,4 +137,14 @@ export class ChatSocketHandler {
        console.error("Error deleting message:", error);
     }
   }
+
+  public emitNotification(userId: string) {
+  const user = this.onlineUsers.get(userId);
+  if (user?.socketId) {
+    this.io.to(user.socketId).emit("newNotification");
+    console.log(`🔔 Emitted 'newNotification' to user ${userId}`);
+  } else {
+    console.warn(`⚠️ Cannot emit notification: user ${userId} not connected`);
+  }
+}
 }
