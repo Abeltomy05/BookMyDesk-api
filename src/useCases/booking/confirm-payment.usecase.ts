@@ -13,6 +13,7 @@ import { INotificationService } from "../../entities/serviceInterfaces/notificat
 import { INotificationRepository } from "../../entities/repositoryInterfaces/notification/notification-repository.interface";
 import { getErrorMessage } from "../../shared/error/errorHandler";
 import { config } from "../../shared/config";
+import { generateBookingId } from "../../shared/helper/generateBookingId";
 
 @injectable()
 export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
@@ -303,6 +304,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
         }else{
 
         const bookingData = {
+            bookingId: generateBookingId(),
             spaceId: new Types.ObjectId(spaceId),
             clientId: new Types.ObjectId(clientId),
             vendorId: new Types.ObjectId(vendorId),

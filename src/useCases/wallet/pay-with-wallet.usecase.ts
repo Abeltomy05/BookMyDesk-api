@@ -8,6 +8,7 @@ import { Types } from "mongoose";
 import { IPayWithWalletUseCase } from "../../entities/usecaseInterfaces/wallet/pay-with-wallet-usecase.interface";
 import { INotificationService } from "../../entities/serviceInterfaces/notification-service.interface";
 import { config } from "../../shared/config";
+import { generateBookingId } from "../../shared/helper/generateBookingId";
 
 @injectable()
 export class PayWithWalletUseCase implements IPayWithWalletUseCase{
@@ -75,6 +76,7 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
 
 
          const booking = await this._bookingRepository.save({
+            bookingId: generateBookingId(),
             spaceId: new Types.ObjectId(spaceId),
             clientId: new Types.ObjectId(userId),
             vendorId,

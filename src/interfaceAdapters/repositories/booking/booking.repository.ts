@@ -116,6 +116,7 @@ async getAdminBookings({
     {
       $project: {
         _id: 1,
+        bookingId:1,
         bookingDate: 1,
         totalPrice: 1,
         status: 1,
