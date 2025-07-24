@@ -57,7 +57,6 @@ export class NotificationService implements INotificationService {
       
        const notificationSocketHandler = getNotificationSocketHandler();
        const chatSocketHandler = getChatSocketHandler();
-
        notificationSocketHandler.emitNotification(userId);
        chatSocketHandler.emitNotification(userId);
     } catch (error) {

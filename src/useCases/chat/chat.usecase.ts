@@ -35,24 +35,27 @@ export class ChatUseCase implements IChatUseCase{
 
         const role = data.receiverModel === 'Building' ? 'vendor' : 'client';
         let finalReceiverId = data.receiverId;
+        let notificationBody = "You have received a new message in chat.";
 
           if (role === 'vendor') {
             const building = await this._buildingRepo.findOne(
               { _id: data.receiverId },
-              { _id: 0, vendorId: 1 }
+              { _id: 0, vendorId: 1, buildingName: 1 }
             );
             if (building?.vendorId) {
               finalReceiverId = building.vendorId.toString();
+              notificationBody = `You have received a new message in chat for building "${building.buildingName}".`;
             } else {
               console.warn(`⚠️ Vendor ID not found for building ${data.receiverId}`);
             }
           }
-
+       
        await this._notificationService.sendToUser(
           finalReceiverId,
           role,
-          "New Message",
-          "You have received a new message",
+          "New Chat Message",
+          notificationBody,
+          {type: "chat", sessionId: data.sessionId, senderId: data.senderId}
         );
 
         return {

@@ -15,6 +15,7 @@ import { IGetSingleBuilding } from "../../entities/usecaseInterfaces/building/ge
 import { IFetchBuildingUseCase } from "../../entities/usecaseInterfaces/building/fetch-building-usecase.interface";
 import { getErrorMessage } from "../../shared/error/errorHandler";
 import { IFetchFiltersUseCase } from "../../entities/usecaseInterfaces/building/fetch-filter-usecase.interface";
+import { IGetEveryBuildingUseCase } from "../../entities/usecaseInterfaces/building/every-building-usecase.interface";
 
 @injectable()
 export class BuildingController implements IBuildingController{
@@ -33,6 +34,8 @@ export class BuildingController implements IBuildingController{
         private _fetchBuildingUseCase: IFetchBuildingUseCase,
         @inject("IFetchFiltersUseCase")
         private _fetchFilterUseCase: IFetchFiltersUseCase,
+        @inject("IGetEveryBuildingUseCase")
+        private _getEveryBuildingUseCase: IGetEveryBuildingUseCase,
     ){}
 //get buildings of a vendor
    async getAllBuilding(req:Request, res: Response): Promise<void>{
@@ -274,6 +277,28 @@ export class BuildingController implements IBuildingController{
        const message = getErrorMessage(error);
       console.error("Error in fetching buildings",error);
        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message,});
+    }
+   }
+
+   async getEveryBuilding(req: Request, res: Response): Promise<void> {
+    try {
+       const{page=1,limit=5,search='',status} = req.query;
+        const pageNumber = Math.max(Number(page), 1);
+        const pageSize = Math.max(Number(limit), 1);
+        const searchTerm = typeof search === "string" ? search : "";
+
+        const result = await this._getEveryBuildingUseCase.execute(pageNumber, pageSize, searchTerm, status as string);
+
+        res.status(StatusCodes.OK).json({
+          success: true,
+          buildings: result.items,
+          totalPages: Math.ceil(result.total / pageSize),
+          currentPage: pageNumber,
+        })
+    } catch (error: unknown) {
+      const message = getErrorMessage(error);
+      console.error("Error in fetching all buildings", error);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message });
     }
    }
 
