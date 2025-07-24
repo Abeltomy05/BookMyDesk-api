@@ -19,6 +19,7 @@ import { NotificationController } from "../../interfaceAdapters/controllers/noti
 import { INotificationController } from "../../entities/controllerInterfaces/others/notification-controller.interface";
 import { ChatController } from "../../interfaceAdapters/controllers/chat.controller";
 import { IChatController } from "../../entities/controllerInterfaces/others/chat-controller.interface";
+import { NotificationSocketHandler } from "../../shared/config/notificationSocket";
 
 DependencyInjection.registerAll();
 //* ====== Middleware Resolving ====== *//

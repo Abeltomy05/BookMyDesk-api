@@ -2,6 +2,7 @@ import nodemailer from "nodemailer";
 import { IEmailService } from "../../entities/serviceInterfaces/email-service.interface";
 import { injectable } from "tsyringe";
 import dotenv from "dotenv";
+import { config } from "../../shared/config";
 
 dotenv.config();
 
@@ -12,11 +13,10 @@ export class EmailService implements IEmailService {
 		this._transporter = nodemailer.createTransport({
 			service: "gmail",
 			auth: {
-				user: process.env.EMAIL_USER,
-				pass: process.env.EMAIL_PASS,
+				user: config.EMAIL_USER,
+				pass: config.EMAIL_PASS,
 			},
-      // debug: process.env.NODE_ENV === 'development',
-      // logger: process.env.NODE_ENV === 'development'
+
 		});
 	}
 
@@ -48,7 +48,7 @@ async sendOtp(to: string, subject: string, otp: string): Promise<void> {
     `;
 
     const mailOptions = {
-      from: `BookMyDesk <${process.env.EMAIL_USER}>`,
+      from: `BookMyDesk <${config.EMAIL_USER}>`,
       to,
       subject,
       text: `Your OTP is ${otp}`,
@@ -79,7 +79,7 @@ async sendResetEmail(to: string, subject: string, resetUrl: string): Promise<voi
     `;
 
     const mailOptions = {
-      from: `BookMyDesk <${process.env.EMAIL_USER}>`,
+      from: `BookMyDesk <${config.EMAIL_USER}>`,
       to,
       subject,
       text: `Click the link to reset your password: ${resetUrl}`, // Plain text fallback
@@ -116,7 +116,7 @@ async sendVendorRejectionEmail(to: string, reason: string, retryUrl: string): Pr
   `;
 
   const mailOptions = {
-    from: `BookMyDesk <${process.env.EMAIL_USER}>`,
+    from: `BookMyDesk <${config.EMAIL_USER}>`,
     to,
     subject,
     text: `Your vendor application has been rejected. Reason: ${reason}`,
@@ -149,7 +149,7 @@ async sendBuildingRejectionEmail(to: string, reason: string): Promise<void> {
   `;
 
   const mailOptions = {
-    from: `BookMyDesk <${process.env.EMAIL_USER}>`,
+    from: `BookMyDesk <${config.EMAIL_USER}>`,
     to,
     subject,
     text: `Your building registration has been rejected. Reason: ${reason}`,

@@ -1,4 +1,4 @@
-import { OfferStatus } from "../../shared/types/user.types";
+import { OfferStatus } from "../../shared/dtos/types/user.types";
 
 export interface IOfferEntity{
     _id: string;

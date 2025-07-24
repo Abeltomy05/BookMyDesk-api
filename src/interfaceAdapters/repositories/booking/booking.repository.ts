@@ -195,4 +195,161 @@ async getMonthlyBookingStats(): Promise<{ month: string; totalBookings: number; 
   ])
 }
 
+async findBookings(
+    filter: FilterQuery<IBookingModel> = {},
+    skip = 0,
+    limit = 10,
+    sort: Record<string, 1 | -1> = {},
+    role?: 'client' | 'vendor'
+){
+   let searchTerm = '';
+    if (role === 'vendor' && filter.search) {
+        searchTerm = filter.search;
+        delete filter.search;
+    }
+
+    if (role === 'vendor') {
+        if (typeof filter.status === 'string' && filter.status.trim() !== '') {
+            filter.status = {
+                $eq: filter.status,
+                $ne: 'failed'
+            };
+        } else {
+            filter.status = { $ne: 'failed' };
+        }
+    }
+
+     if (role === 'vendor' && searchTerm) {
+        const searchRegex = new RegExp(searchTerm, 'i');
+
+       const pipeline = [
+            { $match: filter },
+            {
+                $lookup: {
+                    from: 'buildings', 
+                    localField: 'buildingId',
+                    foreignField: '_id',
+                    as: 'buildingId'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users', 
+                    localField: 'clientId', 
+                    foreignField: '_id',
+                    as: 'clientId'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'spaces', 
+                    localField: 'spaceId',
+                    foreignField: '_id', 
+                    as: 'spaceId'
+                }
+            },
+            {
+                $match: {
+                    $or: [
+                        { 'buildingId.buildingName': { $regex: searchRegex } },
+                        { 'clientId.username': { $regex: searchRegex } }
+                    ]
+                }
+            },
+            { $unwind: { path: '$buildingId', preserveNullAndEmptyArrays: true } },
+            { $unwind: { path: '$clientId', preserveNullAndEmptyArrays: true } },
+            { $unwind: { path: '$spaceId', preserveNullAndEmptyArrays: true } },
+            {
+                $project: {
+                    _id: 1,
+                    bookingDate: 1,
+                    numberOfDesks: 1,
+                    totalPrice: 1,
+                    discountAmount: 1,
+                    status: 1,
+                    paymentStatus: 1,
+                    paymentMethod: 1,
+                    transactionId: 1,
+                    cancellationReason: 1,
+                    cancelledBy: 1,
+                    vendorId: 1,
+                    createdAt: 1,
+                    updatedAt: 1,
+
+                    'buildingId._id': 1,
+                    'buildingId.buildingName': 1,
+                    'buildingId.location': 1,
+
+                    'spaceId._id': 1,
+                    'spaceId.name': 1,
+                    'spaceId.pricePerDay': 1,
+
+                    'clientId._id': 1,
+                    'clientId.username': 1,
+                    'clientId.email': 1,
+                    'clientId.phone': 1,
+                }
+            },
+            { $sort: sort },
+            { $skip: skip },
+            { $limit: limit }
+        ];  
+
+         const [items, totalResult] = await Promise.all([
+            this.model.aggregate(pipeline),
+            this.model.aggregate([
+                { $match: filter },
+                {
+                    $lookup: {
+                        from: 'buildings',
+                        localField: 'buildingId',
+                        foreignField: '_id',
+                        as: 'buildingId'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'clientId',
+                        foreignField: '_id',
+                        as: 'clientId'
+                    }
+                },
+                 { $unwind: { path: '$buildingId', preserveNullAndEmptyArrays: true } },
+                 { $unwind: { path: '$clientId', preserveNullAndEmptyArrays: true } },
+                 { $unwind: { path: '$spaceId', preserveNullAndEmptyArrays: true } },
+                {
+                    $match: {
+                        $or: [
+                            { 'buildingId.buildingName': { $regex: searchRegex } },
+                            { 'clientId.username': { $regex: searchRegex } }
+                        ]
+                    }
+                },
+                { $count: 'total' }
+            ])
+        ]);
+
+        const total = totalResult[0]?.total || 0;
+        return { items, total }; 
+     }
+      let query = this.model.find(filter);
+
+      query = query
+        .populate('buildingId', 'buildingName location')
+        .populate('spaceId', 'name pricePerDay');
+
+    if (role === 'vendor') {
+        query = query.populate('clientId', 'username email phone');
+    }
+
+    query = query.sort(sort).skip(skip).limit(limit);
+
+    const [items, total] = await Promise.all([
+        query as Promise<any[]>,
+        this.model.countDocuments(filter)
+    ]);
+
+    return { items, total };
+}
 }

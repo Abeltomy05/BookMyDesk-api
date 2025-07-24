@@ -1,6 +1,6 @@
 import { inject, injectable } from "tsyringe";
 import { IBookingRepository } from "../../entities/repositoryInterfaces/booking/booking-repository.interface";
-import { MonthlyBookingStatsDTO } from "../../shared/types/booking.types";
+import { MonthlyBookingStatsDTO } from "../../shared/dtos/types/booking.types";
 import { IMonthlyBookingStats } from "../../entities/usecaseInterfaces/users/get-monthly-booking-stats-usecase.interface";
 
 @injectable()

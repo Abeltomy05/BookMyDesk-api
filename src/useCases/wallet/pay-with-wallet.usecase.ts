@@ -7,6 +7,7 @@ import { IBookingRepository } from "../../entities/repositoryInterfaces/booking/
 import { Types } from "mongoose";
 import { IPayWithWalletUseCase } from "../../entities/usecaseInterfaces/wallet/pay-with-wallet-usecase.interface";
 import { INotificationService } from "../../entities/serviceInterfaces/notification-service.interface";
+import { config } from "../../shared/config";
 
 @injectable()
 export class PayWithWalletUseCase implements IPayWithWalletUseCase{
@@ -122,7 +123,7 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
             balanceAfter: vendorWalletResult.balanceAfter,
         });
 
-        const adminId = process.env.ADMIN_ID;
+        const adminId = config.ADMIN_ID;
         if (!adminId) {
             throw new Error("Admin ID not configured in environment");
         }

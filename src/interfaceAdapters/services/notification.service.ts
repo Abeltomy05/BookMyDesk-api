@@ -6,6 +6,10 @@ import { messaging } from "../../shared/config/firebaseAdmin";
 import { INotificationService } from "../../entities/serviceInterfaces/notification-service.interface";
 import { INotificationRepository } from "../../entities/repositoryInterfaces/notification/notification-repository.interface";
 import { Types } from "mongoose";
+import { NotificationSocketHandler } from "../../shared/config/notificationSocket";
+import { INotificationSocketHandler } from "../../entities/socketInterfaces/notification-socket-handler.interface";
+import { getNotificationSocketHandler } from "../../shared/config/setupNotificationSocket";
+import { getChatSocketHandler } from "../../shared/config/setupChatSocket";
 
 @injectable()
 export class NotificationService implements INotificationService {
@@ -50,6 +54,12 @@ export class NotificationService implements INotificationService {
     try {
       await messaging.send(message);
       console.log(`✅ Notification sent to ${role} (${userId})`);
+      
+       const notificationSocketHandler = getNotificationSocketHandler();
+       const chatSocketHandler = getChatSocketHandler();
+
+       notificationSocketHandler.emitNotification(userId);
+       chatSocketHandler.emitNotification(userId);
     } catch (error) {
       const err = error as { code?: string; message?: string };
 

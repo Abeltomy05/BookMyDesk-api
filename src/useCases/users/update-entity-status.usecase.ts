@@ -8,6 +8,7 @@ import { IJwtService } from "../../entities/serviceInterfaces/jwt-service.interf
 import { IBuildingRepository } from "../../entities/repositoryInterfaces/building/building-repository.interface";
 import { IBookingRepository } from "../../entities/repositoryInterfaces/booking/booking-repository.interface";
 import { hasEmail } from "../../shared/helper/hasEmail";
+import { config } from "../../shared/config";
 
 
 
@@ -71,7 +72,7 @@ export class UpdateEntityStatusUseCase  implements IUpdateEntityStatusUseCase {
 	 private async _handleVendorRejection(email: string, reason: string): Promise<void> {
         console.log(`Sending rejection email to vendor: ${email}`);
         const retryToken = this._tokenService.generateResetToken(email);
-        const retryUrl = new URL(`/vendor/retry/${retryToken}`, process.env.CORS_ORIGIN).toString();
+        const retryUrl = new URL(`/vendor/retry/${retryToken}`, config.CORS_ORIGIN).toString();
         await this._emailService.sendVendorRejectionEmail(email, reason, retryUrl);
     }
 

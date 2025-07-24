@@ -70,6 +70,9 @@ import { GetMessagesUseCase } from "../../useCases/chat/get-messages.usecase";
 import { ChatUseCase } from "../../useCases/chat/chat.usecase";
 import { ClearChatUseCase } from "../../useCases/chat/clear-chat.usecase";
 import { MonthlyBookingStats } from "../../useCases/users/get-admin-page-data.usecase";
+import { RevenueReportUseCase } from "../../useCases/booking/revenue-report.usecase";
+import { FetchFiltersUseCase } from "../../useCases/building/fetch-filters.usecase";
+import { NotificationSocketHandler } from "../../shared/config/notificationSocket";
 
 
 
@@ -244,6 +247,12 @@ export class UseCaseRegistry{
       container.register('IMonthlyBookingStats',{
         useClass: MonthlyBookingStats
       })
+      container.register("IRevenueReportUseCase",{
+        useClass: RevenueReportUseCase
+      })
+      container.register("IFetchFiltersUseCase",{
+        useClass: FetchFiltersUseCase
+      })
 
         //* ====== Register Bcrypts ====== *//
         container.register<IBcrypt>("IPasswordBcrypt",{
@@ -281,5 +290,6 @@ export class UseCaseRegistry{
           useClass: NotificationService
         })
 
+          //* ====== Socket Services ====== *//
     }
 }

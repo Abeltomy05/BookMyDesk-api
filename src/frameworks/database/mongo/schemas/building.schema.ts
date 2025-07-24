@@ -44,3 +44,5 @@ export const buildingSchema = new Schema<IBuildingModel>(
   },
   { timestamps: true }
 );
+
+buildingSchema.index({location: '2dsphere'});

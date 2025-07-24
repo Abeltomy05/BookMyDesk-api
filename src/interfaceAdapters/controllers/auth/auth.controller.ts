@@ -27,6 +27,7 @@ import { IVendorModel } from "../../../frameworks/database/mongo/models/vendor.m
 import { ISaveFcmTokenUseCase } from "../../../entities/usecaseInterfaces/auth/save-fcm-token-usecase.interface";
 import { IRemoveFcmTokenUseCase } from "../../../entities/usecaseInterfaces/auth/remove-fcm-token-usecase.interface";
 import { getErrorMessage } from "../../../shared/error/errorHandler";
+import { config } from "../../../shared/config";
 
 
 @injectable()
@@ -160,14 +161,14 @@ export class AuthController implements IAuthController {
 
             res.cookie(accessTokenName, tokens.accessToken, {
                httpOnly: true,
-               secure: process.env.NODE_ENV === "production",
+               secure: config.NODE_ENV === "production",
                sameSite: "strict",
                maxAge: 15 * 60 * 1000, // 15 minutes
                });
 
                res.cookie(refreshTokenName, tokens.refreshToken, {
                httpOnly: true,
-               secure: process.env.NODE_ENV === "production",
+               secure: config.NODE_ENV === "production",
                sameSite: "strict",
                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
                });
@@ -200,7 +201,7 @@ export class AuthController implements IAuthController {
 
                if(user.status === "blocked"){
                     const role = user.role;
-                     const redirectErrorURL = `${process.env.FRONTEND_URL}${role === "client" ? "/login" : `/${role}/login`}?error=${encodeURIComponent("Your account has been blocked by the admin.")}`;
+                     const redirectErrorURL = `${config.FRONTEND_URL}${role === "client" ? "/login" : `/${role}/login`}?error=${encodeURIComponent("Your account has been blocked by the admin.")}`;
                      return res.redirect(redirectErrorURL);
                }
 
@@ -210,7 +211,7 @@ export class AuthController implements IAuthController {
                console.log("Vendor login check:", { status, idProof });
                
                if ((status === "pending" || status === "rejected") && idProof) {
-               const redirectErrorURL = `${process.env.FRONTEND_URL}/vendor/login?error=${encodeURIComponent(
+               const redirectErrorURL = `${config.FRONTEND_URL}/vendor/login?error=${encodeURIComponent(
                     user.status === "pending"
                     ? "Your vendor account is pending admin approval."
                     : "Your vendor account has been rejected.Please check your email for more details."
@@ -230,19 +231,19 @@ export class AuthController implements IAuthController {
 
                res.cookie(accessTokenName, tokens.accessToken, {
                httpOnly: true,
-               secure: process.env.NODE_ENV === "production",
+               secure: config.NODE_ENV === "production",
                sameSite: "strict",
                maxAge: 15 * 60 * 1000, // 15 minutes
                });
 
                res.cookie(refreshTokenName, tokens.refreshToken, {
                httpOnly: true,
-               secure: process.env.NODE_ENV === "production",
+               secure: config.NODE_ENV === "production",
                sameSite: "strict",
                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
                });
 
-               const redirectURL = `${process.env.FRONTEND_URL}/auth-check/${user.role}`;
+               const redirectURL = `${config.FRONTEND_URL}/auth-check/${user.role}`;
                res.redirect(redirectURL);
           } catch (error:unknown) {
                 const message = getErrorMessage(error);
@@ -251,7 +252,7 @@ export class AuthController implements IAuthController {
                 const errorMessage = message;
                 const role = req.query.state;
 
-                const redirectErrorURL = `${process.env.FRONTEND_URL}${role === "client" ? "/login" : `/${role}/login`}?error=${encodeURIComponent(errorMessage)}`;
+                const redirectErrorURL = `${config.FRONTEND_URL}${role === "client" ? "/login" : `/${role}/login`}?error=${encodeURIComponent(errorMessage)}`;
                 res.redirect(redirectErrorURL);
           }
      }
@@ -402,14 +403,14 @@ export class AuthController implements IAuthController {
 
              res.clearCookie(accessTokenName, {
                httpOnly: true,
-               secure: process.env.NODE_ENV === "production",
+               secure: config.NODE_ENV === "production",
                sameSite: "strict",
                path: "/", 
                });
 
              res.clearCookie(refreshTokenName, {
                httpOnly: true,
-               secure: process.env.NODE_ENV === "production",
+               secure: config.NODE_ENV === "production",
                sameSite: "strict",
                path: "/",
                });
@@ -443,7 +444,7 @@ export class AuthController implements IAuthController {
 
 			res.cookie(`${role}_access_token`, accessToken, {
 			httpOnly: true,
-			secure: process.env.NODE_ENV === "production",
+			secure: config.NODE_ENV === "production",
 			sameSite: "strict",
 			path: "/",
 		     });

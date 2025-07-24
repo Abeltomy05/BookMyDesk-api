@@ -16,6 +16,11 @@ import { startOfferCleanupJob } from "./shared/cron/offer-cleanup.cron";
 import { ChatSocketHandler  } from './shared/config/socket';
 import { container } from 'tsyringe';
 import { IChatUseCase } from './entities/usecaseInterfaces/chat/chat-usecase.interface';
+import { config } from './shared/config';
+import { NotificationSocketHandler } from './shared/config/notificationSocket';
+import { INotificationSocketHandler } from './entities/socketInterfaces/notification-socket-handler.interface';
+import { initializeNotificationSocket } from './shared/config/setupNotificationSocket';
+import { initializeChatSocket } from './shared/config/setupChatSocket';
 
 dotenv.config();
 
@@ -24,8 +29,9 @@ const server = http.createServer(app);
 
 const chatUseCase = container.resolve<IChatUseCase>("IChatUseCase");
 
-const chatSocketHandler = new ChatSocketHandler(server, chatUseCase);
-chatSocketHandler.initialize();
+initializeChatSocket(server, chatUseCase);
+initializeNotificationSocket(server);
+
 
 app.use(passport.initialize());
 app.use(morgan("dev"))
@@ -33,9 +39,9 @@ app.use(morgan("dev"))
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// console.log('CORS origin:', process.env.CORS_ORIGIN);
+
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origin: config.CORS_ORIGIN || 'http://localhost:5173',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type'],
     credentials: true, 
@@ -54,7 +60,7 @@ app.use('/api/_v', new VendorRoutes().router);
 app.use('/api/_a', new AdminRoutes().router);
 
 
-const PORT = process.env.PORT || 3000;
+const PORT = config.PORT || 3000;
 
 const startServer = async () => {
   try {

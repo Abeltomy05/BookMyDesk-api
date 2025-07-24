@@ -34,6 +34,11 @@ export class BuildingRepository extends BaseRepository<IBuildingModel> implement
       type?: string;
       minPrice?: number;
       maxPrice?: number;
+      latitude?: number;
+      longitude?: number;
+      radius?: number;
+      amenities?: string[];
+      amenityMatchMode?: 'any' | 'all';
     },
     skip = 0,
     limit = 10,
@@ -67,6 +72,23 @@ export class BuildingRepository extends BaseRepository<IBuildingModel> implement
     query["summarizedSpaces"] = { $elemMatch: summarizedSpaceQuery };
   }
 
+  if (filters.amenities && filters.amenities.length > 0) {
+    if (filters.amenityMatchMode === "any") {
+    query["amenities"] = { $in: filters.amenities };
+  } else {
+    query["amenities"] = { $all: filters.amenities };
+  }
+  }
+
+  if (filters.latitude && filters.longitude && filters.radius) {
+    const radiusInRadians = filters.radius / 6378.1;
+     query["location"] = {
+      $geoWithin: {
+        $centerSphere: [[filters.longitude, filters.latitude], radiusInRadians],
+      },
+    }
+  }
+
   const [items, total] = await Promise.all([
     this.model.find(query).sort(sort).skip(skip).limit(limit).lean(),
     this.model.countDocuments(query),
@@ -85,5 +107,40 @@ async getNamesAndCount(): Promise<{ names: { _id: string; buildingName: string }
     names: mapped,
     count: mapped.length,
   }
+}
+
+async fetchFilters(): Promise<{ spaceNames: string[]; prices: number[] }> {
+   const result = await this.model.aggregate([
+    {
+      $match: {status: "approved" }
+    },
+    {
+      $lookup:{
+        from: "spaces",
+        localField: "_id",
+        foreignField: "buildingId",
+        as : "spaces"
+      }
+    },
+    {
+      $unwind: "$spaces"
+    },
+    {
+      $group: {
+        _id: null,
+        spaceNames: { $addToSet: "$spaces.name" },
+        prices: { $addToSet: "$spaces.pricePerDay" }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        spaceNames: 1,
+        prices: 1
+      }
+    }
+   ])
+
+   return result[0] || { spaceNames: [], prices: [] };
 }
 }

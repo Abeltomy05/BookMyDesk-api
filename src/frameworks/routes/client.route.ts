@@ -90,5 +90,8 @@ export class ClientRoutes extends BaseRoute{
         this.router.post("/client/clear-chat", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response) => {
             chatController.clearChat(req, res);
         });
+        this.router.get("/client/fetch-filters", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response) => {
+            buildingController.fetchFilters(req, res);
+        });
     }
 }

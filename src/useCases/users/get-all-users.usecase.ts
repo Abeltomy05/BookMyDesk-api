@@ -53,7 +53,10 @@ export class GetAllUsersUseCase implements IGetAllUsersUseCase {
       userType === "client" ? this._clientRepository : this._vendorRepository;
 
     const { items, total } = await repo.findAll(filter, skip, limit);
-    const sanitizedUsers = items.map(({ password, ...rest }) => rest);
+    const sanitizedUsers = items.map(({ password, _id, ...rest }) => ({
+      _id: _id.toString(),
+      ...rest,
+    }));
     return {
       users: sanitizedUsers,
       totalPages: Math.ceil(total / limit),

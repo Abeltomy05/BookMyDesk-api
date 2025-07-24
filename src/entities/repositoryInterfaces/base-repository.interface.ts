@@ -1,5 +1,4 @@
 import { FilterQuery } from "mongoose";
-import { PopulateOption } from "../../shared/types/user.types";
 
 export interface IBaseRepository<T> {
   find(filter: any,projection?: any): Promise<T[]>;

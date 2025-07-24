@@ -20,4 +20,15 @@ export interface IBookingRepository extends IBaseRepository<IBookingModel>{
  getAdminBookings(filters: IGetAdminBookingsFilterDTO): Promise<IGetAdminBookingsResultDTO>;
 
  getMonthlyBookingStats(): Promise<{ month: string; totalBookings: number; totalRevenue: number }[]>;
+
+ findBookings(
+    filter: FilterQuery<IBookingModel>,
+    skip?: number,
+    limit?: number,
+    sort?: Record<string, 1 | -1>,
+    role?: 'client' | 'vendor'
+): Promise<{
+    items: IBookingModel[]; 
+    total: number;
+  }>
 }

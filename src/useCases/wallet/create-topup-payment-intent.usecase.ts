@@ -4,6 +4,7 @@ import { IClientRepository } from "../../entities/repositoryInterfaces/users/cli
 import { IVendorRepository } from "../../entities/repositoryInterfaces/users/vendor-repository.interface";
 import { CreatePaymentIntentResponse } from "../../shared/dtos/booking.dto";
 import { ICreateTopUpPaymentIntentUseCase } from "../../entities/usecaseInterfaces/wallet/create-topup-payment-intent-usecase.interface";
+import { config } from "../../shared/config";
 
 
 @injectable()
@@ -42,7 +43,7 @@ export class CreateTopUpPaymentIntentUseCase implements ICreateTopUpPaymentInten
           return {
             clientSecret: paymentIntent.client_secret!,
             paymentIntentId: paymentIntent.id,
-            publishableKey: process.env.STRIPE_PUBLIC_KEY!,
+            publishableKey: config.STRIPE_PUBLIC_KEY!,
           };
     }
 }

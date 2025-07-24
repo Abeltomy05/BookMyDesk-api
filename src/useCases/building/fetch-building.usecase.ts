@@ -17,6 +17,11 @@ export class FetchBuildingUseCase implements IFetchBuildingUseCase{
         type?: string;
         minPrice?: number;
         maxPrice?: number;
+        latitude?: number;
+        longitude?: number;
+        radius?: number;
+        amenities?: string[];
+        amenityMatchMode?: 'any' | 'all'
     } ): Promise<{ items: IBuildingEntity[]; total: number }> {
         const skip = (page - 1) * limit;
         const { items, total } = await this._buildingRepository.searchBuildings(filters, skip, limit, { createdAt: -1 });

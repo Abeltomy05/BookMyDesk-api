@@ -2,7 +2,7 @@ import { inject, injectable } from "tsyringe";
 import { IOfferRepository } from "../../entities/repositoryInterfaces/offer/offer-repository.interface";
 import { FetchOffersResultDTO } from "../../shared/dtos/offer.dto";
 import { IFetchAllOffersUseCase } from "../../entities/usecaseInterfaces/offer/fetch-all-offers-usecase.interface";
-import { OfferStatus } from "../../shared/types/user.types";
+import { OfferStatus } from "../../shared/dtos/types/user.types";
 
 
 @injectable()
