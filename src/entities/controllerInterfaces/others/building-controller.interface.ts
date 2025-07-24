@@ -8,4 +8,5 @@ export interface IBuildingController{
     getSingleBuilding(req:Request, res: Response): Promise<void>;
     fetchBuildings(req:Request, res: Response): Promise<void>;
     fetchFilters(req: Request, res: Response): Promise<void>;
+    getEveryBuilding(req: Request, res: Response): Promise<void>;
 }

@@ -53,6 +53,8 @@ export class AdminRoutes extends BaseRoute{
         this.router.get("/admin/monthly-stats",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response) => {
             usersController.getMonthlyBookingStats(req, res);
         });
-
+        this.router.get("/admin/get-every-building",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response) => {
+            buildingController.getEveryBuilding(req, res);
+        });
     }
 }
