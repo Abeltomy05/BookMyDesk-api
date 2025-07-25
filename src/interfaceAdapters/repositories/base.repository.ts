@@ -8,8 +8,8 @@ export class BaseRepository<T> {
         return this.model.findOne(filter).select(projection).lean() as Promise<T>;
     }
 
-    async find(filter: FilterQuery<T>, projection?: any){
-        return this.model.find(filter,projection).lean();
+    async find(filter: FilterQuery<T>, projection?: any): Promise<T[]>{
+        return this.model.find(filter,projection).lean() as unknown as T[];
     }
 
     async findAll(filter: FilterQuery<T> = {}, skip = 0, limit = 10, sort: Record<string, 1 | -1> = {}) {
