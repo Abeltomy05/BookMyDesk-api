@@ -3,6 +3,8 @@ import { IBookingRepository } from "../../entities/repositoryInterfaces/booking/
 import { FilterQuery } from "mongoose";
 import { IBookingEntity } from "../../entities/models/booking.entity";
 import { IRevenueReportUseCase } from "../../entities/usecaseInterfaces/booking/revenue-report-usecase.interface";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 export interface RevenueReportFilters {
   vendorId: string;
@@ -37,7 +39,7 @@ async execute(data: RevenueReportFilters): Promise<RevenueReportBooking[]> {
   const { vendorId, buildingId } = data;
 
   if (!buildingId || !vendorId) {
-    throw new Error("Missing credentials for getting the revenue data.");
+    throw new CustomError("Missing credentials for getting the revenue data.",StatusCodes.BAD_REQUEST);
   }
 
   const filter: FilterQuery<IBookingEntity> = {

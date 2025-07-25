@@ -3,6 +3,8 @@ import { IBuildingRepository } from "../../entities/repositoryInterfaces/buildin
 import { IChatSessionRepository } from "../../entities/repositoryInterfaces/chat/chat-session-repository.interface";
 import { Types } from "mongoose";
 import { ICreateSessionUseCase } from "../../entities/usecaseInterfaces/chat/create-session-usecase.interface";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class CreateSessionUseCase implements ICreateSessionUseCase{
@@ -16,7 +18,7 @@ export class CreateSessionUseCase implements ICreateSessionUseCase{
 
     async execute(buildingId:string,userId:string):Promise<{sessionId:string}>{
         if(!userId){
-            throw new Error("UserId not found.")
+            throw new CustomError("UserId not found.",StatusCodes.NOT_FOUND);
         }
 
         const existingSession = await this._chatSessionRepo.findOne(

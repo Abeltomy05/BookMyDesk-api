@@ -4,6 +4,8 @@ import { IOtpService } from "../../entities/serviceInterfaces/otp-service.interf
 import { ISendOtpUseCase } from "../../entities/usecaseInterfaces/auth/send-otp-usecase.interface";
 import { IBcrypt } from "../../frameworks/security/bcrypt.interface";
 import { IEmailService } from "../../entities/serviceInterfaces/email-service.interface";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class SendOtpUseCase implements ISendOtpUseCase {
@@ -22,7 +24,7 @@ export class SendOtpUseCase implements ISendOtpUseCase {
           const isEmailExisting = await this._userExistenceService.emailExists(email);
           if (isEmailExisting) {
                console.log("Email already exists:", email);
-               const error = new Error("Email already exists");
+               const error = new CustomError("Email already exists",StatusCodes.CONFLICT);
                error.name = "EmailExistsError";
                throw error;
           }

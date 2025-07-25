@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { CustomRequest } from "../middlewares/auth.middleware";
 import { IWalletController } from "../../entities/controllerInterfaces/others/wallet-controller.interface";
 import { inject, injectable } from "tsyringe";
@@ -22,7 +22,7 @@ export class WalletController implements IWalletController {
      private _confirmTopupPaymentUseCase: IConfirmTopupPaymentUseCase, 
   ) {}
 
-    async getWalletDetails(req: Request, res: Response): Promise<void>{
+    async getWalletDetails(req: Request, res: Response, next: NextFunction): Promise<void>{
         try {
             const page = parseInt(req.query.page as string) || 1;
             const limit = parseInt(req.query.limit as string) || 5;
@@ -38,18 +38,13 @@ export class WalletController implements IWalletController {
                 message: "Wallet details retrieved successfully",
                 data: walletDetails,
             });
-        } catch (error:unknown) {
-             const message = getErrorMessage(error);
-            console.error("Error getting wallet details:", error);
-            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                success: false,
-                message,
-            });
+        } catch (error) {
+            next(error)
             
         }
     }
 
-    async payWithWallet(req: Request, res: Response): Promise<void>{
+    async payWithWallet(req: Request, res: Response, next: NextFunction): Promise<void>{
         try {
             const {spaceId,bookingDate,numberOfDesks,totalPrice,discountAmount} = req.body;
             if(!spaceId || !bookingDate || !numberOfDesks || !totalPrice){
@@ -74,17 +69,12 @@ export class WalletController implements IWalletController {
                     message: "Booking Unsuccessfull, Please try again.",
                 });
             }
-        } catch (error:unknown) {
-             const message = getErrorMessage(error);
-             console.error("Error during booking with wallet:", error);
-            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                success: false,
-                message,
-            });
+        } catch (error) {
+           next(error)
         }
     }
 
-    async createTopupIntent(req: Request, res: Response): Promise<void>{
+    async createTopupIntent(req: Request, res: Response, next: NextFunction): Promise<void>{
         try {
             const {amount,currency} = req.body;
             if(!amount || !currency){
@@ -100,17 +90,12 @@ export class WalletController implements IWalletController {
                 data: response,
                 message: "Payment intent created successfully."
             });
-        } catch (error:unknown) {
-             const message = getErrorMessage(error);
-            console.error("Error create top up payment intent:", error);
-            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                success: false,
-                message,
-            });
+        } catch (error) {
+          next(error)
         }
     }
 
-    async confirmTopupPayment(req: Request, res: Response): Promise<void>{
+    async confirmTopupPayment(req: Request, res: Response, next: NextFunction): Promise<void>{
         try {
             const { paymentIntentId } = req.body;
             if (!paymentIntentId) {
@@ -132,13 +117,8 @@ export class WalletController implements IWalletController {
             } else {
             res.status(400).json(result);
             }
-        } catch (error:unknown) {
-             const message = getErrorMessage(error);
-            console.error("Error confirm top up payment:", error);
-            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                success: false,
-                message,
-            });
+        } catch (error) {
+           next(error)
         }
     }
 

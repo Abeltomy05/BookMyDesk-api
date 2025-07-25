@@ -3,6 +3,8 @@ import { IOfferRepository } from "../../entities/repositoryInterfaces/offer/offe
 import { FetchOffersResultDTO } from "../../shared/dtos/offer.dto";
 import { IFetchAllOffersUseCase } from "../../entities/usecaseInterfaces/offer/fetch-all-offers-usecase.interface";
 import { OfferStatus } from "../../shared/dtos/types/user.types";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 
 @injectable()
@@ -13,7 +15,7 @@ export class FetchAllOffersUseCase implements IFetchAllOffersUseCase{
     ){}
 
     async execute(vendorId:string,page:number,limit:number):Promise<FetchOffersResultDTO>{
-       if(!vendorId) throw new Error("VendorId missing, Please contact for support.");
+       if(!vendorId) throw new CustomError("VendorId missing, Please contact for support.",StatusCodes.BAD_REQUEST);
 
        const skip = (page - 1) * limit;
 

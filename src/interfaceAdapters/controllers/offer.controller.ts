@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { CustomRequest } from "../middlewares/auth.middleware";
 import { IOfferController } from "../../entities/controllerInterfaces/others/offer-controller.interface";
 import { inject, injectable } from "tsyringe";
@@ -18,7 +18,7 @@ export class OfferController implements IOfferController{
        private _createOfferUseCase: ICreateOfferUseCase,
     ){}
 
-    async fetchAllOffers(req:Request, res: Response): Promise<void>{
+    async fetchAllOffers(req:Request, res: Response, next: NextFunction): Promise<void>{
         try {
             const vendorId = (req as CustomRequest).user.userId;
             const page = parseInt(req.query.page as string) || 1;
@@ -28,16 +28,11 @@ export class OfferController implements IOfferController{
                 success: true,
                 data: result,
             })
-        } catch (error:unknown) {
-          const message = getErrorMessage(error);
-          console.error("Error fetching space of a building:", error);
-          res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message,
-           });
+        } catch (error) {
+         next(error)
         }
     }
-    async createOffer(req:Request, res: Response): Promise<void>{
+    async createOffer(req:Request, res: Response, next: NextFunction): Promise<void>{
         try {
             const {title,description,percentage,startDate,endDate,spaceId,buildingId} = req.body;
             const validatedData = CreateOfferSchema.parse({ title, description, percentage, startDate, endDate, spaceId, buildingId })
@@ -57,13 +52,8 @@ export class OfferController implements IOfferController{
                })
                return;
             }
-        } catch (error:unknown) {
-            const message = getErrorMessage(error);
-            console.error("Error fetching space of a building:", error);
-           res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message,
-           });
+        } catch (error) {
+          next(error)
         }
     }
     

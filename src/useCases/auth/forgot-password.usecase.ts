@@ -8,6 +8,8 @@ import { IJwtService } from "../../entities/serviceInterfaces/jwt-service.interf
 import { IVendorEntity } from "../../entities/models/vendor.entity";
 import { IClientEntity } from "../../entities/models/client.entity";
 import { config } from "../../shared/config";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
@@ -46,7 +48,7 @@ export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
             }
 
           if (!user) {
-              throw new Error("User not found");
+              throw new CustomError("User not found",StatusCodes.NOT_FOUND);
           } 
 
           const resetToken = this._tokenService.generateResetToken(email);
@@ -54,7 +56,7 @@ export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
 			       await this._redisTokenRepository.storeResetToken(email,resetToken);
 		        } catch (error) {
 		        	console.error("Failed to store reset token in Redis:", error);
-		         	throw new Error("Failed to store reset token");
+		         	throw new CustomError("Failed to store reset token", StatusCodes.INTERNAL_SERVER_ERROR);
 		       }
         // const rolePrefix = role !== "client" ? `/${role}` : "";
 		const resetUrl = new URL(

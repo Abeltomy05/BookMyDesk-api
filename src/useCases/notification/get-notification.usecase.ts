@@ -3,6 +3,8 @@ import { INotificationEntity } from "../../entities/models/notification.entity";
 import { INotificationRepository } from "../../entities/repositoryInterfaces/notification/notification-repository.interface";
 import { IGetNotificationsUseCase } from "../../entities/usecaseInterfaces/notification/get-notification-usecase.interface";
 import { GetNotificationsResponseDTO } from "../../shared/dtos/notification.dto";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class GetNotificationsUseCase implements IGetNotificationsUseCase{
@@ -12,7 +14,7 @@ export class GetNotificationsUseCase implements IGetNotificationsUseCase{
     ){}
 
     async execute(page:number,limit:number,filter: "unread" | "all",userId:string): Promise<GetNotificationsResponseDTO>{
-      if(!userId) throw new Error("UserId missing, Please contact support.");
+      if(!userId) throw new CustomError("UserId missing, Please contact support.",StatusCodes.BAD_REQUEST);
 
       const skip = page * limit;
       const baseFilter: any = { userId }; 

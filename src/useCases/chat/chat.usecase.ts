@@ -6,6 +6,8 @@ import { Types } from "mongoose";
 import { IChatMessageEntity } from "../../entities/models/chatMessage.entity";
 import { INotificationService } from "../../entities/serviceInterfaces/notification-service.interface";
 import { IBuildingRepository } from "../../entities/repositoryInterfaces/building/building-repository.interface";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class ChatUseCase implements IChatUseCase{
@@ -20,7 +22,7 @@ export class ChatUseCase implements IChatUseCase{
 
     async saveMessage(data:SaveMessageDTO):Promise<IChatMessageEntity>{
        if(!data.senderId || !data.receiverId || !data.senderModel || !data.receiverModel){
-        throw new Error("Message credentials missing.");
+        throw new CustomError("Message credentials missing.",StatusCodes.BAD_REQUEST);
        }
 
        const savedMessage = await this._chatMessageRepo.save({
@@ -76,7 +78,7 @@ export class ChatUseCase implements IChatUseCase{
 
     async deleteMessage(data:{messageId: string, sessionId: string},userId: string){
       if(!userId){
-        throw new Error("Cannot delete message without user Id.");
+        throw new CustomError("Cannot delete message without user Id.",StatusCodes.BAD_REQUEST);
       }
 
       await this._chatMessageRepo.update(

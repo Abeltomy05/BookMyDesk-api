@@ -3,6 +3,8 @@ import { IClientRepository } from "../../entities/repositoryInterfaces/users/cli
 import { IVendorRepository } from "../../entities/repositoryInterfaces/users/vendor-repository.interface";
 import { IAdminRepository } from "../../entities/repositoryInterfaces/users/admin-repository.interface";
 import { ISaveFcmTokenUseCase } from "../../entities/usecaseInterfaces/auth/save-fcm-token-usecase.interface";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class SaveFcmTokenUseCase implements ISaveFcmTokenUseCase{
@@ -24,7 +26,7 @@ export class SaveFcmTokenUseCase implements ISaveFcmTokenUseCase{
        else if(role === "admin")
          repo = this._adminRepo
        else
-         throw new Error("Invalid role.") ;
+         throw new CustomError("Invalid role.",StatusCodes.BAD_REQUEST); ;
 
        await repo.update({_id:userId},{fcmToken})  
     }

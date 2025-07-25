@@ -1,5 +1,5 @@
 import { inject, injectable } from "tsyringe";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { IGetAllBuildingsUsecase } from "../../entities/usecaseInterfaces/building/get-all-building-usecase.interface";
 import { IRegisterBuildingUsecase } from "../../entities/usecaseInterfaces/building/register-building-usecase.interface";
 import { IBuildingController } from "../../entities/controllerInterfaces/others/building-controller.interface";
@@ -38,7 +38,7 @@ export class BuildingController implements IBuildingController{
         private _getEveryBuildingUseCase: IGetEveryBuildingUseCase,
     ){}
 //get buildings of a vendor
-   async getAllBuilding(req:Request, res: Response): Promise<void>{
+   async getAllBuilding(req:Request, res: Response, next: NextFunction): Promise<void>{
       try {
         const{page=1,limit=5,search='',status} = req.query;
         console.log("Fetching all buildings with params:", { page, limit, search, status });
@@ -61,17 +61,12 @@ export class BuildingController implements IBuildingController{
           totalPages,
           currentPage: pageNumber,
         });
-      } catch (error:unknown) {
-         const message = getErrorMessage(error);
-          console.error("Error fetching buildings:", error);
-        res.status(500).json({
-            success: false,
-            message,
-        });
+      } catch (error) {
+       next(error)
       }
     }
 
-   async registerBuilding(req:Request, res: Response): Promise<void>{
+   async registerBuilding(req:Request, res: Response, next: NextFunction): Promise<void>{
       try {
         const data = req.body;
         if (!data) {
@@ -107,24 +102,12 @@ export class BuildingController implements IBuildingController{
           message:"Building registration success",
           data:returnData,
         });
-      } catch (error:unknown) {
-          if (error instanceof Error && error.message.includes("already exists")) {
-            res.status(StatusCodes.CONFLICT).json({
-              success: false,
-              message: error.message,
-            });
-            return;
-          }
-           const message = getErrorMessage(error);
-           console.error("Error registering building:", error);
-        res.status(500).json({
-            success: false,
-            message,
-        });
+      } catch (error) {
+         next(error)
       }
     }
 //get buildings with pending status for admin side
-   async getBuildingsForVerification(req:Request, res: Response): Promise<void>{
+   async getBuildingsForVerification(req:Request, res: Response, next: NextFunction): Promise<void>{
     try {
       const {page=1,limit=5} = req.query;
       const pageNumber = Math.max(Number(page), 1);
@@ -144,17 +127,12 @@ export class BuildingController implements IBuildingController{
       totalPages: result.totalPages,
       currentPage: result.currentPage,
     });    
-    } catch (error:unknown) {
-       const message = getErrorMessage(error);
-       console.error("Error fetching buildings for verification:", error);
-    res.status(500).json({
-      success: false,
-      message,
-    });
+    } catch (error) {
+      next(error)
     }
    }
 
-   async editBuilding(req:Request, res: Response): Promise<void>{
+   async editBuilding(req:Request, res: Response, next: NextFunction): Promise<void>{
     try {
       const { id, name, email, phone,location, openingHours, description, images, amenities, spaces,} = req.body;
       if(email || phone){
@@ -174,30 +152,22 @@ export class BuildingController implements IBuildingController{
         data: result,
       });
 
-    } catch (error:unknown) {
-      const message = getErrorMessage(error);
-      console.error("Unexpected error:", error);
-      res.status(500).json({
-        success: false,
-        message,
-      });
-      return
+    } catch (error) {
+     next(error)
     }
    }
 
-   async getSingleBuilding(req:Request, res: Response): Promise<void>{
+   async getSingleBuilding(req:Request, res: Response, next: NextFunction): Promise<void>{
     try {
       const id = req.params.id;
       const buildingWithSpaces  = await this._getSingleBuildingUseCase.execute(id);
       res.status(200).json({ success: true, data: buildingWithSpaces });
-    } catch (error:unknown) {
-       const message = getErrorMessage(error);
-      console.error("Error getting building:", error);
-       res.status(500).json({ success: false, message,});
+    } catch (error) {
+      next(error)
     }
    }
 
-   async fetchBuildings(req:Request, res: Response): Promise<void>{
+   async fetchBuildings(req:Request, res: Response, next: NextFunction): Promise<void>{
     try {
        const page = parseInt(req.query.page as string) || 1;
        const limit = parseInt(req.query.limit as string) || 5;
@@ -259,28 +229,24 @@ export class BuildingController implements IBuildingController{
       limit,
       totalPages: Math.ceil(result.total / limit),
     });
-    } catch (error:unknown) {
-       const message = getErrorMessage(error);
-      console.error("Error in fetching buildings",error);
-       res.status(500).json({ success: false, message,});
+    } catch (error) {
+      next(error)
     }
    }
 
-   async fetchFilters(req: Request, res: Response): Promise<void> {
+   async fetchFilters(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const result = await this._fetchFilterUseCase.execute()
       res.status(StatusCodes.OK).json({
         success: true,
         data: result,
       })
-    } catch (error:unknown) {
-       const message = getErrorMessage(error);
-      console.error("Error in fetching buildings",error);
-       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message,});
+    } catch (error) {
+     next(error)
     }
    }
 
-   async getEveryBuilding(req: Request, res: Response): Promise<void> {
+   async getEveryBuilding(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
        const{page=1,limit=5,search='',status} = req.query;
         const pageNumber = Math.max(Number(page), 1);
@@ -295,10 +261,8 @@ export class BuildingController implements IBuildingController{
           totalPages: Math.ceil(result.total / pageSize),
           currentPage: pageNumber,
         })
-    } catch (error: unknown) {
-      const message = getErrorMessage(error);
-      console.error("Error in fetching all buildings", error);
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, message });
+    } catch (error) {
+      next(error)
     }
    }
 

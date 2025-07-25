@@ -9,6 +9,8 @@ import { IPayWithWalletUseCase } from "../../entities/usecaseInterfaces/wallet/p
 import { INotificationService } from "../../entities/serviceInterfaces/notification-service.interface";
 import { config } from "../../shared/config";
 import { generateBookingId } from "../../shared/helper/generateBookingId";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class PayWithWalletUseCase implements IPayWithWalletUseCase{
@@ -38,20 +40,20 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
     ):Promise<{ success: boolean; bookingId: string }>{
        const space = await this._spaceRepository.findOne({_id:spaceId});
 
-       if (!space) throw new Error("Space not found.");
-       if (!space.isAvailable) throw new Error("Space is no longer available.");
+       if (!space) throw new CustomError("Space not found.",StatusCodes.NOT_FOUND);
+       if (!space.isAvailable) throw new CustomError("Space is no longer available.",StatusCodes.BAD_REQUEST);
        if(!space.capacity || space.capacity < numberOfDesks){
-         throw new Error(`Insufficient capacity. Only ${space.capacity || 0} desks available`);
+         throw new CustomError(`Insufficient capacity. Only ${space.capacity || 0} desks available`, StatusCodes.BAD_REQUEST);
        }
 
        const building = await this._buildingRepository.findOne({ _id: space.buildingId });
-       if (!building) throw new Error("Building not found for this space.");
+       if (!building) throw new CustomError("Building not found for this space.", StatusCodes.NOT_FOUND);
 
        const vendorId = building.vendorId;
 
         const wallet = await this._walletRepository.findOne({ userId }, { balance: 1 });
         if (!wallet || wallet.balance < totalPrice) {
-            throw new Error("Insufficient wallet balance.");
+            throw new CustomError("Insufficient wallet balance.", StatusCodes.BAD_REQUEST);
         }
 
         const newBalance = wallet.balance - totalPrice;
@@ -72,7 +74,7 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
             { _id: spaceId, capacity: { $gte: numberOfDesks }, isAvailable: true },
             { $inc: { capacity: -numberOfDesks } }
         );
-        if (!updatedSpace) throw new Error("Failed to update space capacity.");
+        if (!updatedSpace) throw new CustomError("Failed to update space capacity.", StatusCodes.INTERNAL_SERVER_ERROR);
 
 
          const booking = await this._bookingRepository.save({
@@ -96,7 +98,7 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
                 { _id: spaceId },
                 { $inc: { capacity: numberOfDesks } }
             );
-            throw new Error("Failed to create booking.");
+            throw new CustomError("Failed to create booking.", StatusCodes.INTERNAL_SERVER_ERROR);
          }
 
          if (building.summarizedSpaces) {
@@ -127,7 +129,7 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
 
         const adminId = config.ADMIN_ID;
         if (!adminId) {
-            throw new Error("Admin ID not configured in environment");
+            throw new CustomError("Admin ID not configured in environment", StatusCodes.INTERNAL_SERVER_ERROR);
         }
 
         const adminWalletResult = await this._walletRepository.updateOrCreateWalletBalance(adminId, 'Admin', platformFee);

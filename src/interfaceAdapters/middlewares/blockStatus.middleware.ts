@@ -7,6 +7,7 @@ import { StatusCodes } from "http-status-codes";
 import { IBlackListTokenUseCase } from "../../entities/usecaseInterfaces/auth/blacklist-token-usecase.interface";
 import { IRevokeRefreshTokenUseCase } from "../../entities/usecaseInterfaces/auth/revoke-refreshtoken-usecase.interface";
 import { config } from "../../shared/config";
+import { CustomError } from "../../entities/utils/custom.error";
 
 @injectable()
 export class BlockStatusMiddleware{
@@ -28,7 +29,7 @@ export class BlockStatusMiddleware{
        }else if(role === "vendor"){
         repo = this._vendorRepository;
        }else{
-        throw new Error("Invalid Role")
+        throw new CustomError("Invalid Role", StatusCodes.BAD_REQUEST);
        }
 
        const user = await repo.findOne({_id:userId});

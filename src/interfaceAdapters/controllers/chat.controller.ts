@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { IChatController } from "../../entities/controllerInterfaces/others/chat-controller.interface";
 import { inject, injectable } from "tsyringe";
 import { StatusCodes } from "http-status-codes";
@@ -22,7 +22,7 @@ export class ChatController implements IChatController{
    private _clearChatUseCase: IClearChatUseCase,
   ){}
 
-  async createSession(req:Request, res: Response): Promise<void>{
+  async createSession(req:Request, res: Response, next: NextFunction): Promise<void>{
     try {
       const {buildingId} = req.body;
       const {userId} = (req as CustomRequest).user;
@@ -41,17 +41,12 @@ export class ChatController implements IChatController{
         message: "Session created successfully.",
         data: result,
       })
-    } catch (error:unknown) {
-       const message = getErrorMessage(error);
-        console.error("Error creating session:", error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message,
-    });
+    } catch (error) {
+      next(error)
     }
   }
 
-  async getChats(req:Request, res: Response): Promise<void>{
+  async getChats(req:Request, res: Response, next: NextFunction): Promise<void>{
     try {
        const buildingId = typeof req.query.buildingId === 'string'
         ? req.query.buildingId
@@ -66,17 +61,12 @@ export class ChatController implements IChatController{
         success: true,
         data: result,
        })
-    } catch (error:unknown) {
-       const message = getErrorMessage(error);
-        console.error("Error getting chats:", error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message,
-    });
+    } catch (error) {
+      next(error)
   }
   }
 
-  async getMessages(req:Request, res: Response): Promise<void>{
+  async getMessages(req:Request, res: Response, next: NextFunction): Promise<void>{
     try {
       const sessionId = req.query.sessionId as string;
       if(!sessionId){
@@ -92,17 +82,12 @@ export class ChatController implements IChatController{
         success:true,
         data:result,
       })
-    } catch (error:unknown) {
-       const message = getErrorMessage(error);
-        console.error("Error getting messages:", error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message,
-    });
+    } catch (error) {
+       next(error)
     }
   }
 
-  async clearChat(req:Request, res: Response): Promise<void>{
+  async clearChat(req:Request, res: Response, next: NextFunction): Promise<void>{
     try {
       const {sessionId} = req.body;
       if(!sessionId){
@@ -119,13 +104,8 @@ export class ChatController implements IChatController{
         success: true,
         message: "Chat cleared successfully."
       })
-    } catch (error:unknown) {
-        const message = getErrorMessage(error);
-        console.error("Error clearing chats:", error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message,
-    });
+    } catch (error) {
+       next(error)
     }
   }
 }

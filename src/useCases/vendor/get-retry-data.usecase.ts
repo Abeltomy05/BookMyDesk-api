@@ -2,6 +2,8 @@ import { inject, injectable } from "tsyringe";
 import { IJwtService } from "../../entities/serviceInterfaces/jwt-service.interface";
 import { IVendorRepository } from "../../entities/repositoryInterfaces/users/vendor-repository.interface";
 import { IGetRetryDataUseCase } from "../../entities/usecaseInterfaces/vendor/get-retry-data.interface";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class GetRetryDataUseCase implements IGetRetryDataUseCase{
@@ -21,13 +23,13 @@ export class GetRetryDataUseCase implements IGetRetryDataUseCase{
     }>{
         const payload = this._tokenService.verifyResetToken(token);
         if (!payload || !payload.email) {
-            throw new Error("Invalid or expired token");
+            throw new CustomError("Invalid or expired token", StatusCodes.BAD_REQUEST);
         }
 
         const vendor = await this._vendorRepository.findOne({email:payload.email});
 
          if (!vendor) {
-          throw new Error("Vendor not found")
+          throw new CustomError("Vendor not found",StatusCodes.NOT_FOUND);
         }
 
          return {

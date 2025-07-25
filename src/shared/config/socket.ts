@@ -51,7 +51,7 @@ export class ChatSocketHandler {
     
     this.onlineUsers.set(socket.userId, { socketId: socket.id, userType: socket.userType });
     this.io.emit("userOnline", { userId: socket.userId });
-    console.log("Current online users:", this.onlineUsers);
+    // console.log("Current online users:", this.onlineUsers);
 
     socket.on("requestOnlineUsers", () => {
       socket.emit("onlineUsers", Array.from(this.onlineUsers.keys()));

@@ -2,6 +2,8 @@ import jwt, { JwtPayload, Secret } from "jsonwebtoken";
 import { IJwtService } from "../../entities/serviceInterfaces/jwt-service.interface";
 import { injectable } from "tsyringe";
 import { config } from "../../shared/config";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 export interface ResetTokenPayload extends JwtPayload {
 	email: string;
@@ -13,7 +15,7 @@ export class JwtService implements IJwtService {
 
     constructor(){
         if (!config.RESET_TOKEN_SECRET) {
-            throw new Error("RESET_TOKEN_SECRET is not defined in environment variables");
+            throw new CustomError("RESET_TOKEN_SECRET is not defined in environment variables",StatusCodes.INTERNAL_SERVER_ERROR);
         }
         this._resetTokenSecret = config.RESET_TOKEN_SECRET
     }

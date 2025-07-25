@@ -17,15 +17,15 @@ export class AuthRoutes extends BaseRoute{
         //*               🗡️ AUTHENTICATION ROUTES 🗡️
         //*========================================================
 
-        this.router.post("/signup",(req: Request, res: Response) => {
-            authController.register(req, res);
+        this.router.post("/signup",(req: Request, res: Response, next: NextFunction) => {
+            authController.register(req, res, next);
          });
 
-         this.router.post("/login", (req: Request, res: Response) => {
-            authController.login(req, res);
+         this.router.post("/login", (req: Request, res: Response, next: NextFunction) => {
+            authController.login(req, res, next);
          });
-         this.router.post("/save-fcm-token", (req: Request, res: Response) => {
-            authController.saveFcmToken(req, res);
+         this.router.post("/save-fcm-token", (req: Request, res: Response, next: NextFunction) => {
+            authController.saveFcmToken(req, res, next);
          });
 
          this.router.get("/google",(req,res,next) => {
@@ -67,32 +67,32 @@ export class AuthRoutes extends BaseRoute{
             authController.authWithGoogle(req, res);
             });
 
-         this.router.get('/me', (req: Request, res: Response) => {
-            authController.getMe(req, res);
+         this.router.get('/me', (req: Request, res: Response, next: NextFunction) => {
+            authController.getMe(req, res, next);
          })   
 
         //*========================================================
         //*               🗡️ OTP ENDPOINTS 🗡️
         //*========================================================
 
-        this.router.post("/send-otp", (req: Request, res: Response) => {
-            authController.sendOtp(req, res);
+        this.router.post("/send-otp", (req: Request, res: Response, next: NextFunction) => {
+            authController.sendOtp(req, res, next);
          });
 
-        this.router.post("/verify-otp", (req: Request, res: Response) => {
-            authController.verifyOtp(req, res);
+        this.router.post("/verify-otp", (req: Request, res: Response, next: NextFunction) => {
+            authController.verifyOtp(req, res, next);
          }); 
 
          //*========================================================
         //*               🗡️ Password ENDPOINTS 🗡️
         //*========================================================
        
-        this.router.post("/forgot-password", (req: Request, res: Response) => {
-            authController.forgotPassword(req, res);
+        this.router.post("/forgot-password", (req: Request, res: Response, next: NextFunction) => {
+            authController.forgotPassword(req, res, next);
          });
 
-        this.router.post("/reset-password", (req: Request, res: Response) => {
-         authController.resetPassword(req, res);
+        this.router.post("/reset-password", (req: Request, res: Response, next: NextFunction) => {
+         authController.resetPassword(req, res, next);
     });
      }
 }
