@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response,NextFunction } from "express";
 import { IAuthController } from "../../../entities/controllerInterfaces/auth/auth-controller.interface";
 import { userSchemas } from "./validations/user-signup.validation.schema";
 import { inject, injectable } from "tsyringe";
@@ -28,6 +28,7 @@ import { ISaveFcmTokenUseCase } from "../../../entities/usecaseInterfaces/auth/s
 import { IRemoveFcmTokenUseCase } from "../../../entities/usecaseInterfaces/auth/remove-fcm-token-usecase.interface";
 import { getErrorMessage } from "../../../shared/error/errorHandler";
 import { config } from "../../../shared/config";
+import { CustomError } from "../../../entities/utils/custom.error";
 
 
 @injectable()
@@ -63,7 +64,7 @@ export class AuthController implements IAuthController {
           private _removeFcmTokenUseCase: IRemoveFcmTokenUseCase,
      ){}
 
-   async register(req: Request, res: Response): Promise<void> {
+   async register(req: Request, res: Response, next: NextFunction): Promise<void> {
           try {
             const { role } = req.body as { role: keyof typeof userSchemas };
             const schema = userSchemas[role];
@@ -87,17 +88,12 @@ export class AuthController implements IAuthController {
 				success: true,
 				message: "User registered successfully",
 			});
-          } catch (error:unknown) {
-             const message = getErrorMessage(error);
-               console.error("Unexpected error during registration:", error);
-               res.status(500).json({
-                success: false,
-                message,
-               });
+          } catch (error) {
+             next(error)
           }
      }
 
-     async login(req: Request, res: Response): Promise<void> {
+     async login(req: Request, res: Response, next: NextFunction): Promise<void> {
           try{
           const data = req.body as LoginUserDTO;
           const validatedData = loginSchema.parse(data);
@@ -151,7 +147,7 @@ export class AuthController implements IAuthController {
             }
             
             if (!user._id || !user.email || !user.role) {
-               throw new Error("User ID, email, or role is missing");
+               throw new CustomError("User ID, email, or role is missing",StatusCodes.BAD_REQUEST);
                }
 
           const tokens = await this._generateTokenUseCase.execute(user._id as Schema.Types.ObjectId,user.email!,user.role!);
@@ -180,14 +176,8 @@ export class AuthController implements IAuthController {
                     ...userWithoutPassword
                },
             })
-          }catch(error:unknown){
-                const message = getErrorMessage(error);
-               console.error("Unknown error in login:", error);
-
-               res.status(500).json({
-                    success: false,
-                    message,
-               });
+          }catch(error){
+             next(error)
           }
      }
 
@@ -196,7 +186,7 @@ export class AuthController implements IAuthController {
                const profile = req.user as GoogleAuthDTO;
                const user = await this._googleUseCase.execute(profile);
                if (!user._id || !user.email || !user.role) {
-				throw new Error("User ID, email, or role is missing");
+				throw new CustomError("User ID, email, or role is missing", StatusCodes.BAD_REQUEST);
 			};
 
                if(user.status === "blocked"){
@@ -257,7 +247,7 @@ export class AuthController implements IAuthController {
           }
      }
 
-    async getMe(req: Request, res: Response): Promise<void> {
+    async getMe(req: Request, res: Response, next: NextFunction): Promise<void> {
           try {
           const token = req.cookies?.client_access_token || req.cookies?.vendor_access_token;
           if (!token) {
@@ -273,14 +263,12 @@ export class AuthController implements IAuthController {
            }
 
           res.json({ success: true, data: user });
-          } catch (err:unknown) {
-           const message = getErrorMessage(err);
-           console.log("Error in get me:", err);
-          res.status(500).json({ success: false, message, });
+          } catch (error) {
+           next(error)
           }
      } 
 
-    async saveFcmToken(req: Request, res: Response): Promise<void>{
+    async saveFcmToken(req: Request, res: Response, next: NextFunction): Promise<void>{
           try {
          const {fcmToken, userId, role} = req.body;
   
@@ -292,14 +280,12 @@ export class AuthController implements IAuthController {
      await this._saveFcmTokenUseCase.execute(fcmToken, userId, role);
 
      res.json({ success: true });
-     } catch (error:unknown) {
-           const message = getErrorMessage(error);
-     console.error("Failed to save FCM token:", error);
-     res.status(500).json({ success: false, message});
+     } catch (error) {
+           next(error)
      }
     }
 
-     async sendOtp(req:Request, res:Response):Promise<void>{
+     async sendOtp(req:Request, res:Response, next: NextFunction):Promise<void>{
           try {
                const { email } = req.body;
                await this._sendOtpUseCase.execute(email);
@@ -307,17 +293,12 @@ export class AuthController implements IAuthController {
                     success: true,
                     message: "OTP sent successfully",
                });
-          } catch (error:unknown) {
-                const message = getErrorMessage(error);
-                console.error("Error sending OTP:", error);
-                    res.status(500).json({
-                         success: false,
-                         message,
-                    });
+          } catch (error) {
+               next(error)
           }
      }
 
-     async verifyOtp(req: Request, res: Response): Promise<void> {
+     async verifyOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
 		try {
 			const { email, otp } = req.body;
 			const validatedData = otpMailValidationSchema.parse({ email, otp });
@@ -327,17 +308,12 @@ export class AuthController implements IAuthController {
 				success: true,
 				message: "OTP verified successfully",
 			});
-		} catch (error:unknown) {
-                const message = getErrorMessage(error);
-                console.log("Error in verify OTP:",error);
-			res.status(500).json({
-                    success: false,
-                    message,
-               });
+		} catch (error) {
+             next(error)
 		}
 	}
 
-     async forgotPassword(req: Request, res: Response): Promise<void> {
+     async forgotPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
           try {
 			const validatedData = forgotPasswordValidationSchema.parse(req.body);
 			if (!validatedData) {
@@ -353,17 +329,12 @@ export class AuthController implements IAuthController {
 				success: true,
 				message: "Password reset link sent to your email",
 			});
-		} catch (error:unknown) {
-                const message = getErrorMessage(error);
-			console.error("Error sending password reset link:", error);
-               res.status(500).json({
-				success: true,
-				message,
-			});
+		} catch (error) {
+            next(error)
 		}   
      }
 
-     async resetPassword(req: Request, res: Response): Promise<void> {
+     async resetPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
 		try {
 			const validatedData = resetPasswordValidationSchema.parse(req.body);
 			if (!validatedData) {
@@ -379,17 +350,12 @@ export class AuthController implements IAuthController {
 				message: "Password reset successfully",
                     data: role,
 			});
-		} catch (error:unknown) {
-                const message = getErrorMessage(error);
-               console.error("Error resetting password:", error);
-               res.status(500).json({
-                    success: false,
-                    message,
-               });
+		} catch (error) {
+            next(error)
 		}
 	}
 
-     async logout(req: Request, res: Response): Promise<void> {
+     async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
           try{
              await this._blackListTokenUseCase.execute((req as CustomRequest).user.access_token);
 
@@ -419,13 +385,8 @@ export class AuthController implements IAuthController {
 			success: true,
 			message: "Logout successful",
 		});
-          }catch(error:unknown){
-                const message = getErrorMessage(error);
-             console.error("Logout error:", error); 
-               res.status(500).json({
-                    success: false,
-                    message,
-               });
+          }catch(error){
+           next(error)
           }
      }
 
@@ -437,7 +398,7 @@ export class AuthController implements IAuthController {
 				key.endsWith("_refresh_token")
 			);
                if (!refreshTokenKey) {
-				throw new Error("No refresh token found");
+				throw new CustomError("No refresh token found", StatusCodes.UNAUTHORIZED);
 			}
                const refreshToken = refreshCookies[refreshTokenKey];
 			const { role, accessToken } = this._refreshTokenUseCase.execute(refreshToken);

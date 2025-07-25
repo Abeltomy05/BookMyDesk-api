@@ -8,6 +8,8 @@ import { IBcrypt } from "../../frameworks/security/bcrypt.interface";
 import { IVendorModel } from "../../frameworks/database/mongo/models/vendor.model";
 import { IAdminModel } from "../../frameworks/database/mongo/models/admin.model";
 import { IClientModel } from "../../frameworks/database/mongo/models/client.model";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class LoginUserUseCase implements ILoginUserUseCase{
@@ -31,18 +33,18 @@ export class LoginUserUseCase implements ILoginUserUseCase{
         }else if(user.role === "admin"){
             repository = this._adminRepository;
         }else{
-            throw new Error("Invalid role");
+            throw new CustomError("Invalid role", StatusCodes.BAD_REQUEST);
         }
 
        const userData = await repository.findOne({email: user.email});
        if(!userData){
-            throw new Error("Invalid email. Please try again with another email");
+            throw new CustomError("Invalid email. Please try again with another email",StatusCodes.BAD_REQUEST);
         }
 
         if(user.password){
             const isPasswordValid = await this._passwordBcrypt.compare(user.password, userData.password);
             if(!isPasswordValid){
-                throw new Error("Invalid password");
+                throw new CustomError("Invalid password", StatusCodes.BAD_REQUEST);
             }
         }
 

@@ -3,6 +3,8 @@ import { IClientRepository } from "../../entities/repositoryInterfaces/users/cli
 import { IVendorRepository } from "../../entities/repositoryInterfaces/users/vendor-repository.interface";
 import { IBcrypt } from "../../frameworks/security/bcrypt.interface";
 import { IUpdateUserPasswordUseCase } from "../../entities/usecaseInterfaces/users/update-password.interface";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 
 @injectable()
@@ -20,7 +22,7 @@ export class UpdateUserPasswordUseCase implements IUpdateUserPasswordUseCase{
   async execute(userId: string, role:string, currentPassword: string, newPassword: string): Promise<{email: string}> {
     try {
      if (!userId || !currentPassword || !newPassword) {
-      throw new Error("Missing required fields.");
+      throw new CustomError("Missing required fields.",StatusCodes.BAD_REQUEST);
     }
 
     let userData: any;
@@ -34,17 +36,17 @@ export class UpdateUserPasswordUseCase implements IUpdateUserPasswordUseCase{
         repository = this._clientRepository;
         break;
       default:
-        throw new Error("Invalid user role.");
+        throw new CustomError("Invalid user role.", StatusCodes.BAD_REQUEST);
     }
 
     userData = await repository.findOne({ _id: userId });
     if (!userData) {
-      throw new Error("User not found.");
+      throw new CustomError("User not found.", StatusCodes.NOT_FOUND);
     }
 
      const isPasswordValid = await this._bcrypt.compare(currentPassword, userData.password);
     if (!isPasswordValid) {
-      throw new Error("Current password is incorrect.");
+      throw new CustomError("Current password is incorrect.", StatusCodes.BAD_REQUEST);
     }
 
     const hashedPassword = await this._bcrypt.hash(newPassword);
@@ -55,7 +57,7 @@ export class UpdateUserPasswordUseCase implements IUpdateUserPasswordUseCase{
     );
 
      if (!updatedUser) {
-    throw new Error("Failed to update user password.");
+    throw new CustomError("Failed to update user password.", StatusCodes.INTERNAL_SERVER_ERROR);
      } 
 
     return {

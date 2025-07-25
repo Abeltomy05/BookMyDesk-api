@@ -8,6 +8,8 @@ import { toEntityBuilding } from "../../interfaceAdapters/mappers/building.mappe
 import { IEditBuildingUsecase } from "../../entities/usecaseInterfaces/building/edit-building-usecase.interface";
 import mongoose from "mongoose";
 import { SpaceAggregation } from "../../shared/dtos/types/user.types";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class EditBuildingUsecase implements IEditBuildingUsecase{
@@ -24,13 +26,13 @@ export class EditBuildingUsecase implements IEditBuildingUsecase{
     ): Promise<IBuildingEntity>{
          const existingBuilding = await this.buildingRepository.findOne({_id:buildingDataToUpdate.id});  
           if (!existingBuilding) {
-            throw new Error("Building not found");
+            throw new CustomError("Building not found",StatusCodes.NOT_FOUND);
             }    
 
       const { id, ...updateData } = buildingDataToUpdate;
       let updatedBuilding = await this.buildingRepository.update({_id: id}, updateData);
        if (!updatedBuilding) {
-        throw new Error("Failed to update building");
+        throw new CustomError("Failed to update building", StatusCodes.INTERNAL_SERVER_ERROR);
         }
 
       const existingSpaces = await this.spaceRepository.find({ buildingId: updatedBuilding._id });
@@ -98,7 +100,7 @@ export class EditBuildingUsecase implements IEditBuildingUsecase{
         );  
 
         if (!updatedBuilding) {
-            throw new Error("Failed to update summarizedSpaces in building");
+            throw new CustomError("Failed to update summarizedSpaces in building", StatusCodes.INTERNAL_SERVER_ERROR);
         }
 
        return toEntityBuilding(updatedBuilding);

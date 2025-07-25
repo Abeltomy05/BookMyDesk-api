@@ -7,6 +7,8 @@ import { IGetBookingPageDataUseCase } from "../../entities/usecaseInterfaces/boo
 import { IWalletRepository } from "../../entities/repositoryInterfaces/wallet/wallet-repository.interface";
 import { IOfferRepository } from "../../entities/repositoryInterfaces/offer/offer-repository.interface";
 import { off, title } from "process";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 
 @injectable()
@@ -41,7 +43,7 @@ export class GetBookingPageDataUseCase implements IGetBookingPageDataUseCase{
             },}>{
         const spaceModel = await this._spaceRepository.findOne({ _id: spaceId });
         if (!spaceModel) {
-        throw new Error("Space not found");
+        throw new CustomError("Space not found",StatusCodes.NOT_FOUND);
         }
 
         const offer = await this._offerRepository.findOne({spaceId});
@@ -50,7 +52,7 @@ export class GetBookingPageDataUseCase implements IGetBookingPageDataUseCase{
 
        const building = await this._buildingRepository.findOne({ _id: spaceEntity.buildingId });
        if (!building) {
-        throw new Error("Building not found for the space");
+        throw new CustomError("Building not found for the space", StatusCodes.NOT_FOUND);
         }
 
       const wallet = await this._walletRepository.findOne({userId},{balance:1})  

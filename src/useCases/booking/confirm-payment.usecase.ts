@@ -14,6 +14,8 @@ import { INotificationRepository } from "../../entities/repositoryInterfaces/not
 import { getErrorMessage } from "../../shared/error/errorHandler";
 import { config } from "../../shared/config";
 import { generateBookingId } from "../../shared/helper/generateBookingId";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
@@ -88,7 +90,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
         const paymentIntent = await this._stripeService.retrievePaymentIntent(data.paymentIntentId);
 
         if (paymentIntent.status !== 'requires_capture') {
-            throw new Error('Payment intent is not in the correct state for confirmation');
+            throw new CustomError('Payment intent is not in the correct state for confirmation',StatusCodes.BAD_REQUEST);
         }
  
             const spaceId = paymentIntent.metadata.spaceId;
@@ -116,7 +118,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                             discountAmount,
                             paymentIntentId: data.paymentIntentId,
                         });
-                        throw new Error('Space not found');
+                        throw new CustomError('Space not found', StatusCodes.NOT_FOUND);
                 }
 
              if (!space.isAvailable) {
@@ -133,7 +135,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                             discountAmount,
                             paymentIntentId: data.paymentIntentId,
                   });
-                throw new Error('Space is no longer available');
+                throw new CustomError('Space is no longer available', StatusCodes.BAD_REQUEST);
             }
             
              if (!space.capacity || space.capacity < numberOfDesks) {
@@ -150,7 +152,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                             discountAmount,
                             paymentIntentId: data.paymentIntentId,
                     });
-                throw new Error(`Insufficient capacity. Only ${space.capacity || 0} desks available`);
+                throw new CustomError(`Insufficient capacity. Only ${space.capacity || 0} desks available`, StatusCodes.BAD_REQUEST);
             }
 
             const updatedSpace = await this._spaceRepository.update(
@@ -177,7 +179,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                     discountAmount,
                     paymentIntentId: data.paymentIntentId,
                 });
-                throw new Error('Failed to update space capacity');
+                throw new CustomError('Failed to update space capacity', StatusCodes.INTERNAL_SERVER_ERROR);
             }
 
             const capturedPayment = await this._stripeService.capturePaymentIntent(data.paymentIntentId);
@@ -203,7 +205,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                             discountAmount,
                             paymentIntentId: data.paymentIntentId,
                      });   
-                throw new Error('Failed to capture payment');
+                throw new CustomError('Failed to capture payment', StatusCodes.INTERNAL_SERVER_ERROR);
             }
 
             //processing vendor amount and platform fee
@@ -223,7 +225,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
 
             const adminId = config.ADMIN_ID;
             if (!adminId) {
-                throw new Error("Admin ID not configured in environment");
+                throw new CustomError("Admin ID not configured in environment", StatusCodes.INTERNAL_SERVER_ERROR);
             }
             const adminWalletResult = await this._walletRepository.updateOrCreateWalletBalance(adminId, 'Admin', platformFee);
 
@@ -264,7 +266,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
             });   
 
             if (!existingBooking) {
-                throw new Error('Booking not found for update');
+                throw new CustomError('Booking not found for update', StatusCodes.NOT_FOUND);
             }
 
             const updatedBooking = await this._bookingRepository.update(
@@ -288,7 +290,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                     { _id: spaceId },
                     { $inc: { capacity: numberOfDesks } }
                 );
-                throw new Error('Failed to update existing booking');
+                throw new CustomError('Failed to update existing booking', StatusCodes.INTERNAL_SERVER_ERROR);
             }
 
              return {
@@ -328,7 +330,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                     capacity: space.capacity,
                 }  
             );
-            throw new Error('Failed to create booking');
+            throw new CustomError('Failed to create booking', StatusCodes.INTERNAL_SERVER_ERROR);
         }
 
 

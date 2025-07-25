@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { CustomRequest } from "../middlewares/auth.middleware";
 import { INotificationController } from "../../entities/controllerInterfaces/others/notification-controller.interface";
@@ -16,7 +16,7 @@ export class NotificationController implements INotificationController{
      private _markAdReadUseCase: IMarkAsReadUseCase,
     ){}
 
-    async getNotifications(req:Request, res: Response): Promise<void>{
+    async getNotifications(req:Request, res: Response, next: NextFunction): Promise<void>{
         try {
             const page = parseInt(req.query.page as string) || 0;
             const limit = parseInt(req.query.limit as string) || 10;
@@ -29,16 +29,11 @@ export class NotificationController implements INotificationController{
                 success:true,
                 data:response,
             })
-        } catch (error:unknown) {
-          const message = getErrorMessage(error);
-           console.error("Error fetching notifications:", error);
-            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message,
-        });
+        } catch (error) {
+        next(error)
         }
     }
-    async markAsRead(req:Request, res: Response): Promise<void>{
+    async markAsRead(req:Request, res: Response, next: NextFunction): Promise<void>{
         try {
             const id = req.params.id;
             if(!id){
@@ -51,13 +46,8 @@ export class NotificationController implements INotificationController{
             res.status(StatusCodes.OK).json({
                 success:true
             })
-        } catch (error:unknown) {
-            const message = getErrorMessage(error);
-           console.error("Error fetching notifications:", error);
-            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message,
-        }); 
+        } catch (error) {
+         next(error)
         }
     }
 }

@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { IBookingController } from "../../entities/controllerInterfaces/others/booking-controller.interface";
 import { inject, injectable } from "tsyringe";
 import { IGetBookingPageDataUseCase } from "../../entities/usecaseInterfaces/booking/booking-page-data-usecase.interface";
@@ -34,7 +34,7 @@ export class BookingController implements IBookingController{
        private _revenueReportUseCase: IRevenueReportUseCase,
     ){}
 
-    async getBookingPageData(req:Request, res: Response): Promise<void>{
+    async getBookingPageData(req:Request, res: Response, next: NextFunction): Promise<void>{
         try {
           const spaceId = req.params.spaceId; 
           if(!spaceId){
@@ -51,19 +51,13 @@ export class BookingController implements IBookingController{
             success: true,
             data: response,
           });
-        } catch (error:unknown) {
-            const message = getErrorMessage(error);
-            console.error("Error fetching booking page data:", error);
-
-             res.status(500).json({
-                success: false,
-                message: message,
-              });
+        } catch (error) {
+           next(error)
         }
 
     }
 
-    async createPaymentIntent(req: Request, res: Response): Promise<void> {
+    async createPaymentIntent(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const { amount, currency = "inr", spaceId, bookingDate, numberOfDesks, discountAmount, bookingId  } = req.body;
             if (!amount || !spaceId || !bookingDate) {
@@ -89,17 +83,12 @@ export class BookingController implements IBookingController{
                 data:result,
                 message: "Payment intent created successfully."
             });
-        } catch (error: unknown) {
-           const message = getErrorMessage(error);
-            console.error("Error creating payment intent:", error);
-            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-                success: false,
-                message: message,
-            });
+        } catch (error) {
+           next(error)
         }
     }
 
-    async confirmPayment(req: Request, res: Response): Promise<void> {
+    async confirmPayment(req: Request, res: Response, next: NextFunction): Promise<void> {
       try {
         const { paymentIntentId } = req.body;
         if (!paymentIntentId) {
@@ -123,17 +112,12 @@ export class BookingController implements IBookingController{
         } else {
           res.status(400).json(result);
         }
-      } catch (error:unknown) {
-        const message = getErrorMessage(error);
-        console.error("Error confirming payment:", error);
-        res.status(500).json({
-            success: false,
-            message: message,
-        });
+      } catch (error) {
+        next(error)
       }
     }
 
-    async getBookings(req: Request, res: Response): Promise<void> {
+    async getBookings(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const { page = '1', limit = '5', search = '', status } = req.query;
             const {userId,role} = (req as CustomRequest).user;
@@ -160,17 +144,12 @@ export class BookingController implements IBookingController{
                 totalItems: result.totalItems,
                 message: "Bookings fetched successfully."
             });
-        } catch (error:unknown) {
-           const message = getErrorMessage(error);
-            console.error("Error fetching bookings:", error);
-            res.status(500).json({
-                success: false,
-                message: message,
-            });
+        } catch (error) {
+          next(error)
         }
     }
 
-    async getBookingDetails(req: Request, res: Response): Promise<void> {
+    async getBookingDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
       try {
         const bookingId = req.params.bookingId;
         if (!bookingId) {
@@ -194,18 +173,12 @@ export class BookingController implements IBookingController{
           data: booking,
           message: 'Booking fetched successfully.'
         });
-      } catch (error:unknown) {
-         const message = getErrorMessage(error);
-        console.error("Error fetching booking details:", error);
-        res.status(500).json({
-            success: false,
-            message: message,
-        });
-        
+      } catch (error) {
+        next(error)
       }
     }
 
-    async cancelBooking(req: Request, res: Response): Promise<void> {
+    async cancelBooking(req: Request, res: Response, next: NextFunction): Promise<void> {
       try {
         const {bookingId, reason} = req.body;
         if (!bookingId || !reason) {
@@ -230,17 +203,12 @@ export class BookingController implements IBookingController{
           });
         }
 
-      } catch (error:unknown) {
-        const message = getErrorMessage(error);
-        console.error("Error cancelling booking:", error);
-        res.status(500).json({
-            success: false,
-            message: message,
-        });
+      } catch (error) {
+        next(error)
       }
     }
 
-    async getBookingsForAdmin(req: Request, res: Response): Promise<void>{
+    async getBookingsForAdmin(req: Request, res: Response, next: NextFunction): Promise<void>{
       try {
         const {page="1",limit="5",vendorId, buildingId, status} = req.query;
         const result = await this._GetBookingsForAdminUseCase.execute({
@@ -255,17 +223,12 @@ export class BookingController implements IBookingController{
           success: true,
           data: result,
         });
-      } catch (error:unknown) {
-         const message = getErrorMessage(error);
-         console.log("Error when getting booking:",error)
-         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-          success: false,
-          message: message,
-         })
+      } catch (error) {
+        next(error)
       }
     }
 
-    async bookingsForRevenueReport(req: Request, res: Response): Promise<void>{
+    async bookingsForRevenueReport(req: Request, res: Response, next: NextFunction): Promise<void>{
       try {
          const rawBuildingId = req.query.buildingId;
          const buildingId: string = Array.isArray(rawBuildingId)
@@ -282,13 +245,8 @@ export class BookingController implements IBookingController{
           success: true,
           data: result,
         });
-      } catch (error: unknown) {
-         const message = getErrorMessage(error);
-         console.log("Error when getting booking:",error)
-         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-          success: false,
-          message: message,
-         })
+      } catch (error) {
+        next(error)
       }
     }
 

@@ -6,6 +6,8 @@ import { IVendorRepository } from "../../entities/repositoryInterfaces/users/ven
 import { IClientRepository } from "../../entities/repositoryInterfaces/users/client-repository.interface";
 import { IConfirmTopupPaymentUseCase } from "../../entities/usecaseInterfaces/wallet/confirm-topup-payment-usecase.interface";
 import { Types } from "mongoose";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class ConfirmTopupPaymentUseCase implements IConfirmTopupPaymentUseCase{
@@ -20,7 +22,7 @@ export class ConfirmTopupPaymentUseCase implements IConfirmTopupPaymentUseCase{
     async execute(paymentIntentId:string):Promise<{ success: boolean; data?:{walletBalance:number};}>{
        const capturedIntent = await this._stripeService.capturePaymentIntent(paymentIntentId);
        if (capturedIntent.status !== "succeeded") {
-        throw new Error("Payment capture failed");
+        throw new CustomError("Payment capture failed",StatusCodes.BAD_REQUEST);
        }
 
        const amountInRupees = capturedIntent.amount / 100;
@@ -32,19 +34,19 @@ export class ConfirmTopupPaymentUseCase implements IConfirmTopupPaymentUseCase{
        const email = metadata.email;
 
         if (!userId || !username || !email || !role) {
-         throw new Error("Missing metadata. Please contact support.");
+         throw new CustomError("Missing metadata. Please contact support.", StatusCodes.BAD_REQUEST);
         }
 
             if (role === "client") {
             const client = await this._clientRepository.findOne({ _id: userId });
-            if (!client) throw new Error("Client not found");
+            if (!client) throw new CustomError("Client not found", StatusCodes.NOT_FOUND);
 
             } else if (role === "vendor") {
             const vendor = await this._vendorRepository.findOne({ _id: userId });
-            if (!vendor) throw new Error("Vendor not found");
+            if (!vendor) throw new CustomError("Vendor not found", StatusCodes.NOT_FOUND);
 
             } else {
-            throw new Error("Invalid role in metadata");
+            throw new CustomError("Invalid role in metadata", StatusCodes.BAD_REQUEST);
           }
 
            const { wallet, balanceBefore, balanceAfter } = await this._walletRepository.updateOrCreateWalletBalance(

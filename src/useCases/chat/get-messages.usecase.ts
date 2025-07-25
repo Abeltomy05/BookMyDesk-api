@@ -5,6 +5,8 @@ import { GetMessageDTO } from "../../shared/dtos/chat.dto";
 import { IGetMessagesUseCase } from "../../entities/usecaseInterfaces/chat/get-messages-usecase.interface";
 import { IChatSessionRepository } from "../../entities/repositoryInterfaces/chat/chat-session-repository.interface";
 import { IChatMessageEntity } from "../../entities/models/chatMessage.entity";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class GetMessagesUseCase implements IGetMessagesUseCase{
@@ -17,12 +19,12 @@ export class GetMessagesUseCase implements IGetMessagesUseCase{
 
     async execute(sessionId:string,userId:string):Promise<GetMessageDTO[]>{
        if (!sessionId || !userId) {
-          throw new Error("Session ID or User ID missing");
+          throw new CustomError("Session ID or User ID missing",StatusCodes.BAD_REQUEST);
         }
 
         const session = await this._chatSessionRepo.findOne({ _id: sessionId });
         if (!session) {
-          throw new Error("Chat session not found");
+          throw new CustomError("Chat session not found", StatusCodes.NOT_FOUND);
         }
 
         const clearedAtForUser = session.clearedAtBy?.[userId];

@@ -1,6 +1,6 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
 export interface IOfferController{
-    fetchAllOffers(req:Request, res: Response): Promise<void>;
-    createOffer(req:Request, res: Response): Promise<void>;
+    fetchAllOffers(req:Request, res: Response, next: NextFunction): Promise<void>;
+    createOffer(req:Request, res: Response, next: NextFunction): Promise<void>;
 }

@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
 import { IGetAllUsersUseCase } from "../../entities/usecaseInterfaces/users/get-all-users-usecase.interface";
 import { IUsersController } from "../../entities/controllerInterfaces/others/users-controller.interface";
@@ -38,7 +38,7 @@ export class UsersController implements IUsersController{
        private _getMonthlyBookingStats: IMonthlyBookingStats,
     ){}
     
-    async getAllUsers(req: Request, res: Response): Promise<void> {
+    async getAllUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
            const { page = 1, limit = 4, search = "", role, status, excludeStatus  } = req.query; 
            console.log("Fetching all users with params:", { page, limit, search, role, status, excludeStatus });
@@ -70,17 +70,12 @@ export class UsersController implements IUsersController{
 			totalPages,
 			currentPage: pageNumber,
 		 });
-        } catch (error:unknown) {
-             const message = getErrorMessage(error);
-             console.error("Error fetching users:", error);
-            res.status(500).json({
-                success: false,
-                message,
-            });
+        } catch (error) {
+          next(error)
         }
     }
 
-    async getUserData(req: Request, res: Response): Promise<void> {
+    async getUserData(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const { userId, role } = (req as CustomRequest).user;
             console.log("Fetching user data for:", { userId, role });
@@ -91,17 +86,12 @@ export class UsersController implements IUsersController{
                 message: "User data fetched successfully",
                 data: userData,
             });
-        } catch (error:unknown) {
-            const message = getErrorMessage(error);
-            console.error("Error fetching user data:", error);
-            res.status(500).json({ 
-                success: false, 
-                message,
-            });
+        } catch (error) {
+          next(error)
         }
     }
 
-    async updateEntityStatus(req: Request, res: Response): Promise<void> {
+    async updateEntityStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const { entityType, entityId, status, reason } = req.body;
             console.log("Updating user status:", { entityType, entityId, status });
@@ -111,14 +101,12 @@ export class UsersController implements IUsersController{
                 success: true,
                 message: `${entityType} status updated successfully`
             });
-        } catch (error:unknown) {
-             const message = getErrorMessage(error);
-            console.error("Error updating user status:", error);
-            res.status(500).json({ success: false, message,});
+        } catch (error) {
+          next(error)
         }
     }
 
-   async getUserCount(req: Request, res: Response): Promise<void> {
+   async getUserCount(req: Request, res: Response, next: NextFunction): Promise<void> {
     try{
       const {clients, vendors} = await this._getUserCountUseCase.execute();
       console.log("Fetched user counts:", { clients, vendors });
@@ -130,17 +118,12 @@ export class UsersController implements IUsersController{
             vendors
         }
       });
-    }catch(error:unknown){
-         const message = getErrorMessage(error);
-        console.error("Error fetching user count:", error);
-        res.status(500).json({
-            success: false,
-            message,
-        });
+    }catch(error){
+      next(error)
     }
    }
 
-   async updateUserProfile(req: Request, res: Response): Promise<void> {
+   async updateUserProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
      try {
          const {userId,role} = (req as CustomRequest).user; 
          const data = req.body;
@@ -172,18 +155,12 @@ export class UsersController implements IUsersController{
             message: "User profile updated successfully",
             data: updatedData,
          })
-     } catch (error: unknown) {
-         const message = getErrorMessage(error);
-        console.error("Error updating user profile:", error);
-        res.status(500).json({
-            success: false,
-            message,
-        });
-        
+     } catch (error) {
+       next(error)
      }
    }
 
-   async updateUserPassword(req: Request, res: Response): Promise<void> {
+   async updateUserPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
         const { userId, role } = (req as CustomRequest).user;
         const { currentPassword, newPassword } = req.body;
@@ -194,28 +171,21 @@ export class UsersController implements IUsersController{
             message: "User password updated successfully",
             data: response,
         })
-    } catch (error: unknown) {
-         const message = getErrorMessage(error);
-        console.error("Error updating user password:", error);
-        res.status(500).json({
-            success: false,
-            message,
-        });
+    } catch (error) {
+     next(error)
     }
    }
 
-  async getVendorsAndBuildings(req: Request, res: Response): Promise<void>{
+  async getVendorsAndBuildings(req: Request, res: Response, next: NextFunction): Promise<void>{
      try {
     const result = await this._getVendorsAndBuildingsUseCase.execute();
     res.status(200).json({ success: true, data: result });
-   } catch (error:unknown) {
-     const message = getErrorMessage(error);
-    console.error("Error in getEntitiesSummary:", error);
-    res.status(500).json({ success: false, message, });
+   } catch (error) {
+   next(error)
    }
   }
 
-  async deleteEntity(req:Request, res: Response): Promise<void>{
+  async deleteEntity(req:Request, res: Response, next: NextFunction): Promise<void>{
         try {
             const entityId = req.query.entityId as string;
             const entityType = req.query.entityType as string;
@@ -234,28 +204,20 @@ export class UsersController implements IUsersController{
                 })
                 return;
             }
-        } catch (error:unknown) {
-            const message = getErrorMessage(error);
-            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message,
-            });
+        } catch (error) {
+          next(error)
         }
     }
 
-  async getMonthlyBookingStats(req:Request, res: Response): Promise<void>{
+  async getMonthlyBookingStats(req:Request, res: Response, next: NextFunction): Promise<void>{
     try {
         const result = await this._getMonthlyBookingStats.execute()
         res.status(StatusCodes.OK).json({
             success: true,
             data: result,
         })
-    } catch (error:unknown) {
-         const message = getErrorMessage(error);
-            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message,
-            });
+    } catch (error) {
+      next(error)
     }
   }
 

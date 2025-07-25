@@ -9,6 +9,8 @@ import { ISpaceRepository } from "../../entities/repositoryInterfaces/building/s
 import { ISpaceEntity } from "../../entities/models/space.entity";
 import { INotificationService } from "../../entities/serviceInterfaces/notification-service.interface";
 import { config } from "../../shared/config";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 
 
@@ -33,7 +35,7 @@ export class RegisterBuildingUsecase implements IRegisterBuildingUsecase{
 
        
         if (existingBuilding) {
-          throw new Error("A building with this name and location already exists.");
+          throw new CustomError("A building with this name and location already exists.",StatusCodes.BAD_REQUEST);
         }
  
         
@@ -121,7 +123,7 @@ export class RegisterBuildingUsecase implements IRegisterBuildingUsecase{
 
     const adminId = config.ADMIN_ID;
     if (!adminId) {
-      throw new Error("ADMIN_ID is not defined in environment variables. Please contact support.");
+      throw new CustomError("ADMIN_ID is not defined in environment variables. Please contact support.", StatusCodes.INTERNAL_SERVER_ERROR);
     }
     await this._notificationService.sendToUser(
       adminId,

@@ -10,6 +10,8 @@ import { NotificationSocketHandler } from "../../shared/config/notificationSocke
 import { INotificationSocketHandler } from "../../entities/socketInterfaces/notification-socket-handler.interface";
 import { getNotificationSocketHandler } from "../../shared/config/setupNotificationSocket";
 import { getChatSocketHandler } from "../../shared/config/setupChatSocket";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class NotificationService implements INotificationService {
@@ -36,7 +38,7 @@ export class NotificationService implements INotificationService {
     if (role === "client") repo = this._clientRepo;
     else if (role === "vendor") repo = this._vendorRepo;
     else if (role === "admin") repo = this._adminRepo;
-    else throw new Error("Invalid user role for notification");
+    else throw new CustomError("Invalid user role for notification",StatusCodes.BAD_REQUEST);
 
     const user = await repo.findOne({ _id: userId });
 

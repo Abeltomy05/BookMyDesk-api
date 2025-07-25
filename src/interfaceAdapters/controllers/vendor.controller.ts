@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
 import { IVendorController } from "../../entities/controllerInterfaces/others/vendor-controller.interface";
 import { StatusCodes } from "http-status-codes";
@@ -32,7 +32,7 @@ export class VendorController implements IVendorController{
         private _fetchSpacesForBuildingUseCase: IFetchSpacesForBuilding,
     ){}
 
-    async uploadIdProof(req: Request, res: Response): Promise<void> {
+    async uploadIdProof(req: Request, res: Response, next: NextFunction): Promise<void> {
       try {
         const { idProof } = req.body;
         if (!idProof) {
@@ -65,17 +65,12 @@ export class VendorController implements IVendorController{
         message: "ID proof uploaded successfully",
         data: vendor,
         });
-      } catch (error:unknown) {
-         const message = getErrorMessage(error);
-        console.error("Error uploading ID proof:", error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message,
-        });
+      } catch (error) {
+        next(error);
       }
     }
 
-    async getRetryData(req: Request, res: Response): Promise<void>{
+    async getRetryData(req: Request, res: Response, next: NextFunction): Promise<void>{
       try {
          const {token} = req.query;
           if (!token || typeof token !== 'string') {
@@ -89,17 +84,12 @@ export class VendorController implements IVendorController{
              success: true,
              data: vendor,
           })
-      } catch (error:unknown) {
-         const message = getErrorMessage(error);
-         console.error("Error getting retry data:", error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-          success: false,
-          message,
-        });
+      } catch (error) {
+       next(error)
       }
     }
 
-    async retryRegistration(req: Request, res: Response): Promise<void>{
+    async retryRegistration(req: Request, res: Response, next: NextFunction): Promise<void>{
       try {
         const {email,phone,companyName,companyAddress,idProof} = req.body;
         if(!phone || !companyName || !companyAddress || !idProof){
@@ -112,17 +102,12 @@ export class VendorController implements IVendorController{
           success: true,
           message: "Your application has been retried with the updated details. Please wait while the admin reviews and approves it.",
         });
-      } catch (error:unknown) {
-         const message = getErrorMessage(error);
-           console.error("Error retry vendor registration:", error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message,
-        });
+      } catch (error) {
+         next(error)
       }
     }
 
-    async vendorHomeData(req: Request, res: Response): Promise<void>{
+    async vendorHomeData(req: Request, res: Response, next: NextFunction): Promise<void>{
       try {
         const vendorId = (req as CustomRequest).user.userId;
 
@@ -131,17 +116,12 @@ export class VendorController implements IVendorController{
           success: true,
           data: response,
         });
-      } catch (error:unknown) {
-         const message = getErrorMessage(error);
-        console.error("Error retry vendor registration:", error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message,
-        });
+      } catch (error) {
+       next(error)
       }
     }
 
-    async singleVendorData(req: Request, res: Response): Promise<void>{
+    async singleVendorData(req: Request, res: Response, next: NextFunction): Promise<void>{
       try {
         const vendorId = req.params.vendorId;
         console.log("VendorId is:",vendorId)
@@ -151,17 +131,12 @@ export class VendorController implements IVendorController{
           success:true,
           data:result,
         })
-      } catch (error:unknown) {
-         const message = getErrorMessage(error);
-          console.error("Error getting vendor data in admin side:", error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-          success: false,
-          message,
-        });
+      } catch (error) {
+       next(error)
       }
     }
 
-    async fetchBuildingsForVendor(req: Request, res: Response): Promise<void>{
+    async fetchBuildingsForVendor(req: Request, res: Response, next: NextFunction): Promise<void>{
       try {
         const vendorId = (req as CustomRequest).user.userId;
         const result = await this._fetchBuildingsForVendorUseCase.execute(vendorId);
@@ -169,17 +144,12 @@ export class VendorController implements IVendorController{
           success: true,
           data: result,
         })
-      } catch (error:unknown) {
-         const message = getErrorMessage(error);
-         console.error("Error fetching buildings of a vendor:", error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message,
-        });
+      } catch (error) {
+        next(error)
       }
     }
 
-    async fetchSpaceForBuilding(req: Request, res: Response): Promise<void>{
+    async fetchSpaceForBuilding(req: Request, res: Response, next: NextFunction): Promise<void>{
       try {
         const buildingId = req.params.buildingId;
         const response = await this._fetchSpacesForBuildingUseCase.execute(buildingId);
@@ -187,13 +157,8 @@ export class VendorController implements IVendorController{
           success: true,
           data: response,
         })
-      } catch (error:unknown) {
-         const message = getErrorMessage(error);
-         console.error("Error fetching space of a building:", error);
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message,
-        });
+      } catch (error) {
+       next(error)
       }
     }
 

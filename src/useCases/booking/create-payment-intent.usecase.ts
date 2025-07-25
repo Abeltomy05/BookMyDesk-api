@@ -9,6 +9,8 @@ import { IBuildingRepository } from "../../entities/repositoryInterfaces/buildin
 import { BookingStatus, PaymentMethod, PaymentStatus } from "../../shared/dtos/types/user.types";
 import { getErrorMessage } from "../../shared/error/errorHandler";
 import { config } from "../../shared/config";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class CreatePaymentIntentUseCase implements ICreatePaymentIntentUseCase{
@@ -27,12 +29,12 @@ export class CreatePaymentIntentUseCase implements ICreatePaymentIntentUseCase{
          try {
         const space = await this._spaceRepository.findOne({_id:data.spaceId});
         if (!space) {
-            throw new Error('Space not found');
+            throw new CustomError('Space not found',StatusCodes.NOT_FOUND);
         }
 
         const building = await this._buildingRepository.findOne({ _id: space.buildingId });
         if (!building) {
-         throw new Error('Building not found for the space');
+         throw new CustomError('Building not found for the space', StatusCodes.NOT_FOUND);
         }
 
       if (data.bookingId) {
@@ -43,7 +45,7 @@ export class CreatePaymentIntentUseCase implements ICreatePaymentIntentUseCase{
         });
 
          if (!existingBooking) {
-          throw new Error('Invalid booking ID or booking cannot be retried');
+          throw new CustomError('Invalid booking ID or booking cannot be retried', StatusCodes.BAD_REQUEST);
         }
       }
       const paymentIntent = await this._stripeService.createPaymentIntent({
@@ -73,7 +75,7 @@ export class CreatePaymentIntentUseCase implements ICreatePaymentIntentUseCase{
        } catch (error: unknown) {
         const message = getErrorMessage(error)
       console.error('Error in CreatePaymentIntentUseCase:', error);
-      throw new Error(message || 'Failed to create payment intent');
+      throw new CustomError(message || 'Failed to create payment intent', StatusCodes.INTERNAL_SERVER_ERROR);
     }
     }
 }

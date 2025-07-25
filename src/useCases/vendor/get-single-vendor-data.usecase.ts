@@ -4,6 +4,8 @@ import { IWalletRepository } from "../../entities/repositoryInterfaces/wallet/wa
 import { IBuildingRepository } from "../../entities/repositoryInterfaces/building/building-repository.interface";
 import { IVendorDataResponseDTO } from "../../shared/dtos/vendorInfo.dto";
 import { IGetSingleVendorData } from "../../entities/usecaseInterfaces/vendor/get-single-vendorData-usecase.interface";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class GetSingleVendorData implements IGetSingleVendorData{
@@ -17,7 +19,7 @@ export class GetSingleVendorData implements IGetSingleVendorData{
     ){}
 
     async execute(vendorId:string):Promise<IVendorDataResponseDTO>{
-        if(!vendorId) throw new Error("Vendor Id missing, Please try again.");
+        if(!vendorId) throw new CustomError("Vendor Id missing, Please try again.",StatusCodes.BAD_REQUEST);
 
         const totalBookings = await this._bookingRepo.countDocuments({
             vendorId,

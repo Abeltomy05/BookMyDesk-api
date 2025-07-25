@@ -4,6 +4,8 @@ import { IWalletTransactionRepository } from "../../entities/repositoryInterface
 import { WalletDetailsDTO } from "../../shared/dtos/wallet.dto";
 import { IGetWalletDetailsUseCase } from "../../entities/usecaseInterfaces/wallet/get-walletDetails-usecase.interface";
 import { Types } from "mongoose";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class GetWalletDetailsUseCase implements IGetWalletDetailsUseCase {
@@ -16,7 +18,7 @@ export class GetWalletDetailsUseCase implements IGetWalletDetailsUseCase {
 
     async execute(userId: string, role: string, page: number, limit: number): Promise<WalletDetailsDTO> {
         if (!userId || !role) {
-            throw new Error("User ID and role are required");
+            throw new CustomError("User ID and role are required",StatusCodes.BAD_REQUEST);
         }
        console.log("Looking for wallet:", {
         userId: new Types.ObjectId(userId).toHexString(),

@@ -7,6 +7,8 @@ import { ICancelBookingUseCase } from "../../entities/usecaseInterfaces/booking/
 import { ISpaceRepository } from "../../entities/repositoryInterfaces/building/space-repository.interface";
 import { IBuildingRepository } from "../../entities/repositoryInterfaces/building/building-repository.interface";
 import { INotificationService } from "../../entities/serviceInterfaces/notification-service.interface";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class CancelBookingUseCase implements ICancelBookingUseCase {
@@ -28,19 +30,19 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
     async execute(bookingId: string, reason:string, userId:string, role:'client' | 'vendor'): Promise<{ success: boolean}> {
          const booking = await this._bookingRepository.findOne({_id:bookingId});
         if(!booking || !booking.totalPrice) {
-            throw new Error("Booking not found");
+            throw new CustomError("Booking not found",StatusCodes.NOT_FOUND);
         }
 
         if(booking.status === "cancelled") {
-            throw new Error("Booking is already cancelled");
+            throw new CustomError("Booking is already cancelled", StatusCodes.BAD_REQUEST);
         }
 
         if (role === 'client' && booking.clientId.toString() !== userId) {
-          throw new Error("You are not allowed to cancel this booking.");
+          throw new CustomError("You are not allowed to cancel this booking.", StatusCodes.FORBIDDEN);
         }
 
         if (role === 'vendor' && booking.vendorId.toString() !== userId) {
-          throw new Error("You are not allowed to cancel this booking.");
+          throw new CustomError("You are not allowed to cancel this booking.", StatusCodes.FORBIDDEN);
         }
 
         //refund
@@ -94,7 +96,7 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
         });
 
         const space = await this._spaceRepository.findOne({_id:booking.spaceId});
-        if(!space) throw new Error("No space found for cancelling.")
+        if(!space) throw new CustomError("No space found for cancelling.", StatusCodes.NOT_FOUND);
 
         if (role === 'vendor') {
         await this._notificationService.sendToUser(

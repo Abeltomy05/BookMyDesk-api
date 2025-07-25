@@ -4,6 +4,8 @@ import { IGetBookingsUseCase } from "../../entities/usecaseInterfaces/booking/ge
 import { IGetBookingsDTO, IGetBookingsResult } from "../../shared/dtos/booking.dto";
 import {  toEntityBookingWithDetails } from "../../interfaceAdapters/mappers/booking.mapper";
 import { Types } from "mongoose";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 
 @injectable()
@@ -16,7 +18,7 @@ export class GetBookingsUseCase implements IGetBookingsUseCase {
     async execute(params: IGetBookingsDTO): Promise<IGetBookingsResult> {
         const { userId, role, page, limit, search, status } = params;
         if (!userId || !role) {
-            throw new Error("User ID and role is required to fetch bookings.");
+            throw new CustomError("User ID and role is required to fetch bookings.",StatusCodes.BAD_REQUEST);
         }
 
         const filterCriteria: any = {};
@@ -26,7 +28,7 @@ export class GetBookingsUseCase implements IGetBookingsUseCase {
         } else if (role === 'vendor') {
         filterCriteria.vendorId = new Types.ObjectId(userId);
         } else {
-        throw new Error("Invalid role. Only 'client' and 'vendor' roles are supported.");
+        throw new CustomError("Invalid role. Only 'client' and 'vendor' roles are supported.", StatusCodes.BAD_REQUEST);
         }
 
          if (status) {

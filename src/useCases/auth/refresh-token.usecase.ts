@@ -2,6 +2,8 @@ import { inject, injectable } from "tsyringe";
 import { IJwtService } from "../../entities/serviceInterfaces/jwt-service.interface";
 import { JwtPayload } from "jsonwebtoken";
 import { IRefreshTokenUseCase } from "../../entities/usecaseInterfaces/auth/refresh-token-usecase.interface";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class RefreshTokenUseCase implements IRefreshTokenUseCase {
@@ -13,7 +15,7 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
     execute(refreshToken: string): { role: string; accessToken: string } {
 		const payload = this._tokenService.verifyRefreshToken(refreshToken);
 		if (!payload) {
-			throw new Error('Invalid refresh token');
+			throw new CustomError('Invalid refresh token',StatusCodes.BAD_REQUEST);
 		}
 		return {
 			role: (payload as JwtPayload).role,

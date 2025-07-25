@@ -9,6 +9,8 @@ import { IBuildingRepository } from "../../entities/repositoryInterfaces/buildin
 import { IBookingRepository } from "../../entities/repositoryInterfaces/booking/booking-repository.interface";
 import { hasEmail } from "../../shared/helper/hasEmail";
 import { config } from "../../shared/config";
+import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
 
 
 
@@ -30,7 +32,7 @@ export class UpdateEntityStatusUseCase  implements IUpdateEntityStatusUseCase {
 	) {}
 	async execute(entityType: string, entityId: string, status: string, reason?: string): Promise<void> {
 		if (!entityType || !entityId || !status) {
-			throw new Error("Missing required fields: entityType, entityId, or status");
+			throw new CustomError("Missing required fields: entityType, entityId, or status",StatusCodes.BAD_REQUEST);
 			}
 		let repo;
 
@@ -49,12 +51,12 @@ export class UpdateEntityStatusUseCase  implements IUpdateEntityStatusUseCase {
 			break;
 
 			default:
-			throw new Error("Unsupported entity type");
+			throw new CustomError("Unsupported entity type", StatusCodes.BAD_REQUEST);
 		}
 		const entity  = await repo.findOne({ _id: entityId  });
 
 		if (!entity) {
-			throw new Error(`${entityType} not found`);
+			throw new CustomError(`${entityType} not found`, StatusCodes.NOT_FOUND);
 		}
 
 		await repo.update({ _id: entityId },{ status });
