@@ -36,4 +36,6 @@ export const config = {
     ADMIN_ID: process.env.ADMIN_ID,
 
     FIREBASE_SERVICE_ACCOUNT_PATH: process.env.FIREBASE_SERVICE_ACCOUNT_PATH,
+
+    LOGGER_STATUS: process.env.LOGGER_STATUS || "dev", 
 }

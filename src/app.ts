@@ -1,6 +1,5 @@
 import 'reflect-metadata';
 import express from 'express';
-import morgan from 'morgan';
 import passport from "passport";
 import cors from 'cors';
 import http from 'http';
@@ -13,14 +12,13 @@ import { ClientRoutes } from './frameworks/routes/client.route';
 import { VendorRoutes } from './frameworks/routes/vendor.route';
 import { AdminRoutes } from './frameworks/routes/admin.route';
 import { startOfferCleanupJob } from "./shared/cron/offer-cleanup.cron";
-import { ChatSocketHandler  } from './shared/config/socket';
 import { container } from 'tsyringe';
 import { IChatUseCase } from './entities/usecaseInterfaces/chat/chat-usecase.interface';
 import { config } from './shared/config';
-import { NotificationSocketHandler } from './shared/config/notificationSocket';
-import { INotificationSocketHandler } from './entities/socketInterfaces/notification-socket-handler.interface';
 import { initializeNotificationSocket } from './shared/config/setupNotificationSocket';
 import { initializeChatSocket } from './shared/config/setupChatSocket';
+import morganLogger from './frameworks/http/logger';
+import { errorHandler } from './interfaceAdapters/middlewares/error.middleware';
 
 dotenv.config();
 
@@ -34,7 +32,7 @@ initializeNotificationSocket(server);
 
 
 app.use(passport.initialize());
-app.use(morgan("dev"))
+app.use(morganLogger)
 
 app.use(cookieParser());
 app.use(express.json());
@@ -49,16 +47,12 @@ app.use(cors({
 
 startOfferCleanupJob();
 
-// app.use((req, res, next) => {
-//   console.log("➡️ Incoming request:", req.method, req.url);
-//   next();
-// });
-
 app.use('/api/auth', new AuthRoutes().router);
 app.use('/api/_c', new ClientRoutes().router);
 app.use('/api/_v', new VendorRoutes().router);
 app.use('/api/_a', new AdminRoutes().router);
 
+app.use(errorHandler);
 
 const PORT = config.PORT || 3000;
 
