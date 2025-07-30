@@ -12,6 +12,8 @@ import { IGetBookingsForAdmin } from "../../entities/usecaseInterfaces/booking/g
 import { StatusCodes } from "http-status-codes";
 import { getErrorMessage } from "../../shared/error/errorHandler";
 import { IRevenueReportUseCase } from "../../entities/usecaseInterfaces/booking/revenue-report-usecase.interface";
+import { RevenueReportFilters } from "../../shared/dtos/revenue-report.dto";
+import { IRevenueChartDataUseCase } from "../../entities/usecaseInterfaces/booking/revenue-chart-data-usecase.interface";
 
 @injectable()
 export class BookingController implements IBookingController{
@@ -32,6 +34,8 @@ export class BookingController implements IBookingController{
        private _GetBookingsForAdminUseCase: IGetBookingsForAdmin,
        @inject("IRevenueReportUseCase")
        private _revenueReportUseCase: IRevenueReportUseCase,
+       @inject("IRevenueChartDataUseCase")
+       private _revenueChartDataUseCase: IRevenueChartDataUseCase,
     ){}
 
     async getBookingPageData(req:Request, res: Response, next: NextFunction): Promise<void>{
@@ -236,9 +240,13 @@ export class BookingController implements IBookingController{
           : rawBuildingId?.toString() ?? 'all';
 
         const vendorId = (req as CustomRequest).user.userId;
-        const data = {
+        const data: RevenueReportFilters = {
           buildingId,
           vendorId,
+          filterType: req.query.filterType as 'date' | 'month' | 'year',
+          date: req.query.date as string,
+          month: req.query.month as string,
+          year: req.query.year as string,
         }
         const result = await this._revenueReportUseCase.execute(data);
         res.status(StatusCodes.OK).json({
@@ -250,4 +258,23 @@ export class BookingController implements IBookingController{
       }
     }
 
+    async getRevenueChartData(req: Request, res: Response, next: NextFunction): Promise<void> {
+      try {
+        const {userId, role} = (req as CustomRequest).user;
+        const { filterType, date, month, year } = req.query;
+
+        const result = await this._revenueChartDataUseCase.execute({
+         userId,
+         role,
+         filterType: filterType as 'date' | 'month' | 'year',
+         date: date as string,
+         month: month as string,
+         year: year as string, 
+        });
+
+        res.status(StatusCodes.OK).json({ success: true, data: result });
+      } catch (error) {
+        next(error);
+      }
+    }
 }

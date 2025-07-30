@@ -98,11 +98,6 @@ export interface VendorHomeDataResultDTO {
   totalSpaces: number;
   completedBookingsCount: number;
   totalRevenue: number;
-  monthlyBookings: {
-    month:string;
-    revenue:number;
-    bookings:number;
-  }[];
   completedBookings: IBookingEntityWithDetails[];
   buildingIdsAndName:{
     _id: string,

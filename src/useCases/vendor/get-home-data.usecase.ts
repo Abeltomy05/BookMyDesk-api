@@ -2,7 +2,6 @@ import { inject, injectable } from "tsyringe";
 import { IBuildingRepository } from "../../entities/repositoryInterfaces/building/building-repository.interface";
 import { IBookingRepository } from "../../entities/repositoryInterfaces/booking/booking-repository.interface";
 import { IWalletRepository } from "../../entities/repositoryInterfaces/wallet/wallet-repository.interface";
-import { IWalletTransactionRepository } from "../../entities/repositoryInterfaces/wallet/walletTrasaction-repository.interface";
 import { VendorHomeDataResultDTO } from "../../shared/dtos/booking.dto";
 import { IGetVendorHomeData } from "../../entities/usecaseInterfaces/vendor/get-vendor-home-data-usecase.interface";
 
@@ -16,16 +15,13 @@ export class GetVendorHomeData implements IGetVendorHomeData{
        private _bookingRepo: IBookingRepository,
        @inject("IWalletRepository") 
        private _walletRepo: IWalletRepository,
-       @inject("IWalletTransactionRepository") 
-       private _walletTxnRepo: IWalletTransactionRepository
     ){}
 
     async execute(vendorId: string):Promise<VendorHomeDataResultDTO>{
 
-        const [buildings, wallet, walletTxns, completedBookingsPaginated] = await Promise.all([
+        const [buildings, wallet, completedBookingsPaginated] = await Promise.all([
             this._buildingRepo.find({vendorId}),
             this._walletRepo.findOne({userId:vendorId}),
-            this._walletTxnRepo.getMonthlyBookingIncome(vendorId),
             this._bookingRepo.findAllWithDetails(
                 { vendorId, status: "completed" },
                 0,
@@ -47,7 +43,6 @@ export class GetVendorHomeData implements IGetVendorHomeData{
           );
 
         const totalRevenue = wallet?.balance || 0;
-        const monthlyBookings = walletTxns;
 
         const completedBookings = completedBookingsPaginated.items.map((b:any) => ({
         ...b,
@@ -76,7 +71,6 @@ export class GetVendorHomeData implements IGetVendorHomeData{
             totalSpaces,
             completedBookingsCount: completedBookingsPaginated.total,
             totalRevenue,
-            monthlyBookings,
             completedBookings,
             buildingIdsAndName,
         } 

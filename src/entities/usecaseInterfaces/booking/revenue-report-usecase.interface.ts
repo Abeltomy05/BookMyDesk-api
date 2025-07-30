@@ -1,4 +1,4 @@
-import { RevenueReportBooking, RevenueReportFilters } from "../../../useCases/booking/revenue-report.usecase";
+import { RevenueReportBooking, RevenueReportFilters } from "../../../shared/dtos/revenue-report.dto";
 
 export interface IRevenueReportUseCase{
      execute(data: RevenueReportFilters): Promise<RevenueReportBooking[]> 

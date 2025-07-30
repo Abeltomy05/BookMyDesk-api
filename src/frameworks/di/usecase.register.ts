@@ -74,6 +74,7 @@ import { RevenueReportUseCase } from "../../useCases/booking/revenue-report.usec
 import { FetchFiltersUseCase } from "../../useCases/building/fetch-filters.usecase";
 import { NotificationSocketHandler } from "../../shared/config/notificationSocket";
 import { GetEveryBuildingUseCase } from "../../useCases/building/get-every-building.usecase";
+import { RevenueChartDataUseCase } from "../../useCases/booking/revenue-chart-data.usecase";
 
 
 
@@ -256,6 +257,9 @@ export class UseCaseRegistry{
       })
       container.register("IGetEveryBuildingUseCase",{
         useClass: GetEveryBuildingUseCase
+      })
+      container.register("IRevenueChartDataUseCase",{
+        useClass: RevenueChartDataUseCase
       })
 
         //* ====== Register Bcrypts ====== *//

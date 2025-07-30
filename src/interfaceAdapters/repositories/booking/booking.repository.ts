@@ -353,4 +353,146 @@ async findBookings(
 
     return { items, total };
 }
+
+async getRevenueByHour(userId: string, date: string, isAdmin: boolean) {
+  const start = new Date(date);
+  const end = new Date(date);
+  end.setDate(end.getDate() + 1);
+
+  const matchFilter: {
+    vendorId?: Types.ObjectId;
+    bookingDate: { $gte: Date; $lt: Date };
+    status: string;
+  } = {
+    bookingDate: { $gte: start, $lt: end },
+    status: "completed"
+  };
+
+  if (!isAdmin) {
+    matchFilter.vendorId = new Types.ObjectId(userId);
+  }
+
+  const data = await this.model.aggregate([
+    { $match: matchFilter  },
+    {
+      $group: {
+        _id: { $hour: "$bookingDate" },
+        revenue: { $sum: "$totalPrice" },
+        bookings: { $sum: 1 }
+      }
+    },
+    {
+      $project: {
+        hour: {
+          $concat: [
+            { $toString: "$_id" },
+            ":00"
+          ]
+        },
+        revenue: 1,
+        bookings: 1,
+        _id: 0
+      }
+    },
+    { $sort: { hour: 1 } }
+  ]);
+
+  return data;
+}
+
+async getRevenueByDay(userId: string, month: string, year: string, isAdmin: boolean) {
+  const start = new Date(`${year}-${month}-01`);
+  const end = new Date(start);
+  end.setMonth(end.getMonth() + 1);
+
+  const matchFilter: {
+    vendorId?: Types.ObjectId;
+    bookingDate: { $gte: Date; $lt: Date };
+    status: string;
+  } = {
+    bookingDate: { $gte: start, $lt: end },
+    status: "completed"
+  };
+
+  if (!isAdmin) {
+    matchFilter.vendorId = new Types.ObjectId(userId);
+  }
+
+  const data = await this.model.aggregate([
+    { $match: matchFilter },
+    {
+      $group: {
+        _id: {
+          $dayOfMonth: "$bookingDate"
+        },
+        revenue: { $sum: "$totalPrice" },
+        bookings: { $sum: 1 }
+      }
+    },
+    {
+      $project: {
+        date: {
+          $dateToString: { format: "%Y-%m-%d", date: {
+            $dateFromParts: {
+              year: parseInt(year),
+              month: parseInt(month),
+              day: "$_id"
+            }
+          }}
+        },
+        revenue: 1,
+        bookings: 1,
+        _id: 0
+      }
+    },
+    { $sort: { date: 1 } }
+  ]);
+  return data;
+}
+
+async getRevenueByMonth(userId: string, year: string, isAdmin: boolean) {
+  const start = new Date(`${year}-01-01`);
+  const end = new Date(`${parseInt(year) + 1}-01-01`);
+
+  const matchFilter: {
+    vendorId?: Types.ObjectId;
+    bookingDate: { $gte: Date; $lt: Date };
+    status: string;
+  } = {
+    bookingDate: { $gte: start, $lt: end },
+    status: "completed"
+  };
+
+  if (!isAdmin) {
+    matchFilter.vendorId = new Types.ObjectId(userId);
+  }
+
+  const data = await this.model.aggregate([
+    { $match: matchFilter },
+    {
+      $group: {
+        _id: { $month: "$bookingDate" },
+        revenue: { $sum: "$totalPrice" },
+        bookings: { $sum: 1 }
+      }
+    },
+    {
+      $project: {
+        month: {
+          $arrayElemAt: [
+            ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+            { $subtract: ["$_id", 1] }
+          ]
+        },
+        revenue: 1,
+        bookings: 1,
+        _id: 0
+      }
+    },
+    { $sort: { month: 1 } }
+  ]);
+
+  return data;
+}
+
 }

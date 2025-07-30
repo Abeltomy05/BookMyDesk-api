@@ -9,4 +9,5 @@ export interface IBookingController{
     cancelBooking(req: Request, res: Response, next: NextFunction): Promise<void>;
     getBookingsForAdmin(req: Request, res: Response, next: NextFunction): Promise<void>;
     bookingsForRevenueReport(req: Request, res: Response, next: NextFunction): Promise<void>;
+    getRevenueChartData(req: Request, res: Response, next: NextFunction): Promise<void>;
 }
