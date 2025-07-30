@@ -56,5 +56,8 @@ export class AdminRoutes extends BaseRoute{
         this.router.get("/admin/get-every-building",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
             buildingController.getEveryBuilding(req, res, next);
         });
+        this.router.get("/admin/revenue-chart",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
+            bookingController.getRevenueChartData(req, res, next);
+        });
     }
 }
