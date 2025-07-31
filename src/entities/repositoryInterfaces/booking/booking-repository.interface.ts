@@ -2,6 +2,7 @@ import { FilterQuery } from "mongoose";
 import { IBookingModel } from "../../../frameworks/database/mongo/models/booking.model";
 import { IBaseRepository } from "../base-repository.interface";
 import { IGetAdminBookingsFilterDTO, IGetAdminBookingsResultDTO } from "../../../shared/dtos/booking.dto";
+import { RevenueChartDataDTO } from "../../../shared/dtos/revenue-report.dto";
 
 export interface IBookingRepository extends IBaseRepository<IBookingModel>{
   findAllWithDetails(
@@ -31,4 +32,8 @@ export interface IBookingRepository extends IBaseRepository<IBookingModel>{
     items: IBookingModel[]; 
     total: number;
   }>
+
+  getRevenueByHour(userId: string, date: string, isAdmin: boolean): Promise<RevenueChartDataDTO[]>;
+  getRevenueByDay(userId: string, month: string, year: string, isAdmin: boolean): Promise<RevenueChartDataDTO[]>;
+  getRevenueByMonth(userId: string, year: string, isAdmin: boolean): Promise<RevenueChartDataDTO[]>;
 }
