@@ -93,5 +93,8 @@ export class ClientRoutes extends BaseRoute{
         this.router.get("/client/fetch-filters", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => {
             buildingController.fetchFilters(req, res, next);
         });
+        this.router.delete("/client/clear-notifications", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => {
+            notifiactionController.clearNotification(req, res, next);
+        });
     }
 }

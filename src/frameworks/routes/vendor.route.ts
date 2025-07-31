@@ -110,5 +110,8 @@ export class VendorRoutes extends BaseRoute{
        this.router.get("/vendor/revenue-chart",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
          bookingController.getRevenueChartData(req, res, next);
        });
+       this.router.delete("/vendor/clear-notifications",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
+         notifiactionController.clearNotification(req, res, next);
+       });
     }
 }
