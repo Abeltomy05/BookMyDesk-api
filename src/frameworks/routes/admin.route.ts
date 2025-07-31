@@ -62,5 +62,8 @@ export class AdminRoutes extends BaseRoute{
         this.router.get("/admin/revenue-report",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
             bookingController.adminRevenueReport(req, res, next);
         });
+        this.router.delete("/admin/clear-notifications",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
+            notifiactionController.clearNotification(req, res, next);
+        });
     }
 }

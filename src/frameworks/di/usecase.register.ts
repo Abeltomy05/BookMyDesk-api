@@ -76,6 +76,7 @@ import { NotificationSocketHandler } from "../../shared/config/notificationSocke
 import { GetEveryBuildingUseCase } from "../../useCases/building/get-every-building.usecase";
 import { RevenueChartDataUseCase } from "../../useCases/booking/revenue-chart-data.usecase";
 import { AdminRevenueReportUseCase } from "../../useCases/booking/admin-revenue-report.usecase";
+import { ClearNotificationUseCase } from "../../useCases/notification/clear-notification.usecase";
 
 
 
@@ -264,6 +265,9 @@ export class UseCaseRegistry{
       })
       container.register("IAdminRevenueReportUseCase",{
         useClass: AdminRevenueReportUseCase
+      })
+      container.register("IClearNotificationUseCase",{
+        useClass: ClearNotificationUseCase
       })
 
         //* ====== Register Bcrypts ====== *//

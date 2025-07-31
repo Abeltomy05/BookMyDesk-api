@@ -9,3 +9,4 @@ export class NotificationRepository extends BaseRepository<INotificationModel> i
     super(NotificationModel)
    }
 }
+

@@ -5,7 +5,7 @@ import { INotificationController } from "../../entities/controllerInterfaces/oth
 import { inject, injectable } from "tsyringe";
 import { IGetNotificationsUseCase } from "../../entities/usecaseInterfaces/notification/get-notification-usecase.interface";
 import { IMarkAsReadUseCase } from "../../entities/usecaseInterfaces/notification/mark-as-read-usecase.interface";
-import { getErrorMessage } from "../../shared/error/errorHandler";
+import { IClearNotificationUseCase } from "../../entities/usecaseInterfaces/notification/clear-notification-usecase.interface";
 
 @injectable()
 export class NotificationController implements INotificationController{
@@ -14,6 +14,8 @@ export class NotificationController implements INotificationController{
      private _getNotificationUseCase: IGetNotificationsUseCase,
      @inject("IMarkAsReadUseCase")
      private _markAdReadUseCase: IMarkAsReadUseCase,
+     @inject("IClearNotificationUseCase")
+     private _clearNotificationUseCase: IClearNotificationUseCase,
     ){}
 
     async getNotifications(req:Request, res: Response, next: NextFunction): Promise<void>{
@@ -48,6 +50,18 @@ export class NotificationController implements INotificationController{
             })
         } catch (error) {
          next(error)
+        }
+    }
+    async clearNotification(req:Request, res: Response, next: NextFunction): Promise<void>{
+        try {
+            const { userId,role } = (req as CustomRequest).user;
+            await this._clearNotificationUseCase.execute(userId,role);
+            
+            res.status(StatusCodes.OK).json({
+                success: true,
+            })
+        } catch (error) {
+            next(error)
         }
     }
 }
