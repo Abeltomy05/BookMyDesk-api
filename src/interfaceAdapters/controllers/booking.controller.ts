@@ -14,6 +14,7 @@ import { getErrorMessage } from "../../shared/error/errorHandler";
 import { IRevenueReportUseCase } from "../../entities/usecaseInterfaces/booking/revenue-report-usecase.interface";
 import { RevenueReportFilters } from "../../shared/dtos/revenue-report.dto";
 import { IRevenueChartDataUseCase } from "../../entities/usecaseInterfaces/booking/revenue-chart-data-usecase.interface";
+import { IAdminRevenueReportUseCase } from "../../entities/usecaseInterfaces/booking/admin-revenue-report-usecase.interface";
 
 @injectable()
 export class BookingController implements IBookingController{
@@ -36,6 +37,8 @@ export class BookingController implements IBookingController{
        private _revenueReportUseCase: IRevenueReportUseCase,
        @inject("IRevenueChartDataUseCase")
        private _revenueChartDataUseCase: IRevenueChartDataUseCase,
+       @inject("IAdminRevenueReportUseCase")
+       private _adminRevenueReportUseCase: IAdminRevenueReportUseCase,
     ){}
 
     async getBookingPageData(req:Request, res: Response, next: NextFunction): Promise<void>{
@@ -270,6 +273,23 @@ export class BookingController implements IBookingController{
          date: date as string,
          month: month as string,
          year: year as string, 
+        });
+
+        res.status(StatusCodes.OK).json({ success: true, data: result });
+      } catch (error) {
+        next(error);
+      }
+    }
+
+    async adminRevenueReport(req: Request, res: Response, next: NextFunction): Promise<void> {
+      try {
+        const { filterType, date, month, year } = req.query;
+
+        const result = await this._adminRevenueReportUseCase.execute({
+          filterType: filterType as 'date' | 'month' | 'year',
+          date: date as string,
+          month: month as string,
+          year: year as string,
         });
 
         res.status(StatusCodes.OK).json({ success: true, data: result });

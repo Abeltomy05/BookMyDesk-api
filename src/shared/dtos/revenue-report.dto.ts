@@ -20,6 +20,11 @@ export interface RevenueReportBooking {
   paymentMethod?: string;
 }
 
+//admin revenue report 
+export interface AdminRevenueReportDTO extends RevenueReportBooking {
+   adminRevenue: number;
+}
+
 export type PopulatedBooking = Omit<IBookingEntity, 'clientId' | 'spaceId' | 'buildingId'> & {
   clientId: { _id: string; username: string };
   spaceId: { _id: string; name: string };
