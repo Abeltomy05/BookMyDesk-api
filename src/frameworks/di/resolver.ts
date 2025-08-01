@@ -20,6 +20,8 @@ import { INotificationController } from "../../entities/controllerInterfaces/oth
 import { ChatController } from "../../interfaceAdapters/controllers/chat.controller";
 import { IChatController } from "../../entities/controllerInterfaces/others/chat-controller.interface";
 import { NotificationSocketHandler } from "../../shared/config/notificationSocket";
+import { AmenityController } from "../../interfaceAdapters/controllers/amenity.controller";
+import { IAmenityController } from "../../entities/controllerInterfaces/others/amenity-controller.interface";
 
 DependencyInjection.registerAll();
 //* ====== Middleware Resolving ====== *//
@@ -47,5 +49,7 @@ export const offerController =
 export const notifiactionController = 
             container.resolve<INotificationController>(NotificationController);
 export const chatController = 
-            container.resolve<IChatController>(ChatController);                                 
-//* ====== Socket Handler Resolving ====== *//            
+            container.resolve<IChatController>(ChatController);
+export const amenityController =
+            container.resolve<IAmenityController>(AmenityController)
+     

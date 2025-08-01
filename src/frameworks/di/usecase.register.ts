@@ -77,6 +77,10 @@ import { GetEveryBuildingUseCase } from "../../useCases/building/get-every-build
 import { RevenueChartDataUseCase } from "../../useCases/booking/revenue-chart-data.usecase";
 import { AdminRevenueReportUseCase } from "../../useCases/booking/admin-revenue-report.usecase";
 import { ClearNotificationUseCase } from "../../useCases/notification/clear-notification.usecase";
+import { GetAllAmenityUseCase } from "../../useCases/amenity/get-all-amenity.usecase";
+import { CreateAmenityUseCase } from "../../useCases/amenity/create-amenity.usecase";
+import { EditAmenityUseCase } from "../../useCases/amenity/edit-amenity.usecase";
+import { DeleteAmenityUseCase } from "../../useCases/amenity/delete-amenity.usecase";
 
 
 
@@ -268,6 +272,18 @@ export class UseCaseRegistry{
       })
       container.register("IClearNotificationUseCase",{
         useClass: ClearNotificationUseCase
+      })
+      container.register("IGetAllAmenityUseCase",{
+        useClass: GetAllAmenityUseCase
+      })
+      container.register("ICreateAmenityUseCase",{
+        useClass: CreateAmenityUseCase
+      })
+      container.register("IEditAmenityUseCase",{
+        useClass: EditAmenityUseCase
+      })
+      container.register("IDeleteAmenityUseCase",{
+        useClass: DeleteAmenityUseCase
       })
 
         //* ====== Register Bcrypts ====== *//
