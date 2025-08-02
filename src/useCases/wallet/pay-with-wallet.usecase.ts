@@ -42,9 +42,23 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
 
        if (!space) throw new CustomError("Space not found.",StatusCodes.NOT_FOUND);
        if (!space.isAvailable) throw new CustomError("Space is no longer available.",StatusCodes.BAD_REQUEST);
-       if(!space.capacity || space.capacity < numberOfDesks){
-         throw new CustomError(`Insufficient capacity. Only ${space.capacity || 0} desks available`, StatusCodes.BAD_REQUEST);
-       }
+       
+        const bookingsOnDate = await this._bookingRepository.find({
+                spaceId: new Types.ObjectId(spaceId),
+                bookingDate: new Date(bookingDate),
+                status: 'confirmed',
+                paymentStatus: 'succeeded'
+        });
+
+        const alreadyBookedDesks = bookingsOnDate.reduce((sum, booking) => {
+                return sum + (booking.numberOfDesks || 0);
+        }, 0);
+
+        const availableDesks = space.capacity! - alreadyBookedDesks;
+
+         if (availableDesks < numberOfDesks) {
+            throw new CustomError(`Oops! Only ${availableDesks} desk(s) are available on that date. Try selecting fewer desks or pick another day.`, StatusCodes.BAD_REQUEST);
+         }
 
        const building = await this._buildingRepository.findOne({ _id: space.buildingId });
        if (!building) throw new CustomError("Building not found for this space.", StatusCodes.NOT_FOUND);
@@ -70,13 +84,6 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
             updatedAt: new Date()
         });
 
-        const updatedSpace = await this._spaceRepository.update(
-            { _id: spaceId, capacity: { $gte: numberOfDesks }, isAvailable: true },
-            { $inc: { capacity: -numberOfDesks } }
-        );
-        if (!updatedSpace) throw new CustomError("Failed to update space capacity.", StatusCodes.INTERNAL_SERVER_ERROR);
-
-
          const booking = await this._bookingRepository.save({
             bookingId: generateBookingId(),
             spaceId: new Types.ObjectId(spaceId),
@@ -94,25 +101,8 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
          });
 
          if (!booking) {
-            await this._spaceRepository.update(
-                { _id: spaceId },
-                { $inc: { capacity: numberOfDesks } }
-            );
             throw new CustomError("Failed to create booking.", StatusCodes.INTERNAL_SERVER_ERROR);
          }
-
-         if (building.summarizedSpaces) {
-            const index = building.summarizedSpaces.findIndex(s => s.name === space.name);
-            if (index !== -1) {
-                const summarizedSpaces = [...building.summarizedSpaces];
-                summarizedSpaces[index].count = Math.max(0, summarizedSpaces[index].count - numberOfDesks);
-
-                await this._buildingRepository.update(
-                    { _id: building._id },
-                    { summarizedSpaces }
-                );
-            }
-        }
 
         const platformFee = Math.round(totalPrice * 0.05);
         const vendorAmount = totalPrice - platformFee;
