@@ -11,6 +11,7 @@ import { hasEmail } from "../../shared/helper/hasEmail";
 import { config } from "../../shared/config";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { IAmenityRepository } from "../../entities/repositoryInterfaces/building/amenity-repository.interface";
 
 
 
@@ -25,6 +26,8 @@ export class UpdateEntityStatusUseCase  implements IUpdateEntityStatusUseCase {
 		private _buildingRepository: IBuildingRepository,
 		@inject("IBookingRepository")
 		private _bookingRepository: IBookingRepository,
+		@inject("IAmenityRepository")
+		private _amenityRepository: IAmenityRepository,
 		@inject("IEmailService")
 	    private _emailService: IEmailService, 
 		@inject("IJwtService")
@@ -49,6 +52,9 @@ export class UpdateEntityStatusUseCase  implements IUpdateEntityStatusUseCase {
 			case "booking":
 			repo = this._bookingRepository;
 			break;
+			case "amenity":
+			repo = this._amenityRepository;
+			break;
 
 			default:
 			throw new CustomError("Unsupported entity type", StatusCodes.BAD_REQUEST);
@@ -59,7 +65,18 @@ export class UpdateEntityStatusUseCase  implements IUpdateEntityStatusUseCase {
 			throw new CustomError(`${entityType} not found`, StatusCodes.NOT_FOUND);
 		}
 
-		await repo.update({ _id: entityId },{ status });
+		let updateData: Record<string, string | boolean>;
+
+		if (entityType === "amenity") {
+			if (status !== "active" && status !== "non-active") {
+				throw new CustomError("Invalid status for amenity. Use 'active' or 'non-active'", StatusCodes.BAD_REQUEST);
+			}
+			updateData = { isActive: status === "active" };
+			} else {
+			updateData = { status };
+		}
+
+		await repo.update({ _id: entityId },updateData);
 
 		  if (entityType === "vendor" && status === "rejected" && reason && hasEmail(entity)) {
             await this._handleVendorRejection(entity.email, reason);

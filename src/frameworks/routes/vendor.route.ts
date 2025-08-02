@@ -1,6 +1,6 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { BaseRoute } from "./base.route";
-import { blockStatusMiddleware, authController,buildingController,usersController,vendorController, bookingController, walletController, offerController, notifiactionController, chatController } from "../di/resolver";
+import { blockStatusMiddleware, authController,buildingController,usersController,vendorController, bookingController, walletController, offerController, notifiactionController, chatController, amenityController } from "../di/resolver";
 import { authorizeRole, decodeToken, verifyAuth } from "../../interfaceAdapters/middlewares/auth.middleware";
 
 export class VendorRoutes extends BaseRoute{
@@ -112,6 +112,9 @@ export class VendorRoutes extends BaseRoute{
        });
        this.router.delete("/vendor/clear-notifications",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
          notifiactionController.clearNotification(req, res, next);
+       });
+       this.router.get("/vendor/get-amenities",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
+         amenityController.getAllAmenity(req, res, next);
        });
     }
 }

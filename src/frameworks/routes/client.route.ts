@@ -1,6 +1,6 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { BaseRoute } from "./base.route";
-import { blockStatusMiddleware, authController, buildingController, usersController, bookingController, walletController, notifiactionController, chatController } from "../di/resolver";
+import { blockStatusMiddleware, authController, buildingController, usersController, bookingController, walletController, notifiactionController, chatController, amenityController } from "../di/resolver";
 import { authorizeRole, decodeToken, verifyAuth } from "../../interfaceAdapters/middlewares/auth.middleware";
 
 export class ClientRoutes extends BaseRoute{
@@ -95,6 +95,9 @@ export class ClientRoutes extends BaseRoute{
         });
         this.router.delete("/client/clear-notifications", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => {
             notifiactionController.clearNotification(req, res, next);
+        });
+        this.router.get("/client/get-amenities", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => {
+            amenityController.getAllAmenity(req, res, next);
         });
     }
 }

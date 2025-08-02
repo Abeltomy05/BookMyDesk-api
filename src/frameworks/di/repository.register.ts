@@ -17,6 +17,7 @@ import { OfferRepository } from "../../interfaceAdapters/repositories/offer/offe
 import { NotificationRepository } from "../../interfaceAdapters/repositories/notification/notification.repository";
 import { ChatMessageRepository } from "../../interfaceAdapters/repositories/chat/chat-message.repository";
 import { ChatSessionRepository } from "../../interfaceAdapters/repositories/chat/chat-session.repository";
+import { AmenityRepository } from "../../interfaceAdapters/repositories/building/amenity.repository";
 
 export class RepositoryRegistry{
     static registerRepositories():void{
@@ -66,6 +67,9 @@ export class RepositoryRegistry{
         })
         container.register("IChatSessionRepository",{
             useClass: ChatSessionRepository
+        })
+        container.register("IAmenityRepository",{
+            useClass: AmenityRepository
         })
         
     }

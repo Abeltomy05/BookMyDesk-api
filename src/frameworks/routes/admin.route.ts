@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { authController, bookingController, buildingController, notifiactionController, usersController, vendorController, walletController } from "../di/resolver";
+import { amenityController, authController, bookingController, buildingController, notifiactionController, usersController, vendorController, walletController } from "../di/resolver";
 import { BaseRoute } from "./base.route";
 import { authorizeRole, verifyAuth } from "../../interfaceAdapters/middlewares/auth.middleware";
 
@@ -64,6 +64,18 @@ export class AdminRoutes extends BaseRoute{
         });
         this.router.delete("/admin/clear-notifications",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
             notifiactionController.clearNotification(req, res, next);
+        });
+        this.router.get("/admin/get-amenities",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
+            amenityController.getAllAmenity(req, res, next);
+        });
+        this.router.post("/admin/create-amenity",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
+            amenityController.createAmenity(req, res, next);
+        });
+        this.router.patch("/admin/edit-amenity",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
+            amenityController.editAmenity(req, res, next);
+        });
+        this.router.delete("/admin/delete-amenity",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
+            amenityController.deleteAmenity(req, res, next);
         });
     }
 }
