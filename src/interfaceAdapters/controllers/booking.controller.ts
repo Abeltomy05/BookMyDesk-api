@@ -10,7 +10,6 @@ import { IGetBookingDetailsUseCase } from "../../entities/usecaseInterfaces/book
 import { ICancelBookingUseCase } from "../../entities/usecaseInterfaces/booking/cancel-booking-usecase.interface";
 import { IGetBookingsForAdmin } from "../../entities/usecaseInterfaces/booking/get-booking-for-admin-usecase.interface";
 import { StatusCodes } from "http-status-codes";
-import { getErrorMessage } from "../../shared/error/errorHandler";
 import { IRevenueReportUseCase } from "../../entities/usecaseInterfaces/booking/revenue-report-usecase.interface";
 import { RevenueReportFilters } from "../../shared/dtos/revenue-report.dto";
 import { IRevenueChartDataUseCase } from "../../entities/usecaseInterfaces/booking/revenue-chart-data-usecase.interface";

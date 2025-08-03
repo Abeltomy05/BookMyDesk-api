@@ -25,14 +25,14 @@ export class AdminRevenueReportUseCase implements IAdminRevenueReportUseCase {
           status: "completed",
       };
 
- if (filterType === 'date' && date) {
-     const selectedDate = new Date(date);
-     selectedDate.setHours(0, 0, 0, 0);
+  if (filterType === 'date' && date) {
+    const selectedDate = new Date(date);
+    selectedDate.setHours(0, 0, 0, 0);
 
-     const nextDate = new Date(selectedDate);
-     nextDate.setDate(selectedDate.getDate() + 1);
+    const nextDate = new Date(selectedDate);
+    nextDate.setDate(selectedDate.getDate() + 1);
 
-     filter.bookingDate = { $gte: selectedDate, $lt: nextDate };
+    filter.bookingDates = { $elemMatch: { $gte: selectedDate, $lt: nextDate } };
   }
 
   if (filterType === 'month' && month && year) {
@@ -41,7 +41,8 @@ export class AdminRevenueReportUseCase implements IAdminRevenueReportUseCase {
 
     const endDate = new Date(startDate);
     endDate.setMonth(startDate.getMonth() + 1);
-    filter.bookingDate = { $gte: startDate, $lt: endDate };
+
+    filter.bookingDates = { $elemMatch: { $gte: startDate, $lt: endDate } };
   }
 
   if (filterType === 'year' && year) {
@@ -50,7 +51,8 @@ export class AdminRevenueReportUseCase implements IAdminRevenueReportUseCase {
 
     const endDate = new Date(`${+year + 1}-01-01`);
     endDate.setHours(0, 0, 0, 0);
-    filter.bookingDate = { $gte: startDate, $lt: endDate };
+
+    filter.bookingDates = { $elemMatch: { $gte: startDate, $lt: endDate } };
   }
 
   const populatedBookings = await this._bookingRepo.findWithPopulate(
@@ -81,7 +83,7 @@ export class AdminRevenueReportUseCase implements IAdminRevenueReportUseCase {
         },
         totalPrice: booking.totalPrice,
         numberOfDesks: booking.numberOfDesks,
-        bookingDate: booking.bookingDate,
+        bookingDates: booking.bookingDates,
         paymentMethod: booking.paymentMethod,
         adminRevenue,
       };

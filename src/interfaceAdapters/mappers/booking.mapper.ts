@@ -9,7 +9,7 @@ export const toEntityBooking = (model: IBookingModel): IBookingEntity => ({
   clientId: model.clientId.toString(),
   vendorId: model.vendorId.toString(),
   buildingId: model.buildingId.toString(),
-  bookingDate: model.bookingDate,
+  bookingDates: model.bookingDates, 
   numberOfDesks: model.numberOfDesks,
   totalPrice: model.totalPrice,
   status: model.status,
@@ -25,7 +25,7 @@ export const toModelBooking = (entity: IBookingEntity): Partial<IBookingModel> =
   clientId: new Types.ObjectId(entity.clientId),
   vendorId: new Types.ObjectId(entity.vendorId),
   buildingId: new Types.ObjectId(entity.buildingId),
-  bookingDate: entity.bookingDate,
+  bookingDates: entity.bookingDates,
   numberOfDesks: entity.numberOfDesks,
   totalPrice: entity.totalPrice,
   status: entity.status,
@@ -37,6 +37,7 @@ export const toModelBooking = (entity: IBookingEntity): Partial<IBookingModel> =
 // booking
 export const toEntityBookingWithDetails = (model: any): IBookingEntityWithDetails => ({
   _id: model._id?.toString() ?? '',
+  bookingId: model.bookingId,
   spaceId: model.spaceId
     ? typeof model.spaceId === 'object'
       ? model.spaceId._id?.toString() ?? ''
@@ -49,7 +50,7 @@ export const toEntityBookingWithDetails = (model: any): IBookingEntityWithDetail
       ? model.buildingId._id?.toString() ?? ''
       : model.buildingId?.toString() ?? ''
     : '',
-  bookingDate: model.bookingDate,
+  bookingDates: model.bookingDates,
   numberOfDesks: model.numberOfDesks,
   totalPrice: model.totalPrice,
   discountAmount: model.discountAmount,

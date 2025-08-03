@@ -31,33 +31,35 @@ async execute(data: RevenueReportFilters): Promise<RevenueReportBooking[]> {
     filter.buildingId = buildingId;
   }
 
-  if (filterType === 'date' && date) {
-     const selectedDate = new Date(date);
-     selectedDate.setHours(0, 0, 0, 0);
+if (filterType === 'date' && date) {
+  const selectedDate = new Date(date);
+  selectedDate.setHours(0, 0, 0, 0);
 
-     const nextDate = new Date(selectedDate);
-     nextDate.setDate(selectedDate.getDate() + 1);
+  const nextDate = new Date(selectedDate);
+  nextDate.setDate(selectedDate.getDate() + 1);
 
-     filter.bookingDate = { $gte: selectedDate, $lt: nextDate };
-  }
+  filter.bookingDates = { $elemMatch: { $gte: selectedDate, $lt: nextDate } };
+}
 
-  if (filterType === 'month' && month && year) {
-    const startDate = new Date(`${year}-${month}-01`);
-    startDate.setHours(0, 0, 0, 0);
+if (filterType === 'month' && month && year) {
+  const startDate = new Date(`${year}-${month}-01`);
+  startDate.setHours(0, 0, 0, 0);
 
-    const endDate = new Date(startDate);
-    endDate.setMonth(startDate.getMonth() + 1);
-    filter.bookingDate = { $gte: startDate, $lt: endDate };
-  }
+  const endDate = new Date(startDate);
+  endDate.setMonth(startDate.getMonth() + 1);
 
-  if (filterType === 'year' && year) {
-    const startDate = new Date(`${year}-01-01`);
-    startDate.setHours(0, 0, 0, 0);
+  filter.bookingDates = { $elemMatch: { $gte: startDate, $lt: endDate } };
+}
 
-    const endDate = new Date(`${+year + 1}-01-01`);
-    endDate.setHours(0, 0, 0, 0);
-    filter.bookingDate = { $gte: startDate, $lt: endDate };
-  }
+if (filterType === 'year' && year) {
+  const startDate = new Date(`${year}-01-01`);
+  startDate.setHours(0, 0, 0, 0);
+
+  const endDate = new Date(`${+year + 1}-01-01`);
+  endDate.setHours(0, 0, 0, 0);
+
+  filter.bookingDates = { $elemMatch: { $gte: startDate, $lt: endDate } };
+}
 
   const populatedBookings = await this._bookingRepo.findWithPopulate(
     filter,
@@ -84,7 +86,7 @@ async execute(data: RevenueReportFilters): Promise<RevenueReportBooking[]> {
     },
     totalPrice: booking.totalPrice,
     numberOfDesks: booking.numberOfDesks,
-    bookingDate: booking.bookingDate,
+    bookingDates: booking.bookingDates,
     paymentMethod: booking.paymentMethod,
   }));
 }

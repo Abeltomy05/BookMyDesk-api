@@ -120,42 +120,6 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
         )
         }
 
-        if (booking.spaceId && booking.numberOfDesks) {
-            const space = await this._spaceRepository.findOne({_id:booking.spaceId});
-            if (space && typeof space.capacity === 'number') {
-                await this._spaceRepository.update(
-                    {_id: space._id}, 
-                    { $inc: { capacity: booking.numberOfDesks } }    
-                );
-                console.log(`[Space Capacity Restored] Space ${space._id} updated `);
-            }
-        }
-
-        if (booking.buildingId && booking.spaceId && typeof booking.numberOfDesks === 'number') {
-            const numberOfDesks = booking.numberOfDesks;
-            const building = await this._buildingRepository.findOne({_id: booking.buildingId});
-            const space = await this._spaceRepository.findOne({_id: booking.spaceId});
-
-            if (building && space && building.summarizedSpaces && space.name) {
-                const updatedSummarizedSpaces = building.summarizedSpaces.map(s => {
-                    if (s.name === space.name) {
-                        return {
-                            ...s,
-                            count: s.count + numberOfDesks
-                        };
-                    }
-                    return s;
-                });
-
-                await this._buildingRepository.update(
-                    {_id: building._id}, 
-                    {summarizedSpaces: updatedSummarizedSpaces}
-                );
-
-                console.log(`[Building Summary Updated] ${booking.buildingId} → ${space.name} count increased by ${booking.numberOfDesks}`);
-            }
-        }
-
         console.log(`[Booking Cancelled] by ${role}(${userId}) for booking ${bookingId}`);
 
          return { success: true };

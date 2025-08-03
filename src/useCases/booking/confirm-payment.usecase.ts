@@ -68,6 +68,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
             }
         }else {
         await this._bookingRepository.save({
+            bookingId: generateBookingId(),
             spaceId: new Types.ObjectId(spaceId),
             clientId: new Types.ObjectId(clientId),
             vendorId: new Types.ObjectId(vendorId),

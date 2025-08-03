@@ -16,7 +16,7 @@ export interface RevenueReportBooking {
   buildingId: { _id: string,buildingName: string };
   totalPrice?: number;
   numberOfDesks?: number;
-  bookingDate: Date;
+  bookingDates: Date[];
   paymentMethod?: string;
 }
 
