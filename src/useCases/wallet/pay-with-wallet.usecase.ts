@@ -32,24 +32,38 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
 
     async execute(
         spaceId:string,
-        bookingDate:Date,
+        bookingDates:Date[],
         numberOfDesks:number,
         totalPrice:number,
         userId:string,
         discountAmount?: number
     ):Promise<{ success: boolean; bookingId: string }>{
-       const space = await this._spaceRepository.findOne({_id:spaceId});
 
+       const space = await this._spaceRepository.findOne({_id:spaceId});
        if (!space) throw new CustomError("Space not found.",StatusCodes.NOT_FOUND);
+
        if (!space.isAvailable) throw new CustomError("Space is no longer available.",StatusCodes.BAD_REQUEST);
-       if(!space.capacity || space.capacity < numberOfDesks){
-         throw new CustomError(`Insufficient capacity. Only ${space.capacity || 0} desks available`, StatusCodes.BAD_REQUEST);
-       }
 
        const building = await this._buildingRepository.findOne({ _id: space.buildingId });
        if (!building) throw new CustomError("Building not found for this space.", StatusCodes.NOT_FOUND);
 
        const vendorId = building.vendorId;
+       
+       for (const date of bookingDates) {
+        const bookingsOnDate = await this._bookingRepository.find({
+                spaceId: new Types.ObjectId(spaceId),
+                bookingDates: { $in: [new Date(date)] },
+                status: 'confirmed',
+                paymentStatus: 'succeeded'
+        });
+
+        const alreadyBookedDesks = bookingsOnDate.reduce((sum, booking) => sum + (booking.numberOfDesks || 0), 0);
+        const availableDesks = space.capacity! - alreadyBookedDesks;
+
+         if (availableDesks < numberOfDesks) {
+            throw new CustomError(`Only ${availableDesks} desk(s) are available on ${new Date(date).toDateString()}. Please choose fewer desks or another date.`, StatusCodes.BAD_REQUEST);
+         }
+      }
 
         const wallet = await this._walletRepository.findOne({ userId }, { balance: 1 });
         if (!wallet || wallet.balance < totalPrice) {
@@ -70,20 +84,13 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
             updatedAt: new Date()
         });
 
-        const updatedSpace = await this._spaceRepository.update(
-            { _id: spaceId, capacity: { $gte: numberOfDesks }, isAvailable: true },
-            { $inc: { capacity: -numberOfDesks } }
-        );
-        if (!updatedSpace) throw new CustomError("Failed to update space capacity.", StatusCodes.INTERNAL_SERVER_ERROR);
-
-
          const booking = await this._bookingRepository.save({
             bookingId: generateBookingId(),
             spaceId: new Types.ObjectId(spaceId),
             clientId: new Types.ObjectId(userId),
             vendorId,
             buildingId: space.buildingId,
-            bookingDate: new Date(bookingDate),
+            bookingDates: bookingDates.map(date => new Date(date)),
             numberOfDesks,
             totalPrice,
             discountAmount: discountAmount || 0,
@@ -94,25 +101,9 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
          });
 
          if (!booking) {
-            await this._spaceRepository.update(
-                { _id: spaceId },
-                { $inc: { capacity: numberOfDesks } }
-            );
             throw new CustomError("Failed to create booking.", StatusCodes.INTERNAL_SERVER_ERROR);
          }
-
-         if (building.summarizedSpaces) {
-            const index = building.summarizedSpaces.findIndex(s => s.name === space.name);
-            if (index !== -1) {
-                const summarizedSpaces = [...building.summarizedSpaces];
-                summarizedSpaces[index].count = Math.max(0, summarizedSpaces[index].count - numberOfDesks);
-
-                await this._buildingRepository.update(
-                    { _id: building._id },
-                    { summarizedSpaces }
-                );
-            }
-        }
+    
 
         const platformFee = Math.round(totalPrice * 0.05);
         const vendorAmount = totalPrice - platformFee;

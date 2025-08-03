@@ -9,7 +9,7 @@ export const bookingSchema = new Schema<IBookingModel>(
     buildingId:   { type: Schema.Types.ObjectId, ref: "Building", required: true },
 
     bookingId: { type: String },
-    bookingDate:   { type: Date, required: true },
+    bookingDates:   { type: [Date], required: true },
     numberOfDesks:  { type: Number },
     totalPrice:     { type: Number},
     discountAmount: { type: Number, default: 0 },

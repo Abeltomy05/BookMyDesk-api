@@ -46,8 +46,8 @@ export class WalletController implements IWalletController {
 
     async payWithWallet(req: Request, res: Response, next: NextFunction): Promise<void>{
         try {
-            const {spaceId,bookingDate,numberOfDesks,totalPrice,discountAmount} = req.body;
-            if(!spaceId || !bookingDate || !numberOfDesks || !totalPrice){
+            const {spaceId,bookingDates,numberOfDesks,totalPrice,discountAmount} = req.body;
+            if(!spaceId || !bookingDates || !numberOfDesks || !totalPrice){
                 res.status(StatusCodes.BAD_REQUEST).json({
                     success:false,
                     message:"There are missing fields, Please try again."
@@ -56,7 +56,7 @@ export class WalletController implements IWalletController {
             }
 
             const {userId} = (req as CustomRequest).user;
-            const response = await this._payWithWalletUseCase.execute(spaceId,bookingDate,numberOfDesks,totalPrice,userId,discountAmount);
+            const response = await this._payWithWalletUseCase.execute(spaceId,bookingDates,numberOfDesks,totalPrice,userId,discountAmount);
             if(response.success && response.bookingId){
                 res.status(StatusCodes.OK).json({
                     success: true,

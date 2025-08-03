@@ -8,7 +8,7 @@ export interface IBookingEntity{
     buildingId: string;
     
     bookingId?: string;
-    bookingDate: Date;
+    bookingDates: Date[];
     numberOfDesks?: number;
     totalPrice?: number;
     discountAmount?: number

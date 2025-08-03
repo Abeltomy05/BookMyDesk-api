@@ -6,7 +6,6 @@ import { ICreatePaymentIntentUseCase } from "../../entities/usecaseInterfaces/bo
 import { IStripeService } from "../../entities/serviceInterfaces/stripe-service.interface";
 import { ISpaceRepository } from "../../entities/repositoryInterfaces/building/space-repository.interface";
 import { IBuildingRepository } from "../../entities/repositoryInterfaces/building/building-repository.interface";
-import { BookingStatus, PaymentMethod, PaymentStatus } from "../../shared/dtos/types/user.types";
 import { getErrorMessage } from "../../shared/error/errorHandler";
 import { config } from "../../shared/config";
 import { CustomError } from "../../entities/utils/custom.error";
@@ -57,13 +56,13 @@ export class CreatePaymentIntentUseCase implements ICreatePaymentIntentUseCase{
                 clientId: data.clientId,
                 vendorId: building.vendorId.toString(),
                 buildingId: space.buildingId.toString(),
-                bookingDate: new Date(data.bookingDate).toISOString(),
+                bookingDates: JSON.stringify(data.bookingDates.map(date => new Date(date).toISOString())),
                 numberOfDesks: (data.numberOfDesks ?? 1).toString(),
                 totalPrice: (data.amount / 100).toString(),
                 discountAmount: (data.discountAmount || 0).toString(),
                 bookingId: data.bookingId || '',
             },
-            description: `Booking payment for ${data.numberOfDesks || 1} desk(s)`,
+            description: `Booking payment for ${data.numberOfDesks || 1} desk(s) on ${data.bookingDates.length} date(s)`
         });
 
 

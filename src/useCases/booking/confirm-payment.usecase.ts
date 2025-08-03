@@ -10,7 +10,6 @@ import { IBuildingRepository } from "../../entities/repositoryInterfaces/buildin
 import { IWalletRepository } from "../../entities/repositoryInterfaces/wallet/wallet-repository.interface";
 import { IWalletTransactionRepository } from "../../entities/repositoryInterfaces/wallet/walletTrasaction-repository.interface";
 import { INotificationService } from "../../entities/serviceInterfaces/notification-service.interface";
-import { INotificationRepository } from "../../entities/repositoryInterfaces/notification/notification-repository.interface";
 import { getErrorMessage } from "../../shared/error/errorHandler";
 import { config } from "../../shared/config";
 import { generateBookingId } from "../../shared/helper/generateBookingId";
@@ -43,7 +42,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
         clientId: string;
         vendorId: string;
         buildingId: string;
-        bookingDate: string;
+        bookingDates: string[],
         numberOfDesks: number;
         totalPrice: number;
         discountAmount?: number;
@@ -51,7 +50,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
     }){
         const {
           bookingId, spaceId, clientId, vendorId, buildingId,
-          bookingDate, numberOfDesks, totalPrice, discountAmount, paymentIntentId,
+          bookingDates, numberOfDesks, totalPrice, discountAmount, paymentIntentId,
         } = metadata;
 
          if (bookingId) {
@@ -69,11 +68,12 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
             }
         }else {
         await this._bookingRepository.save({
+            bookingId: generateBookingId(),
             spaceId: new Types.ObjectId(spaceId),
             clientId: new Types.ObjectId(clientId),
             vendorId: new Types.ObjectId(vendorId),
             buildingId: new Types.ObjectId(buildingId),
-            bookingDate: new Date(bookingDate),
+            bookingDates: bookingDates.map(date => new Date(date)),
             numberOfDesks,
             totalPrice,
             discountAmount: discountAmount || 0,
@@ -97,7 +97,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
             const buildingId = paymentIntent.metadata.buildingId;
             const clientId = paymentIntent.metadata.clientId;
             const vendorId = paymentIntent.metadata.vendorId;
-            const bookingDate = paymentIntent.metadata.bookingDate;
+            const bookingDates: string[] = JSON.parse(paymentIntent.metadata.bookingDates);
             const numberOfDesks = parseInt(paymentIntent.metadata.numberOfDesks);
             const totalPrice = parseFloat(paymentIntent.metadata.totalPrice);
             const discountAmount = parseFloat(paymentIntent.metadata.discountAmount) || 0; 
@@ -112,7 +112,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                             clientId,
                             vendorId,
                             buildingId,
-                            bookingDate,
+                            bookingDates,
                             numberOfDesks,
                             totalPrice,
                             discountAmount,
@@ -121,76 +121,59 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                         throw new CustomError('Space not found', StatusCodes.NOT_FOUND);
                 }
 
-             if (!space.isAvailable) {
-                await this._stripeService.cancelPaymentIntent(data.paymentIntentId);
-                 await this.handleFailedBooking({
-                            bookingId,
-                            spaceId,
-                            clientId,
-                            vendorId,
-                            buildingId,
-                            bookingDate,
-                            numberOfDesks,
-                            totalPrice,
-                            discountAmount,
-                            paymentIntentId: data.paymentIntentId,
-                  });
-                throw new CustomError('Space is no longer available', StatusCodes.BAD_REQUEST);
-            }
-            
-             if (!space.capacity || space.capacity < numberOfDesks) {
-                await this._stripeService.cancelPaymentIntent(data.paymentIntentId);
-                 await this.handleFailedBooking({
-                            bookingId,
-                            spaceId,
-                            clientId,
-                            vendorId,
-                            buildingId,
-                            bookingDate,
-                            numberOfDesks,
-                            totalPrice,
-                            discountAmount,
-                            paymentIntentId: data.paymentIntentId,
+                if (!space.isAvailable) {
+                    await this._stripeService.cancelPaymentIntent(data.paymentIntentId);
+                    await this.handleFailedBooking({
+                                bookingId,
+                                spaceId,
+                                clientId,
+                                vendorId,
+                                buildingId,
+                                bookingDates,
+                                numberOfDesks,
+                                totalPrice,
+                                discountAmount,
+                                paymentIntentId: data.paymentIntentId,
                     });
-                throw new CustomError(`Insufficient capacity. Only ${space.capacity || 0} desks available`, StatusCodes.BAD_REQUEST);
-            }
+                    throw new CustomError('Space is no longer available', StatusCodes.BAD_REQUEST);
+                }
 
-            const updatedSpace = await this._spaceRepository.update(
-                {
-                    _id: spaceId,
-                    capacity: { $gte: numberOfDesks },
-                    isAvailable: true
-                },
-                {
-                    $inc: { capacity: -numberOfDesks }
-                },
-                );
+          for (const date of bookingDates) {
+            const bookingsOnDate = await this._bookingRepository.find({
+                spaceId: new Types.ObjectId(spaceId),
+                bookingDates: { $in: [new Date(date)] },
+                status: 'confirmed',
+                paymentStatus: 'succeeded'
+            });
+            
+            const alreadyBookedDesks = bookingsOnDate.reduce((sum, booking) => {
+                return sum + (booking.numberOfDesks || 0);
+            }, 0);
 
-             if (!updatedSpace) {
-                await this.handleFailedBooking({
+            const availableDesks = space.capacity! - alreadyBookedDesks;
+            
+            if (availableDesks < numberOfDesks) {
+               await this._stripeService.cancelPaymentIntent(data.paymentIntentId);
+               await this.handleFailedBooking({
                     bookingId,
                     spaceId,
                     clientId,
                     vendorId,
                     buildingId,
-                    bookingDate,
+                    bookingDates,
                     numberOfDesks,
                     totalPrice,
                     discountAmount,
                     paymentIntentId: data.paymentIntentId,
-                });
-                throw new CustomError('Failed to update space capacity', StatusCodes.INTERNAL_SERVER_ERROR);
+                }); 
+                const formattedDate = new Date(date).toDateString();
+                throw new CustomError(`Only ${availableDesks} desk${availableDesks === 1 ? '' : 's'} available on ${formattedDate}. Please adjust your selection.`, StatusCodes.BAD_REQUEST);
             }
+        }
 
             const capturedPayment = await this._stripeService.capturePaymentIntent(data.paymentIntentId);
 
              if (capturedPayment.status !== 'succeeded') {
-
-                 await this._spaceRepository.update(
-                        { _id: spaceId },
-                        { $inc: { capacity: numberOfDesks } }
-                 );
-
                 await this._stripeService.refundPaymentIntent(data.paymentIntentId);
          
                     await this.handleFailedBooking({
@@ -199,7 +182,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                             clientId,
                             vendorId,
                             buildingId,
-                            bookingDate,
+                            bookingDates,
                             numberOfDesks,
                             totalPrice,
                             discountAmount,
@@ -240,24 +223,6 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
 
 
             const building = await this._buildingRepository.findOne({ _id: buildingId });
-            if (building && building.summarizedSpaces) {
-                const spaceIndex = building.summarizedSpaces.findIndex(
-                    s => s.name === space.name
-                );
-
-                 if (spaceIndex !== -1) {
-                    const updatedSummarizedSpaces = [...building.summarizedSpaces];
-                    updatedSummarizedSpaces[spaceIndex] = {
-                        ...updatedSummarizedSpaces[spaceIndex],
-                        count: Math.max(0, updatedSummarizedSpaces[spaceIndex].count - numberOfDesks)
-                    };
-
-                    await this._buildingRepository.update(
-                        { _id: buildingId },
-                        { summarizedSpaces: updatedSummarizedSpaces }
-                    );
-                }
-            }
 
         if (bookingId) {
             const existingBooking = await this._bookingRepository.findOne({
@@ -278,7 +243,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                     numberOfDesks: numberOfDesks,
                     totalPrice: totalPrice,
                     discountAmount: discountAmount,
-                    bookingDate: new Date(bookingDate),
+                    bookingDates: bookingDates.map(date => new Date(date)),
                     transactionId: data.paymentIntentId,
                     paymentMethod: 'stripe' as PaymentMethod,
                     cancellationReason:"",
@@ -286,10 +251,6 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
             );
    
             if (!updatedBooking) {
-                await this._spaceRepository.update(
-                    { _id: spaceId },
-                    { $inc: { capacity: numberOfDesks } }
-                );
                 throw new CustomError('Failed to update existing booking', StatusCodes.INTERNAL_SERVER_ERROR);
             }
 
@@ -311,7 +272,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
             clientId: new Types.ObjectId(clientId),
             vendorId: new Types.ObjectId(vendorId),
             buildingId: new Types.ObjectId(buildingId),
-            bookingDate: new Date(bookingDate),
+            bookingDates: bookingDates.map(date => new Date(date)),
             numberOfDesks: numberOfDesks,
             totalPrice: totalPrice,
             discountAmount: discountAmount,
@@ -324,12 +285,6 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
         const newBooking = await this._bookingRepository.save(bookingData);
 
          if (!newBooking) {
-              await this._spaceRepository.update(
-                { _id: spaceId },
-                { 
-                    capacity: space.capacity,
-                }  
-            );
             throw new CustomError('Failed to create booking', StatusCodes.INTERNAL_SERVER_ERROR);
         }
 
