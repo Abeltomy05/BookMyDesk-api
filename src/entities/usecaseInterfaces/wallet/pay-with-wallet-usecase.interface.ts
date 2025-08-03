@@ -1,7 +1,7 @@
 export interface IPayWithWalletUseCase{
    execute(
         spaceId:string,
-        bookingDate:Date,
+        bookingDates:Date[],
         numberOfDesks:number,
         totalPrice:number,
         userId:string,

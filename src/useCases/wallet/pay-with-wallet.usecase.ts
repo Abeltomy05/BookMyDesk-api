@@ -32,38 +32,38 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
 
     async execute(
         spaceId:string,
-        bookingDate:Date,
+        bookingDates:Date[],
         numberOfDesks:number,
         totalPrice:number,
         userId:string,
         discountAmount?: number
     ):Promise<{ success: boolean; bookingId: string }>{
+
        const space = await this._spaceRepository.findOne({_id:spaceId});
-
        if (!space) throw new CustomError("Space not found.",StatusCodes.NOT_FOUND);
+
        if (!space.isAvailable) throw new CustomError("Space is no longer available.",StatusCodes.BAD_REQUEST);
-       
-        const bookingsOnDate = await this._bookingRepository.find({
-                spaceId: new Types.ObjectId(spaceId),
-                bookingDate: new Date(bookingDate),
-                status: 'confirmed',
-                paymentStatus: 'succeeded'
-        });
-
-        const alreadyBookedDesks = bookingsOnDate.reduce((sum, booking) => {
-                return sum + (booking.numberOfDesks || 0);
-        }, 0);
-
-        const availableDesks = space.capacity! - alreadyBookedDesks;
-
-         if (availableDesks < numberOfDesks) {
-            throw new CustomError(`Oops! Only ${availableDesks} desk(s) are available on that date. Try selecting fewer desks or pick another day.`, StatusCodes.BAD_REQUEST);
-         }
 
        const building = await this._buildingRepository.findOne({ _id: space.buildingId });
        if (!building) throw new CustomError("Building not found for this space.", StatusCodes.NOT_FOUND);
 
        const vendorId = building.vendorId;
+       
+       for (const date of bookingDates) {
+        const bookingsOnDate = await this._bookingRepository.find({
+                spaceId: new Types.ObjectId(spaceId),
+                bookingDates: { $in: [new Date(date)] },
+                status: 'confirmed',
+                paymentStatus: 'succeeded'
+        });
+
+        const alreadyBookedDesks = bookingsOnDate.reduce((sum, booking) => sum + (booking.numberOfDesks || 0), 0);
+        const availableDesks = space.capacity! - alreadyBookedDesks;
+
+         if (availableDesks < numberOfDesks) {
+            throw new CustomError(`Only ${availableDesks} desk(s) are available on ${new Date(date).toDateString()}. Please choose fewer desks or another date.`, StatusCodes.BAD_REQUEST);
+         }
+      }
 
         const wallet = await this._walletRepository.findOne({ userId }, { balance: 1 });
         if (!wallet || wallet.balance < totalPrice) {
@@ -90,7 +90,7 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
             clientId: new Types.ObjectId(userId),
             vendorId,
             buildingId: space.buildingId,
-            bookingDate: new Date(bookingDate),
+            bookingDates: bookingDates.map(date => new Date(date)),
             numberOfDesks,
             totalPrice,
             discountAmount: discountAmount || 0,
@@ -103,6 +103,7 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
          if (!booking) {
             throw new CustomError("Failed to create booking.", StatusCodes.INTERNAL_SERVER_ERROR);
          }
+    
 
         const platformFee = Math.round(totalPrice * 0.05);
         const vendorAmount = totalPrice - platformFee;

@@ -42,7 +42,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
         clientId: string;
         vendorId: string;
         buildingId: string;
-        bookingDate: string;
+        bookingDates: string[],
         numberOfDesks: number;
         totalPrice: number;
         discountAmount?: number;
@@ -50,7 +50,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
     }){
         const {
           bookingId, spaceId, clientId, vendorId, buildingId,
-          bookingDate, numberOfDesks, totalPrice, discountAmount, paymentIntentId,
+          bookingDates, numberOfDesks, totalPrice, discountAmount, paymentIntentId,
         } = metadata;
 
          if (bookingId) {
@@ -72,7 +72,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
             clientId: new Types.ObjectId(clientId),
             vendorId: new Types.ObjectId(vendorId),
             buildingId: new Types.ObjectId(buildingId),
-            bookingDate: new Date(bookingDate),
+            bookingDates: bookingDates.map(date => new Date(date)),
             numberOfDesks,
             totalPrice,
             discountAmount: discountAmount || 0,
@@ -96,7 +96,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
             const buildingId = paymentIntent.metadata.buildingId;
             const clientId = paymentIntent.metadata.clientId;
             const vendorId = paymentIntent.metadata.vendorId;
-            const bookingDate = paymentIntent.metadata.bookingDate;
+            const bookingDates: string[] = JSON.parse(paymentIntent.metadata.bookingDates);
             const numberOfDesks = parseInt(paymentIntent.metadata.numberOfDesks);
             const totalPrice = parseFloat(paymentIntent.metadata.totalPrice);
             const discountAmount = parseFloat(paymentIntent.metadata.discountAmount) || 0; 
@@ -111,7 +111,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                             clientId,
                             vendorId,
                             buildingId,
-                            bookingDate,
+                            bookingDates,
                             numberOfDesks,
                             totalPrice,
                             discountAmount,
@@ -128,7 +128,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                                 clientId,
                                 vendorId,
                                 buildingId,
-                                bookingDate,
+                                bookingDates,
                                 numberOfDesks,
                                 totalPrice,
                                 discountAmount,
@@ -137,9 +137,10 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                     throw new CustomError('Space is no longer available', StatusCodes.BAD_REQUEST);
                 }
 
+          for (const date of bookingDates) {
             const bookingsOnDate = await this._bookingRepository.find({
                 spaceId: new Types.ObjectId(spaceId),
-                bookingDate: new Date(bookingDate),
+                bookingDates: { $in: [new Date(date)] },
                 status: 'confirmed',
                 paymentStatus: 'succeeded'
             });
@@ -158,14 +159,16 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                     clientId,
                     vendorId,
                     buildingId,
-                    bookingDate,
+                    bookingDates,
                     numberOfDesks,
                     totalPrice,
                     discountAmount,
                     paymentIntentId: data.paymentIntentId,
                 }); 
-                throw new CustomError(`Oops! Only ${availableDesks} desk(s) are available on that date. Try selecting fewer desks or pick another day.`, StatusCodes.BAD_REQUEST);
+                const formattedDate = new Date(date).toDateString();
+                throw new CustomError(`Only ${availableDesks} desk${availableDesks === 1 ? '' : 's'} available on ${formattedDate}. Please adjust your selection.`, StatusCodes.BAD_REQUEST);
             }
+        }
 
             const capturedPayment = await this._stripeService.capturePaymentIntent(data.paymentIntentId);
 
@@ -178,7 +181,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                             clientId,
                             vendorId,
                             buildingId,
-                            bookingDate,
+                            bookingDates,
                             numberOfDesks,
                             totalPrice,
                             discountAmount,
@@ -239,7 +242,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
                     numberOfDesks: numberOfDesks,
                     totalPrice: totalPrice,
                     discountAmount: discountAmount,
-                    bookingDate: new Date(bookingDate),
+                    bookingDates: bookingDates.map(date => new Date(date)),
                     transactionId: data.paymentIntentId,
                     paymentMethod: 'stripe' as PaymentMethod,
                     cancellationReason:"",
@@ -268,7 +271,7 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
             clientId: new Types.ObjectId(clientId),
             vendorId: new Types.ObjectId(vendorId),
             buildingId: new Types.ObjectId(buildingId),
-            bookingDate: new Date(bookingDate),
+            bookingDates: bookingDates.map(date => new Date(date)),
             numberOfDesks: numberOfDesks,
             totalPrice: totalPrice,
             discountAmount: discountAmount,
