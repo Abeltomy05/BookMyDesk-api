@@ -29,8 +29,10 @@ export interface IGetBookingsDTO {
   role: string;
   page: number;
   limit: number;
-  search: string;
   status?: string;
+  buildingId?: string;
+  fromDate?: string;
+  toDate?: string;
 }
 
 export interface IGetBookingsResult {

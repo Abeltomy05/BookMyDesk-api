@@ -5,15 +5,12 @@ import { IRegisterBuildingUsecase } from "../../entities/usecaseInterfaces/build
 import { IBuildingController } from "../../entities/controllerInterfaces/others/building-controller.interface";
 import { StatusCodes } from "http-status-codes";
 import { CustomRequest } from "../middlewares/auth.middleware";
-import { buildingRegistrationSchema, type BuildingRegistrationData } from "../../shared/validations/register-building.validation";
+import { buildingRegistrationSchema } from "../../shared/validations/register-building.validation";
 import { IGetBuildingsForVerification } from "../../entities/usecaseInterfaces/building/get-building-varification-usecase.interface";
 import { editBuildingValidator } from "./validations/editBuilding.validation";
-import { ZodError } from "zod";
 import { IEditBuildingUsecase } from "../../entities/usecaseInterfaces/building/edit-building-usecase.interface";
-import { IBuildingEntity } from "../../entities/models/building.entity";
 import { IGetSingleBuilding } from "../../entities/usecaseInterfaces/building/get-single-building-usecase.interface";
 import { IFetchBuildingUseCase } from "../../entities/usecaseInterfaces/building/fetch-building-usecase.interface";
-import { getErrorMessage } from "../../shared/error/errorHandler";
 import { IFetchFiltersUseCase } from "../../entities/usecaseInterfaces/building/fetch-filter-usecase.interface";
 import { IGetEveryBuildingUseCase } from "../../entities/usecaseInterfaces/building/every-building-usecase.interface";
 
@@ -265,5 +262,4 @@ export class BuildingController implements IBuildingController{
       next(error)
     }
    }
-
 }
