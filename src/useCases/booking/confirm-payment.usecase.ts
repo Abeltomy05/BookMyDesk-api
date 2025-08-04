@@ -15,6 +15,7 @@ import { config } from "../../shared/config";
 import { generateBookingId } from "../../shared/helper/generateBookingId";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { IRedisTokenRepository } from "../../entities/repositoryInterfaces/redis/redis-token-repository.interface";
 
 @injectable()
 export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
@@ -33,8 +34,9 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
        private _walletTransactionRepository: IWalletTransactionRepository,
        @inject("INotificationService")
        private _notificationService: INotificationService,
+       @inject("IRedisTokenRepository")
+       private _redisTokenRepo: IRedisTokenRepository,
     ){}
-
 
     private async handleFailedBooking(metadata:{
         bookingId?: string;
@@ -85,275 +87,299 @@ export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
     }
     }
 
-    async execute(data: ConfirmPaymentDTO){
-       try {
-        const paymentIntent = await this._stripeService.retrievePaymentIntent(data.paymentIntentId);
-
-        if (paymentIntent.status !== 'requires_capture') {
-            throw new CustomError('Payment intent is not in the correct state for confirmation',StatusCodes.BAD_REQUEST);
-        }
- 
-            const spaceId = paymentIntent.metadata.spaceId;
-            const buildingId = paymentIntent.metadata.buildingId;
-            const clientId = paymentIntent.metadata.clientId;
-            const vendorId = paymentIntent.metadata.vendorId;
-            const bookingDates: string[] = JSON.parse(paymentIntent.metadata.bookingDates);
-            const numberOfDesks = parseInt(paymentIntent.metadata.numberOfDesks);
-            const totalPrice = parseFloat(paymentIntent.metadata.totalPrice);
-            const discountAmount = parseFloat(paymentIntent.metadata.discountAmount) || 0; 
-            const bookingId = paymentIntent.metadata.bookingId;
-            
-             const space = await this._spaceRepository.findOne({_id: spaceId});
-                if (!space) {
-                    await this._stripeService.cancelPaymentIntent(data.paymentIntentId);
-                      await this.handleFailedBooking({
-                            bookingId,
-                            spaceId,
-                            clientId,
-                            vendorId,
-                            buildingId,
-                            bookingDates,
-                            numberOfDesks,
-                            totalPrice,
-                            discountAmount,
-                            paymentIntentId: data.paymentIntentId,
-                        });
-                        throw new CustomError('Space not found', StatusCodes.NOT_FOUND);
-                }
-
-                if (!space.isAvailable) {
-                    await this._stripeService.cancelPaymentIntent(data.paymentIntentId);
-                    await this.handleFailedBooking({
-                                bookingId,
-                                spaceId,
-                                clientId,
-                                vendorId,
-                                buildingId,
-                                bookingDates,
-                                numberOfDesks,
-                                totalPrice,
-                                discountAmount,
-                                paymentIntentId: data.paymentIntentId,
-                    });
-                    throw new CustomError('Space is no longer available', StatusCodes.BAD_REQUEST);
-                }
-
-          for (const date of bookingDates) {
-            const bookingsOnDate = await this._bookingRepository.find({
-                spaceId: new Types.ObjectId(spaceId),
-                bookingDates: { $in: [new Date(date)] },
-                status: 'confirmed',
-                paymentStatus: 'succeeded'
-            });
-            
-            const alreadyBookedDesks = bookingsOnDate.reduce((sum, booking) => {
-                return sum + (booking.numberOfDesks || 0);
-            }, 0);
-
-            const availableDesks = space.capacity! - alreadyBookedDesks;
-            
-            if (availableDesks < numberOfDesks) {
-               await this._stripeService.cancelPaymentIntent(data.paymentIntentId);
-               await this.handleFailedBooking({
-                    bookingId,
-                    spaceId,
-                    clientId,
-                    vendorId,
-                    buildingId,
-                    bookingDates,
-                    numberOfDesks,
-                    totalPrice,
-                    discountAmount,
-                    paymentIntentId: data.paymentIntentId,
-                }); 
-                const formattedDate = new Date(date).toDateString();
-                throw new CustomError(`Only ${availableDesks} desk${availableDesks === 1 ? '' : 's'} available on ${formattedDate}. Please adjust your selection.`, StatusCodes.BAD_REQUEST);
-            }
-        }
-
-            const capturedPayment = await this._stripeService.capturePaymentIntent(data.paymentIntentId);
-
-             if (capturedPayment.status !== 'succeeded') {
-                await this._stripeService.refundPaymentIntent(data.paymentIntentId);
-         
-                    await this.handleFailedBooking({
-                            bookingId,
-                            spaceId,
-                            clientId,
-                            vendorId,
-                            buildingId,
-                            bookingDates,
-                            numberOfDesks,
-                            totalPrice,
-                            discountAmount,
-                            paymentIntentId: data.paymentIntentId,
-                     });   
-                throw new CustomError('Failed to capture payment', StatusCodes.INTERNAL_SERVER_ERROR);
-            }
-
-            //processing vendor amount and platform fee
-            const platformFee = Math.round(totalPrice * 0.05);
-            const vendorAmount = totalPrice - platformFee;
-
-            const vendorWalletResult = await this._walletRepository.updateOrCreateWalletBalance(vendorId, 'Vendor', vendorAmount);
-
-            await this._walletTransactionRepository.save({
-                walletId: new Types.ObjectId(vendorWalletResult.wallet._id),
-                type: 'booking-income',
-                amount: vendorAmount,
-                description: `Booking income for booking via Stripe (Amount: ${vendorAmount})`,
-                balanceBefore: vendorWalletResult.balanceBefore,
-                balanceAfter: vendorWalletResult.balanceAfter,
-            });
-
-            const adminId = config.ADMIN_ID;
-            if (!adminId) {
-                throw new CustomError("Admin ID not configured in environment", StatusCodes.INTERNAL_SERVER_ERROR);
-            }
-            const adminWalletResult = await this._walletRepository.updateOrCreateWalletBalance(adminId, 'Admin', platformFee);
-
-            await this._walletTransactionRepository.save({
-                walletId: new Types.ObjectId(adminWalletResult.wallet._id),
-                type: 'platform-fee',
-                amount: platformFee,
-                description: `Platform fee for booking via Stripe (5%)`,
-                balanceBefore: adminWalletResult.balanceBefore,
-                balanceAfter: adminWalletResult.balanceAfter,
-            });
-
-
-            const building = await this._buildingRepository.findOne({ _id: buildingId });
-
-        if (bookingId) {
-            const existingBooking = await this._bookingRepository.findOne({
-                _id: new Types.ObjectId(bookingId),
-                clientId: new Types.ObjectId(clientId),
-            });   
-
-            if (!existingBooking) {
-                throw new CustomError('Booking not found for update', StatusCodes.NOT_FOUND);
-            }
-
-            const updatedBooking = await this._bookingRepository.update(
-                { _id: existingBooking._id },
-                {
-                    status: 'confirmed' as BookingStatus,
-                    paymentStatus: 'succeeded' as PaymentStatus,
-
-                    numberOfDesks: numberOfDesks,
-                    totalPrice: totalPrice,
-                    discountAmount: discountAmount,
-                    bookingDates: bookingDates.map(date => new Date(date)),
-                    transactionId: data.paymentIntentId,
-                    paymentMethod: 'stripe' as PaymentMethod,
-                    cancellationReason:"",
-                }
-            );
+async execute(data: ConfirmPaymentDTO){
+   const locks: { lockKey: string; lockId: string }[] = [];
    
-            if (!updatedBooking) {
-                throw new CustomError('Failed to update existing booking', StatusCodes.INTERNAL_SERVER_ERROR);
+   try {
+    const paymentIntent = await this._stripeService.retrievePaymentIntent(data.paymentIntentId);
+
+    if (paymentIntent.status !== 'requires_capture') {
+        throw new CustomError('Payment intent is not in the correct state for confirmation',StatusCodes.BAD_REQUEST);
+    }
+
+        const spaceId = paymentIntent.metadata.spaceId;
+        const buildingId = paymentIntent.metadata.buildingId;
+        const clientId = paymentIntent.metadata.clientId;
+        const vendorId = paymentIntent.metadata.vendorId;
+        const bookingDates: string[] = JSON.parse(paymentIntent.metadata.bookingDates);
+        const numberOfDesks = parseInt(paymentIntent.metadata.numberOfDesks);
+        const totalPrice = parseFloat(paymentIntent.metadata.totalPrice);
+        const discountAmount = parseFloat(paymentIntent.metadata.discountAmount) || 0; 
+        const bookingId = paymentIntent.metadata.bookingId;
+        
+         const space = await this._spaceRepository.findOne({_id: spaceId});
+
+            if (!space) {
+                await this._stripeService.cancelPaymentIntent(data.paymentIntentId);
+                  await this.handleFailedBooking({
+                        bookingId,
+                        spaceId,
+                        clientId,
+                        vendorId,
+                        buildingId,
+                        bookingDates,
+                        numberOfDesks,
+                        totalPrice,
+                        discountAmount,
+                        paymentIntentId: data.paymentIntentId,
+                    });
+                    throw new CustomError('Space not found', StatusCodes.NOT_FOUND);
             }
 
-             return {
-                success: true,
-                data: {
-                    booking: updatedBooking,
-                    bookingId: updatedBooking._id.toString(),
-                    paymentStatus: 'succeeded',
-                    transactionId: data.paymentIntentId,
-                    isRetry: true
-                }
-            };
-        }else{
+            if (!space.isAvailable) {
+                await this._stripeService.cancelPaymentIntent(data.paymentIntentId);
+                await this.handleFailedBooking({
+                            bookingId,
+                            spaceId,
+                            clientId,
+                            vendorId,
+                            buildingId,
+                            bookingDates,
+                            numberOfDesks,
+                            totalPrice,
+                            discountAmount,
+                            paymentIntentId: data.paymentIntentId,
+                });
+                throw new CustomError('Space is no longer available', StatusCodes.BAD_REQUEST);
+            }
 
-        const bookingData = {
-            bookingId: generateBookingId(),
+      const ttl = 10000;
+
+      for (const date of bookingDates) {
+          const lockKey = `lock:space:${spaceId}:date:${date}`;
+          const lockId = await this._redisTokenRepo.acquireLock(lockKey, ttl);
+
+           if (!lockId) {
+               for (const lock of locks) {
+                  await this._redisTokenRepo.releaseLock(lock.lockKey, lock.lockId).catch(err => {
+                      console.warn(`Failed to release Redis lock for ${lock.lockKey}`, err);
+                  });
+               }
+              throw new CustomError("This space is temporarily unavailable due to high demand. Please refresh and try booking again.", StatusCodes.TOO_MANY_REQUESTS);
+           }
+
+          locks.push({ lockKey, lockId });
+      }
+
+      for (const date of bookingDates) {
+        const bookingsOnDate = await this._bookingRepository.find({
             spaceId: new Types.ObjectId(spaceId),
-            clientId: new Types.ObjectId(clientId),
-            vendorId: new Types.ObjectId(vendorId),
-            buildingId: new Types.ObjectId(buildingId),
-            bookingDates: bookingDates.map(date => new Date(date)),
-            numberOfDesks: numberOfDesks,
-            totalPrice: totalPrice,
-            discountAmount: discountAmount,
-            status: 'confirmed' as BookingStatus,
-            paymentStatus: 'succeeded' as PaymentStatus,
-            paymentMethod: 'stripe' as PaymentMethod,
-            transactionId: data.paymentIntentId
-        };
+            bookingDates: { $in: [new Date(date)] },
+            status: 'confirmed',
+            paymentStatus: 'succeeded'
+        });
+        
+        const alreadyBookedDesks = bookingsOnDate.reduce((sum, booking) => {
+            return sum + (booking.numberOfDesks || 0);
+        }, 0);
 
-        const newBooking = await this._bookingRepository.save(bookingData);
+        const availableDesks = space.capacity! - alreadyBookedDesks;
+        
+        if (availableDesks < numberOfDesks) {
+           await this._stripeService.cancelPaymentIntent(data.paymentIntentId);
+           await this.handleFailedBooking({
+                bookingId,
+                spaceId,
+                clientId,
+                vendorId,
+                buildingId,
+                bookingDates,
+                numberOfDesks,
+                totalPrice,
+                discountAmount,
+                paymentIntentId: data.paymentIntentId,
+            }); 
+            const formattedDate = new Date(date).toDateString();
+            throw new CustomError(`Only ${availableDesks} desk${availableDesks === 1 ? '' : 's'} available on ${formattedDate}. Please adjust your selection.`, StatusCodes.BAD_REQUEST);
+        }
+    }
 
-         if (!newBooking) {
-            throw new CustomError('Failed to create booking', StatusCodes.INTERNAL_SERVER_ERROR);
+        const capturedPayment = await this._stripeService.capturePaymentIntent(data.paymentIntentId);
+
+         if (capturedPayment.status !== 'succeeded') {
+            await this._stripeService.refundPaymentIntent(data.paymentIntentId);
+     
+                await this.handleFailedBooking({
+                        bookingId,
+                        spaceId,
+                        clientId,
+                        vendorId,
+                        buildingId,
+                        bookingDates,
+                        numberOfDesks,
+                        totalPrice,
+                        discountAmount,
+                        paymentIntentId: data.paymentIntentId,
+                 });   
+            throw new CustomError('Failed to capture payment', StatusCodes.INTERNAL_SERVER_ERROR);
         }
 
+        //processing vendor amount and platform fee
+        const platformFee = Math.round(totalPrice * 0.05);
+        const vendorAmount = totalPrice - platformFee;
 
+        const vendorWalletResult = await this._walletRepository.updateOrCreateWalletBalance(vendorId, 'Vendor', vendorAmount);
 
-         await this._notificationService.sendToUser(
-            vendorId.toString(), 'vendor', 
-            'New Booking Received!', 
-            `You received a booking for ${space.name} in ${building?.buildingName}. Total: ₹${totalPrice}`,
-             {
-                bookingId: newBooking._id.toString(),
-                buildingName: building?.buildingName || "",
-                spaceName: space.name,
-                type: 'success'
-             }
-        )
+        await this._walletTransactionRepository.save({
+            walletId: new Types.ObjectId(vendorWalletResult.wallet._id),
+            type: 'booking-income',
+            amount: vendorAmount,
+            description: `Booking income for booking via Stripe (Amount: ${vendorAmount})`,
+            balanceBefore: vendorWalletResult.balanceBefore,
+            balanceAfter: vendorWalletResult.balanceAfter,
+        });
 
-         await this._notificationService.saveNotification(
-            vendorId.toString(), 'Vendor',
-            'New Booking Received!',
-            `You received a booking for ${space.name} in ${building?.buildingName}. Total: ₹${totalPrice}`,
+        const adminId = config.ADMIN_ID;
+        if (!adminId) {
+            throw new CustomError("Admin ID not configured in environment", StatusCodes.INTERNAL_SERVER_ERROR);
+        }
+        const adminWalletResult = await this._walletRepository.updateOrCreateWalletBalance(adminId, 'Admin', platformFee);
+
+        await this._walletTransactionRepository.save({
+            walletId: new Types.ObjectId(adminWalletResult.wallet._id),
+            type: 'platform-fee',
+            amount: platformFee,
+            description: `Platform fee for booking via Stripe (5%)`,
+            balanceBefore: adminWalletResult.balanceBefore,
+            balanceAfter: adminWalletResult.balanceAfter,
+        });
+
+        const building = await this._buildingRepository.findOne({ _id: buildingId });
+
+    if (bookingId) {
+        const existingBooking = await this._bookingRepository.findOne({
+            _id: new Types.ObjectId(bookingId),
+            clientId: new Types.ObjectId(clientId),
+        });   
+
+        if (!existingBooking) {
+            throw new CustomError('Booking not found for update', StatusCodes.NOT_FOUND);
+        }
+
+        const updatedBooking = await this._bookingRepository.update(
+            { _id: existingBooking._id },
             {
-                bookingId: newBooking._id.toString(),
-                buildingName: building?.buildingName || "",
-                spaceName: space.name,
+                status: 'confirmed' as BookingStatus,
+                paymentStatus: 'succeeded' as PaymentStatus,
+                numberOfDesks: numberOfDesks,
+                totalPrice: totalPrice,
+                discountAmount: discountAmount,
+                bookingDates: bookingDates.map(date => new Date(date)),
+                transactionId: data.paymentIntentId,
+                paymentMethod: 'stripe' as PaymentMethod,
+                cancellationReason:"",
             }
         );
 
-        await this._notificationService.sendToUser(
-             adminId, 'admin', 
-            'Platform Fee Collected!', 
-            `A new booking was made for ${space.name} in ${building?.buildingName}. Platform fee earned: ₹${platformFee}`,
-             {
-                bookingId: newBooking._id.toString(),
-                buildingName: building?.buildingName || "",
-                spaceName: space.name,
-                type: 'success'
-             }
-        )
+        if (!updatedBooking) {
+            throw new CustomError('Failed to update existing booking', StatusCodes.INTERNAL_SERVER_ERROR);
+        }
 
-        await this._notificationService.saveNotification(
-            adminId, 'Admin',
-            'Platform Fee Collected!',
-            `A new booking was made for ${space.name} in ${building?.buildingName}. Platform fee earned: ₹${platformFee}`,
-            {
-                bookingId: newBooking._id.toString(),
-                buildingName: building?.buildingName || "",
-                spaceName: space.name,
-            }
-        );
-
-        return {
+         return {
             success: true,
-           data: {
-                booking: newBooking,
-                bookingId: newBooking._id.toString(),
+            data: {
+                booking: updatedBooking,
+                bookingId: updatedBooking._id.toString(),
                 paymentStatus: 'succeeded',
                 transactionId: data.paymentIntentId,
-                isRetry: false
+                isRetry: true
             }
         };
+    }else{
+
+    const bookingData = {
+        bookingId: generateBookingId(),
+        spaceId: new Types.ObjectId(spaceId),
+        clientId: new Types.ObjectId(clientId),
+        vendorId: new Types.ObjectId(vendorId),
+        buildingId: new Types.ObjectId(buildingId),
+        bookingDates: bookingDates.map(date => new Date(date)),
+        numberOfDesks: numberOfDesks,
+        totalPrice: totalPrice,
+        discountAmount: discountAmount,
+        status: 'confirmed' as BookingStatus,
+        paymentStatus: 'succeeded' as PaymentStatus,
+        paymentMethod: 'stripe' as PaymentMethod,
+        transactionId: data.paymentIntentId
+    };
+
+    const newBooking = await this._bookingRepository.save(bookingData);
+
+     if (!newBooking) {
+        throw new CustomError('Failed to create booking', StatusCodes.INTERNAL_SERVER_ERROR);
     }
-       } catch (error: unknown) {
-            console.error("Error confirming payment:", error);
-            const message = getErrorMessage(error)
-             return {
-                success: false,
-                message: message || "Something went wrong while confirming payment."
-            };
-       } 
-    }
+
+     await this._notificationService.sendToUser(
+        vendorId.toString(), 'vendor', 
+        'New Booking Received!', 
+        `You received a booking for ${space.name} in ${building?.buildingName}. Total: ₹${totalPrice}`,
+         {
+            bookingId: newBooking._id.toString(),
+            buildingName: building?.buildingName || "",
+            spaceName: space.name,
+            type: 'success'
+         }
+    )
+
+     await this._notificationService.saveNotification(
+        vendorId.toString(), 'Vendor',
+        'New Booking Received!',
+        `You received a booking for ${space.name} in ${building?.buildingName}. Total: ₹${totalPrice}`,
+        {
+            bookingId: newBooking._id.toString(),
+            buildingName: building?.buildingName || "",
+            spaceName: space.name,
+        }
+    );
+
+    await this._notificationService.sendToUser(
+         adminId, 'admin', 
+        'Platform Fee Collected!', 
+        `A new booking was made for ${space.name} in ${building?.buildingName}. Platform fee earned: ₹${platformFee}`,
+         {
+            bookingId: newBooking._id.toString(),
+            buildingName: building?.buildingName || "",
+            spaceName: space.name,
+            type: 'success'
+         }
+    )
+
+    await this._notificationService.saveNotification(
+        adminId, 'Admin',
+        'Platform Fee Collected!',
+        `A new booking was made for ${space.name} in ${building?.buildingName}. Platform fee earned: ₹${platformFee}`,
+        {
+            bookingId: newBooking._id.toString(),
+            buildingName: building?.buildingName || "",
+            spaceName: space.name,
+        }
+    );
+
+    return {
+        success: true,
+       data: {
+            booking: newBooking,
+            bookingId: newBooking._id.toString(),
+            paymentStatus: 'succeeded',
+            transactionId: data.paymentIntentId,
+            isRetry: false
+        }
+    };
+}
+
+   } catch (error: unknown) {
+        console.error("Error confirming payment:", error);
+        const message = getErrorMessage(error)
+         return {
+            success: false,
+            message: message || "Something went wrong while confirming payment."
+        };
+   } finally {
+       for (const lock of locks) {
+          await this._redisTokenRepo.releaseLock(lock.lockKey, lock.lockId).catch(err => {
+              console.warn(`Failed to release Redis lock for ${lock.lockKey}`, err);
+          });
+       }
+   }
+}
 }
