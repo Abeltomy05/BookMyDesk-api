@@ -50,6 +50,9 @@ export class AdminRoutes extends BaseRoute{
         this.router.patch("/admin/mark-as-read/:id",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
             notifiactionController.markAsRead(req, res, next);
         });
+         this.router.patch("/admin/mark-as-read",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
+            notifiactionController.markAsRead(req, res, next);
+        });
         this.router.get("/admin/monthly-stats",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
             usersController.getMonthlyBookingStats(req, res, next);
         });

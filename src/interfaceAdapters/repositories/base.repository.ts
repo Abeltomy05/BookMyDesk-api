@@ -30,6 +30,14 @@ export class BaseRepository<T> {
       .lean() as Promise<T>;
   }
 
+  async updateAll(filter: FilterQuery<T>, updateData: Partial<T>): Promise<{ matchedCount: number; modifiedCount: number }> {
+    const result = await this.model.updateMany(filter, updateData);
+    return {
+      matchedCount: result.matchedCount,
+      modifiedCount: result.modifiedCount,
+    };
+  }
+
     async delete(filter: FilterQuery<T>) {
     return this.model.findOneAndDelete(filter).lean() as Promise<T>;
   }

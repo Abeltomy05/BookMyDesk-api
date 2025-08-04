@@ -11,9 +11,15 @@ export class MarkAsReadUseCase implements IMarkAsReadUseCase{
      private _notificationRepo: INotificationRepository, 
     ){}
 
-    async execute(id:string):Promise<void>{
-       if(!id) throw new CustomError("Notification Id missing, Please try again.",StatusCodes.BAD_REQUEST);
+    async execute(id?: string, userId?: string):Promise<void>{
+       if (id != undefined) {
+        await this._notificationRepo.update({ _id: id }, { isRead: true });
 
-       await this._notificationRepo.update({_id:id},{isRead:true});
+        } else if (id === undefined && userId) {
+        await this._notificationRepo.updateAll({ userId }, { isRead: true });
+        
+        } else {
+        throw new CustomError("Either notification ID or user ID must be provided", StatusCodes.BAD_REQUEST);
+        }
     }
 }

@@ -11,6 +11,7 @@ export interface IBaseRepository<T> {
   findOne(filter: any,projection?: any): Promise<T | null>;
   save(data: Partial<T>): Promise<T>;
   update(filter: any, updateData: Partial<T> | any): Promise<T | null>;
+  updateAll(filter: FilterQuery<T>, updateData: Partial<T>): Promise<{ matchedCount: number; modifiedCount: number }>
   delete(filter: any): Promise<T | null>;
   deleteAll(filter: any): Promise<void>;
   countDocuments(filter?: any): Promise<number>;
