@@ -78,6 +78,9 @@ export class ClientRoutes extends BaseRoute{
         this.router.patch("/client/mark-as-read/:id", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => {
             notifiactionController.markAsRead(req, res, next);
         });
+        this.router.patch("/client/mark-as-read", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => {
+            notifiactionController.markAsRead(req, res, next);
+        });
         this.router.post("/client/create-session", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => {
             chatController.createSession(req, res, next);
         });

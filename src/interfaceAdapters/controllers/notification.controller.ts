@@ -37,14 +37,14 @@ export class NotificationController implements INotificationController{
     }
     async markAsRead(req:Request, res: Response, next: NextFunction): Promise<void>{
         try {
-            const id = req.params.id;
-            if(!id){
-                res.status(StatusCodes.BAD_REQUEST).json({
-                    success: false,
-                })
-                return;
+            let id:string | undefined = req.params.id;
+            const userId = ( req as CustomRequest ).user.userId;
+            
+            if (!id || id === 'undefined') {
+              id = undefined;
             }
-            await this._markAdReadUseCase.execute(id);
+
+            await this._markAdReadUseCase.execute(id, userId);
             res.status(StatusCodes.OK).json({
                 success:true
             })

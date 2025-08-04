@@ -125,27 +125,24 @@ export class BookingController implements IBookingController{
 
     async getBookings(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const { page = '1', limit = '5', search = '', status } = req.query;
+            const { page = '1', limit = '5', status, buildingId, fromDate, toDate } = req.query;
             const {userId,role} = (req as CustomRequest).user;
- 
-            const pageNum = parseInt(page as string, 10);
-            const limitNum = parseInt(limit as string, 10);
-            const searchStr = search as string;
-            const statusStr = status as string;
 
             const result  = await this._getBookings.execute({
               userId,
               role,
-              page: pageNum,
-              limit: limitNum,
-              search: searchStr,
-              status: statusStr
+              page: parseInt(page as string, 10),
+              limit: parseInt(limit as string, 10),
+              status: status as string,
+              buildingId: buildingId as string,
+              fromDate: fromDate as string,
+              toDate: toDate as string
             });
 
             res.status(200).json({
                 success: true,
                 data: result.bookings,
-                currentPage: pageNum,
+                currentPage: parseInt(page as string, 10),
                 totalPages: result.totalPages,
                 totalItems: result.totalItems,
                 message: "Bookings fetched successfully."

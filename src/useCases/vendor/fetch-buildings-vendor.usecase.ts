@@ -18,12 +18,11 @@ export class FetchBuildingsForVendorUseCase implements IFetchBuildingsForVendorU
 
     async execute(vendorId: string):Promise<IBuildingShort[]>{
        if(!vendorId) throw new CustomError("Vendor Id is neccessary, Please contact support.",StatusCodes.BAD_REQUEST);
-
+       
        const buildingDetails = await this._buildingRepo.find(
-         {vendorId},
+         {vendorId, status:{$nin:['rejected','pending']}},
          {buildingName:1}
         );
-
          return buildingDetails.map((b) => ({
             _id: b._id.toString(),
             buildingName: b.buildingName,

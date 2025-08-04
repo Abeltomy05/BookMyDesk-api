@@ -95,6 +95,9 @@ export class VendorRoutes extends BaseRoute{
           this.router.patch("/vendor/mark-as-read/:id",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
          notifiactionController.markAsRead(req, res, next);
        }); 
+          this.router.patch("/vendor/mark-as-read",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
+         notifiactionController.markAsRead(req, res, next);
+       });
          this.router.get("/vendor/getChats",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
          chatController.getChats(req, res, next);
        }); 

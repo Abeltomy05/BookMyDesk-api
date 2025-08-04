@@ -6,6 +6,7 @@ import {  toEntityBookingWithDetails } from "../../interfaceAdapters/mappers/boo
 import { Types } from "mongoose";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { convertISTDateToUTC } from "../../shared/helper/dateFormatter";
 
 
 @injectable()
@@ -16,7 +17,7 @@ export class GetBookingsUseCase implements IGetBookingsUseCase {
     ) {}
 
     async execute(params: IGetBookingsDTO): Promise<IGetBookingsResult> {
-        const { userId, role, page, limit, search, status } = params;
+        const { userId, role, page, limit, status, buildingId, fromDate, toDate } = params;
         if (!userId || !role) {
             throw new CustomError("User ID and role is required to fetch bookings.",StatusCodes.BAD_REQUEST);
         }
@@ -35,8 +36,16 @@ export class GetBookingsUseCase implements IGetBookingsUseCase {
             filterCriteria.status = status;
         }
 
-        if (search && role === 'vendor') {
-            filterCriteria.search = search; 
+        if (buildingId) {
+            filterCriteria.buildingId = new Types.ObjectId(buildingId);
+        }
+
+        if (fromDate || toDate) {
+            const dateFilter: { $gte?: Date; $lte?: Date } = {};
+
+            if (fromDate) dateFilter.$gte = convertISTDateToUTC(fromDate, false);
+            if (toDate) dateFilter.$lte = convertISTDateToUTC(toDate, true);
+            filterCriteria.bookingDates = { $elemMatch: dateFilter };
         }
 
         const skip = (page - 1) * limit; 

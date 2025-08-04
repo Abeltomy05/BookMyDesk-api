@@ -2,6 +2,7 @@ import { inject, injectable } from "tsyringe";
 import { IBookingRepository } from "../../entities/repositoryInterfaces/booking/booking-repository.interface";
 import { RevenueChartDataDTO } from "../../shared/dtos/revenue-report.dto";
 import { IRevenueChartDataUseCase } from "../../entities/usecaseInterfaces/booking/revenue-chart-data-usecase.interface";
+import { convertISTDateToUTC } from "../../shared/helper/dateFormatter";
 
 @injectable()
 export class RevenueChartDataUseCase implements IRevenueChartDataUseCase {
@@ -19,7 +20,8 @@ export class RevenueChartDataUseCase implements IRevenueChartDataUseCase {
 
          switch (filterType) {
             case 'date':
-            return await this._bookingRepo.getRevenueByHour(userId, date!,isAdmin);
+            let utcDate = convertISTDateToUTC(date!);    
+            return await this._bookingRepo.getRevenueByHour(userId, utcDate.toString(),isAdmin);
             case 'month':
             return await this._bookingRepo.getRevenueByDay(userId, month!, year,isAdmin);
             case 'year':
