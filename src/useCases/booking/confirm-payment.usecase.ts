@@ -143,22 +143,6 @@ async execute(data: ConfirmPaymentDTO){
                 throw new CustomError('Space is no longer available', StatusCodes.BAD_REQUEST);
             }
 
-            const startDate = new Date();
-            startDate.setDate(1);
-            startDate.setHours(0,0,0,0)
-
-
-            const endDate = new Date(startDate);
-            endDate.setMonth(startDate.getMonth() + 1);
-
-            const bookings = await this._bookingRepository.find(
-                {clientId, $in:{bookingDates:[{$gte:startDate,$lt:endDate}]}},
-            )
-
-            if(bookings.length > 2){
-                throw new CustomError("Maximum 2 bookings allowed per month",StatusCodes.BAD_REQUEST);
-            }
-
       const ttl = 10000;
 
       for (const date of bookingDates) {
