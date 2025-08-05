@@ -25,11 +25,11 @@ export class VendorRoutes extends BaseRoute{
         usersController.getUserData(req, res, next);
       });   
      
-     this.router.put("/vendor/update-profile",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => {
+     this.router.patch("/vendor/update-profile",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => {
                   usersController.updateUserProfile(req, res, next);
      });  
 
-     this.router.put("/vendor/update-password", verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => {
+     this.router.patch("/vendor/update-password", verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => {
             usersController.updateUserPassword(req, res, next);
         });
 
@@ -60,7 +60,7 @@ export class VendorRoutes extends BaseRoute{
         this.router.get("/vendor/get-bookings",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
          bookingController.getBookings(req, res, next);
        });  
-       this.router.post("/vendor/cancel-booking",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
+       this.router.patch("/vendor/cancel-booking",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
          bookingController.cancelBooking(req, res, next);
        });   
 
@@ -104,7 +104,7 @@ export class VendorRoutes extends BaseRoute{
         this.router.get("/vendor/messages",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
          chatController.getMessages(req, res, next);
        }); 
-        this.router.post("/vendor/clear-chat",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
+        this.router.patch("/vendor/clear-chat",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
          chatController.clearChat(req, res, next);
        }); 
         this.router.get("/vendor/revenue-report",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
