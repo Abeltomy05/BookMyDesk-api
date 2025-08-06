@@ -6,7 +6,7 @@ import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
 
 export interface ResetTokenPayload extends JwtPayload {
-	email: string;
+	value: string;
 }
 
 @injectable()
@@ -20,8 +20,8 @@ export class JwtService implements IJwtService {
         this._resetTokenSecret = config.RESET_TOKEN_SECRET
     }
 
-    generateResetToken(email: string): string {
-        const payload: ResetTokenPayload = { email };
+    generateResetToken(value: string): string {
+        const payload: ResetTokenPayload = { value };
         const token = jwt.sign(payload, this._resetTokenSecret, {
             expiresIn: "5m",
         });

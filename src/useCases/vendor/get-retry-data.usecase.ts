@@ -22,18 +22,18 @@ export class GetRetryDataUseCase implements IGetRetryDataUseCase{
           idProof?: string
     }>{
         const payload = this._tokenService.verifyResetToken(token);
-        if (!payload || !payload.email) {
+        if (!payload || !payload.value) {
             throw new CustomError("Invalid or expired token", StatusCodes.BAD_REQUEST);
         }
 
-        const vendor = await this._vendorRepository.findOne({email:payload.email});
+        const vendor = await this._vendorRepository.findOne({email:payload.value});
 
          if (!vendor) {
           throw new CustomError("Vendor not found",StatusCodes.NOT_FOUND);
         }
 
          return {
-            email:payload.email,
+            email:payload.value,
             phoneNumber: vendor.phone,
             companyName: vendor.companyName,
             companyAddress: vendor.companyAddress,

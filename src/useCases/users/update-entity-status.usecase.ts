@@ -84,7 +84,7 @@ export class UpdateEntityStatusUseCase  implements IUpdateEntityStatusUseCase {
 
 
 		 if (entityType === "building" && status === "rejected" && reason && hasEmail(entity)) {
-            await this._handleBuildingRejection(entity.email, reason);
+            await this._handleBuildingRejection(entity.email, reason, entityId);
         }
 	}
 
@@ -95,8 +95,10 @@ export class UpdateEntityStatusUseCase  implements IUpdateEntityStatusUseCase {
         await this._emailService.sendVendorRejectionEmail(email, reason, retryUrl);
     }
 
-	  private async _handleBuildingRejection(email: string, reason: string): Promise<void> {
+	  private async _handleBuildingRejection(email: string, reason: string,entityId:string): Promise<void> {
 		 console.log(`Sending rejection email to Building: ${email}`);
-        await this._emailService.sendBuildingRejectionEmail(email, reason);
+		const retryToken = this._tokenService.generateResetToken(entityId);
+        const retryUrl = new URL(`/vendor/retry-building/${retryToken}`, config.CORS_ORIGIN).toString();
+        await this._emailService.sendBuildingRejectionEmail(email, reason, retryUrl);
     }
 }
