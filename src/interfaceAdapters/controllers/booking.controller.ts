@@ -213,13 +213,15 @@ export class BookingController implements IBookingController{
 
     async getBookingsForAdmin(req: Request, res: Response, next: NextFunction): Promise<void>{
       try {
-        const {page="1",limit="5",vendorId, buildingId, status} = req.query;
+        const {page="1",limit="5",vendorId, buildingId, status, fromDate, toDate} = req.query;
         const result = await this._GetBookingsForAdminUseCase.execute({
           page: parseInt(page as string),
           limit: parseInt(limit as string),
           vendorId: vendorId as string,
           buildingId: buildingId as string,
           status: status as string,
+          fromDate: fromDate as string,
+          toDate: toDate as string
         })
 
          res.status(200).json({

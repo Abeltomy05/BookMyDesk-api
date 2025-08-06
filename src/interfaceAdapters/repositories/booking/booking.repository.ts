@@ -4,6 +4,7 @@ import { BaseRepository } from "../base.repository";
 import { FilterQuery, Types } from "mongoose";
 import { IBookingRepository } from "../../../entities/repositoryInterfaces/booking/booking-repository.interface";
 import { IGetAdminBookingsFilterDTO } from "../../../shared/dtos/booking.dto";
+import { convertISTDateToUTC } from "../../../shared/helper/dateFormatter";
 
 @injectable()
 export class BookingRepository extends BaseRepository<IBookingModel> implements IBookingRepository{
@@ -62,6 +63,8 @@ async getAdminBookings({
   vendorId,
   buildingId,
   status,
+  fromDate,
+  toDate,
 }: IGetAdminBookingsFilterDTO) {
   const skip = (page - 1) * limit;
 
@@ -71,6 +74,12 @@ async getAdminBookings({
   if (vendorId) match.vendorId = new Types.ObjectId(vendorId);
   if (buildingId) match.buildingId = new Types.ObjectId(buildingId);
   if (status && status !== 'all') match.status = status;
+  if (fromDate || toDate) {
+    const dateMatch: Record<string, any> = {};
+    if (fromDate) dateMatch.$gte = convertISTDateToUTC(fromDate, false);
+    if (toDate) dateMatch.$lte = convertISTDateToUTC(toDate, true);
+    match.bookingDates = { $elemMatch: dateMatch };
+  }
 
   const pipeline: any[] = [
     { $match: match },
@@ -133,7 +142,7 @@ async getAdminBookings({
         spaceName: "$space.name",
       },
     },
-    { $sort: { bookingDate: -1 } },
+    { $sort: { createdAt: -1 } },
     { $skip: skip },
     { $limit: limit }
   ];

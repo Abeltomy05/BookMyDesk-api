@@ -71,6 +71,8 @@ export interface IGetAdminBookingsFilterDTO {
   vendorId?: string;
   buildingId?: string;
   status?: string;
+  fromDate?:string;
+  toDate?:string;
 }
 
 

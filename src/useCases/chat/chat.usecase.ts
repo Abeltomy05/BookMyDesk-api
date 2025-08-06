@@ -8,12 +8,15 @@ import { INotificationService } from "../../entities/serviceInterfaces/notificat
 import { IBuildingRepository } from "../../entities/repositoryInterfaces/building/building-repository.interface";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { IChatSessionRepository } from "../../entities/repositoryInterfaces/chat/chat-session-repository.interface";
 
 @injectable()
 export class ChatUseCase implements IChatUseCase{
     constructor(
       @inject("IChatMessageRepository")
       private _chatMessageRepo: IChatMessageRepository,
+      @inject("IChatSessionRepository")
+      private _chatSessionRepo: IChatSessionRepository,
       @inject("INotificationService")
       private _notificationService: INotificationService,
       @inject("IBuildingRepository")
@@ -34,6 +37,16 @@ export class ChatUseCase implements IChatUseCase{
         text: data.text,
         image: data.image,
        })
+
+       await this._chatSessionRepo.update(
+          { _id: data.sessionId },
+          {
+            $set: {
+              lastMessage: data.text || "📷 Photo",
+              lastMessageAt: new Date(),
+            },
+          }
+        );
 
         const role = data.receiverModel === 'Building' ? 'vendor' : 'client';
         let finalReceiverId = data.receiverId;
