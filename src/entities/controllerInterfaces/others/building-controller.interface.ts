@@ -9,4 +9,6 @@ export interface IBuildingController{
     fetchBuildings(req:Request, res: Response, next: NextFunction): Promise<void>;
     fetchFilters(req: Request, res: Response, next: NextFunction): Promise<void>;
     getEveryBuilding(req: Request, res: Response, next: NextFunction): Promise<void>;
+     reapplyBuildingData(req: Request, res: Response, next: NextFunction): Promise<void>
+     retryBuildingRegistration(req: Request, res: Response, next: NextFunction): Promise<void>
 }

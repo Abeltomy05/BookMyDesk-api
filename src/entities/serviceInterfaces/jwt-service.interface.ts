@@ -1,8 +1,8 @@
 import { JwtPayload } from "jsonwebtoken";
 
 export interface IJwtService{
-    generateResetToken(email: string): string;
-    verifyResetToken(token: string): { email: string } | null;
+    generateResetToken(value: string): string;
+    verifyResetToken(token: string): { value: string } | null;
     generateAccessToken(payload: object): string;
     generateRefreshToken(payload: object): string;
     verifyAccessToken(token: string): JwtPayload | null ;

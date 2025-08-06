@@ -13,6 +13,10 @@ import { IGetSingleBuilding } from "../../entities/usecaseInterfaces/building/ge
 import { IFetchBuildingUseCase } from "../../entities/usecaseInterfaces/building/fetch-building-usecase.interface";
 import { IFetchFiltersUseCase } from "../../entities/usecaseInterfaces/building/fetch-filter-usecase.interface";
 import { IGetEveryBuildingUseCase } from "../../entities/usecaseInterfaces/building/every-building-usecase.interface";
+import { IGetReApplyBuildingData } from "../../entities/usecaseInterfaces/building/reapply-building-usecase.interface";
+import { IRetryBuildingRegistrationUseCase } from "../../entities/usecaseInterfaces/building/retry-building-registration-usecase.interface";
+import { retrybuildingRegistrationSchema } from "../../shared/validations/retry-building.validation";
+import { Building } from "../../shared/dtos/building.dto";
 
 @injectable()
 export class BuildingController implements IBuildingController{
@@ -33,6 +37,10 @@ export class BuildingController implements IBuildingController{
         private _fetchFilterUseCase: IFetchFiltersUseCase,
         @inject("IGetEveryBuildingUseCase")
         private _getEveryBuildingUseCase: IGetEveryBuildingUseCase,
+        @inject("IGetReApplyBuildingData")
+        private _reapplyBuildingDataUseCase: IGetReApplyBuildingData,
+        @inject("IRetryBuildingRegistrationUseCase")
+        private retryBuildingRegistrationUseCase: IRetryBuildingRegistrationUseCase,
     ){}
 //get buildings of a vendor
    async getAllBuilding(req:Request, res: Response, next: NextFunction): Promise<void>{
@@ -258,6 +266,63 @@ export class BuildingController implements IBuildingController{
           totalPages: Math.ceil(result.total / pageSize),
           currentPage: pageNumber,
         })
+    } catch (error) {
+      next(error)
+    }
+   }
+
+   async reapplyBuildingData(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const token = req.query.token;
+      if(!token || typeof token !== 'string'){
+        res.status(StatusCodes.BAD_REQUEST).json({
+          success: false,
+          message: "Token not found."
+        })
+        return;
+      }
+
+      const result = await this._reapplyBuildingDataUseCase.execute(token);
+      res.status(StatusCodes.OK).json({
+        success: true,
+        data: result,
+        message: "Token verified successfully."
+      })
+    } catch (error) {
+      next(error);
+    }
+   }
+
+   async retryBuildingRegistration(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {    
+        const data:Building = req.body;
+        
+        const validationResult  = retrybuildingRegistrationSchema.safeParse(data);
+         if (!validationResult.success) {
+          const validationErrors = validationResult.error.errors.map(error => {
+            const path = error.path.join('.');
+            return path ? `${path}: ${error.message}` : error.message;
+          }); 
+
+          res.status(StatusCodes.BAD_REQUEST).json({
+            success: false,
+            message: "Validation failed",
+            errors: validationErrors
+          });
+          return;
+        } 
+
+        const buildingData: Building = {
+          ...validationResult.data,
+          _id: data._id,
+        };
+      await this.retryBuildingRegistrationUseCase.execute(buildingData);
+      
+      res.status(StatusCodes.OK).json({
+        success: true,
+        message: "Building re-applied successfully. Please wait for admin approval."
+      });
+
     } catch (error) {
       next(error)
     }

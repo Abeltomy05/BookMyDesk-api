@@ -81,6 +81,8 @@ import { GetAllAmenityUseCase } from "../../useCases/amenity/get-all-amenity.use
 import { CreateAmenityUseCase } from "../../useCases/amenity/create-amenity.usecase";
 import { EditAmenityUseCase } from "../../useCases/amenity/edit-amenity.usecase";
 import { DeleteAmenityUseCase } from "../../useCases/amenity/delete-amenity.usecase";
+import { GetReApplyBuildingData } from "../../useCases/building/get-reapply-building.usecase";
+import { RetryBuildingRegistrationUseCase } from "../../useCases/building/retry-building-registration.usecase";
 
 
 
@@ -284,6 +286,12 @@ export class UseCaseRegistry{
       })
       container.register("IDeleteAmenityUseCase",{
         useClass: DeleteAmenityUseCase
+      })
+      container.register("IGetReApplyBuildingData",{
+        useClass: GetReApplyBuildingData
+      })
+       container.register("IRetryBuildingRegistrationUseCase",{
+        useClass: RetryBuildingRegistrationUseCase
       })
 
         //* ====== Register Bcrypts ====== *//

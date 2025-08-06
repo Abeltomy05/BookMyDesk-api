@@ -29,11 +29,11 @@ export class ResetPasswordUseCase implements IResetPasswordUseCase {
 
     async execute({ password, token}: { password: string; token:string;}): Promise<string> {
          const payload = this._tokenService.verifyResetToken(token);
-        if (!payload || !payload.email) {
+        if (!payload || !payload.value) {
             throw new CustomError("Invalid or expired token",StatusCodes.BAD_REQUEST);
         }
 
-        const email = payload.email;
+        const email = payload.value;
          let user: IClientEntity | IVendorEntity | null = null;
          let repository: IClientRepository | IVendorRepository = this._clientRepository;
          let role: 'client' | 'vendor' = 'client';
