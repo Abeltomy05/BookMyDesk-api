@@ -48,9 +48,9 @@ app.use(cors({
 startOfferCleanupJob();
 
 app.use('/api/auth', new AuthRoutes().router);
-app.use('/api/_c', new ClientRoutes().router);
-app.use('/api/_v', new VendorRoutes().router);
-app.use('/api/_a', new AdminRoutes().router);
+app.use('/api/client', new ClientRoutes().router);
+app.use('/api/vendor', new VendorRoutes().router);
+app.use('/api/admin', new AdminRoutes().router);
 
 app.use(errorHandler);
 

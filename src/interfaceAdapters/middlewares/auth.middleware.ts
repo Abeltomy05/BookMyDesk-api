@@ -78,8 +78,8 @@ export const verifyAuth = async(req:Request,res:Response,next:NextFunction)=>{
                     /* =======================  */
 
 const extractToken = (req: Request): { access_token: string; refresh_token: string } | null => {
-	const userType = req.path.split("/")[1];
-	// console.log("🔍 Extracting tokens for userType:", userType);
+	const userType = req.baseUrl?.split("/")[2];
+	console.log("🔍 Extracting tokens for userType:", userType);
    
 	if (!userType) return null;
 
