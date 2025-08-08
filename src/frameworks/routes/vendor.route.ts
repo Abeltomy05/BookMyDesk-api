@@ -13,7 +13,7 @@ export class VendorRoutes extends BaseRoute{
              authController.logout(req, res, next);
          })
 
-        this.router.post("/refresh-token",decodeToken,(req: Request, res: Response) => {
+        this.router.post("/refresh-token",(req: Request, res: Response) => {
              authController.handleTokenRefresh(req, res);
       }); 
 

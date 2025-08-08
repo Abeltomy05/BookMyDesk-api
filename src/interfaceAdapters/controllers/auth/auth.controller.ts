@@ -150,8 +150,8 @@ export class AuthController implements IAuthController {
                }
 
           const tokens = await this._generateTokenUseCase.execute(user._id as Schema.Types.ObjectId,user.email!,user.role!);
-          const accessTokenName = `${user.role}_access_token`;
-		const refreshTokenName = `${user.role}_refresh_token`;
+          const accessTokenName = "access_token";
+		const refreshTokenName = "refresh_token";
 
 
             res.cookie(accessTokenName, tokens.accessToken, {
@@ -215,8 +215,8 @@ export class AuthController implements IAuthController {
 				user.role
 			);
 
-               const accessTokenName = `${user.role}_access_token`;
-			const refreshTokenName = `${user.role}_refresh_token`;
+               const accessTokenName = "access_token";
+               const refreshTokenName = "refresh_token";
 
                res.cookie(accessTokenName, tokens.accessToken, {
                httpOnly: true,
@@ -363,9 +363,9 @@ export class AuthController implements IAuthController {
              await this._removeFcmTokenUseCase.execute((req as CustomRequest).user.userId,(req as CustomRequest).user.role);
 
              const user = (req as CustomRequest).user;
-		   const accessTokenName = `${user.role}_access_token`;
-		   const refreshTokenName = `${user.role}_refresh_token`;
-
+            const accessTokenName = "access_token";
+            const refreshTokenName = "refresh_token";
+  
              res.clearCookie(accessTokenName, {
                httpOnly: true,
                secure: config.NODE_ENV === "production",
@@ -391,17 +391,15 @@ export class AuthController implements IAuthController {
 
      async handleTokenRefresh(req: Request, res: Response): Promise<void> {
 		try {
-			const refreshCookies  = req.cookies;
-               const refreshTokenKey = Object.keys(refreshCookies).find((key) =>
-				key.endsWith("_refresh_token")
-			);
-               if (!refreshTokenKey) {
+			const refreshToken = req.cookies?.["refresh_token"];
+
+               if (!refreshToken) {
 				throw new CustomError(ERROR_MESSAGES.REFRESH_TOKEN_MISSING, StatusCodes.UNAUTHORIZED);
 			}
-               const refreshToken = refreshCookies[refreshTokenKey];
-			const { role, accessToken } = this._refreshTokenUseCase.execute(refreshToken);
 
-			res.cookie(`${role}_access_token`, accessToken, {
+			const { accessToken } = this._refreshTokenUseCase.execute(refreshToken);
+
+			res.cookie("access_token", accessToken, {
 			httpOnly: true,
 			secure: config.NODE_ENV === "production",
 			sameSite: "strict",
@@ -415,10 +413,19 @@ export class AuthController implements IAuthController {
                 const message = getErrorMessage(error);
                console.error("Refresh token failed:", error);
 
-			["client", "vendor", "admin"].forEach((role) => {
-				res.clearCookie(`${role}_access_token`);
-				res.clearCookie(`${role}_refresh_token`);
-			});
+			res.clearCookie("access_token", {
+                    httpOnly: true,
+                    secure: config.NODE_ENV === "production",
+                    sameSite: "strict",
+                    path: "/",
+               });
+
+               res.clearCookie("refresh_token", {
+                    httpOnly: true,
+                    secure: config.NODE_ENV === "production",
+                    sameSite: "strict",
+                    path: "/",
+               });
 
                res.status(StatusCodes.UNAUTHORIZED).json({
 				message,
