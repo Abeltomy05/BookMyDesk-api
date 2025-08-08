@@ -3,6 +3,7 @@ import { IDeleteEntityUseCase } from "../../entities/usecaseInterfaces/users/del
 import { IOfferRepository } from "../../entities/repositoryInterfaces/offer/offer-repository.interface";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 
 @injectable()
@@ -14,7 +15,7 @@ export class DeleteEntityUseCase implements IDeleteEntityUseCase{
 
     async execute(entityId:string, entityType:string):Promise<{success:boolean}>{
        if(!entityType || !entityId){
-        throw new CustomError("Entity credentials missing. Please try again.",StatusCodes.BAD_REQUEST);
+        throw new CustomError(ERROR_MESSAGES.MISSING_CREDENTIALS,StatusCodes.BAD_REQUEST);
        }
 
        let repo: { delete: (query: any) => Promise<any> };
@@ -24,7 +25,7 @@ export class DeleteEntityUseCase implements IDeleteEntityUseCase{
             repo = this._offerRepo;
             break;
         default:
-			throw new CustomError("Unsupported entity type", StatusCodes.BAD_REQUEST); 
+			throw new CustomError(ERROR_MESSAGES.INVALID_ENTITY_TYPE, StatusCodes.BAD_REQUEST); 
        }
 
        await repo.delete({ _id: entityId });

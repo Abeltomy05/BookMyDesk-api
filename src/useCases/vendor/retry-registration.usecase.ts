@@ -3,6 +3,7 @@ import { IRetryRegistration } from "../../entities/usecaseInterfaces/vendor/retr
 import { IVendorRepository } from "../../entities/repositoryInterfaces/users/vendor-repository.interface";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class RetryRegistration implements IRetryRegistration{
@@ -27,7 +28,7 @@ export class RetryRegistration implements IRetryRegistration{
         console.log("Updating vendor in usecase with",email,phone,companyName);
          const existingVendor = await this._vendorRepository.findOne({email});
          if (!existingVendor) {
-            throw new CustomError("Vendor not found",StatusCodes.NOT_FOUND);
+            throw new CustomError(ERROR_MESSAGES.USER_NOT_FOUND,StatusCodes.NOT_FOUND);
             }
 
         const updatedVendor = await this._vendorRepository.update(

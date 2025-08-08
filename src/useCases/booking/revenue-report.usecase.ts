@@ -6,6 +6,7 @@ import { IRevenueReportUseCase } from "../../entities/usecaseInterfaces/booking/
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
 import { PopulatedBooking, RevenueReportBooking, RevenueReportFilters } from "../../shared/dtos/revenue-report.dto";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 
 @injectable()
@@ -19,7 +20,7 @@ async execute(data: RevenueReportFilters): Promise<RevenueReportBooking[]> {
   const { vendorId, buildingId, filterType, date, month, year } = data;
 
   if (!buildingId || !vendorId) {
-    throw new CustomError("Missing credentials for getting the revenue data.",StatusCodes.BAD_REQUEST);
+    throw new CustomError(ERROR_MESSAGES.MISSING_CREDENTIALS,StatusCodes.BAD_REQUEST);
   }
 
   const filter: FilterQuery<IBookingEntity> = {

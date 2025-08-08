@@ -10,6 +10,7 @@ import { IClientEntity } from "../../entities/models/client.entity";
 import { config } from "../../shared/config";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
@@ -48,7 +49,7 @@ export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
             }
 
           if (!user) {
-              throw new CustomError("User not found",StatusCodes.NOT_FOUND);
+              throw new CustomError(ERROR_MESSAGES.USER_NOT_FOUND,StatusCodes.NOT_FOUND);
           } 
 
           const resetToken = this._tokenService.generateResetToken(email);
@@ -56,9 +57,9 @@ export class ForgotPasswordUseCase implements IForgotPasswordUseCase {
 			       await this._redisTokenRepository.storeResetToken(email,resetToken);
 		        } catch (error) {
 		        	console.error("Failed to store reset token in Redis:", error);
-		         	throw new CustomError("Failed to store reset token", StatusCodes.INTERNAL_SERVER_ERROR);
+		         	throw new CustomError(ERROR_MESSAGES.FAILE_TO_STORE_TOKEN_IN_REDIS, StatusCodes.INTERNAL_SERVER_ERROR);
 		       }
-        // const rolePrefix = role !== "client" ? `/${role}` : "";
+        
 		const resetUrl = new URL(
 			`/reset-password/${resetToken}`,
 			config.CORS_ORIGIN

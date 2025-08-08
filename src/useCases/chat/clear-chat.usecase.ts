@@ -3,6 +3,7 @@ import { IChatSessionRepository } from "../../entities/repositoryInterfaces/chat
 import { IClearChatUseCase } from "../../entities/usecaseInterfaces/chat/clear-chat-usecase.interface";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class ClearChatUseCase implements IClearChatUseCase{
@@ -13,12 +14,12 @@ export class ClearChatUseCase implements IClearChatUseCase{
 
     async execute(sessionId:string,userId:string):Promise<void>{
         if(!sessionId || !userId){
-            throw new CustomError("Session Id or user Id missing",StatusCodes.BAD_REQUEST);
+            throw new CustomError(ERROR_MESSAGES.MISSING_CREDENTIALS,StatusCodes.BAD_REQUEST);
         }
 
         const session = await this._chatSessionRepo.findOne({_id:sessionId});
         if (!session) {
-        throw new CustomError("Chat session not found", StatusCodes.NOT_FOUND);
+        throw new CustomError(ERROR_MESSAGES.CHAT_SESSION_NOT_FOUND, StatusCodes.NOT_FOUND);
         }
 
         const clearedAt = new Date();

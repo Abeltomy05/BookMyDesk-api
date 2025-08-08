@@ -7,6 +7,7 @@ import { ICreateTopUpPaymentIntentUseCase } from "../../entities/usecaseInterfac
 import { config } from "../../shared/config";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 
 @injectable()
@@ -24,10 +25,10 @@ export class CreateTopUpPaymentIntentUseCase implements ICreateTopUpPaymentInten
         let repo: IClientRepository | IVendorRepository;
         if(role === 'client') repo = this._clientRepository;
         else if(role === 'vendor') repo = this._vendorRepository;
-        else throw new CustomError("Invalid role",StatusCodes.BAD_REQUEST);
+        else throw new CustomError(ERROR_MESSAGES.INVALID_ROLE, StatusCodes.BAD_REQUEST);
 
         const user = await repo.findOne({_id:userId});
-        if(!user) throw new CustomError("User Not Found.", StatusCodes.NOT_FOUND);
+        if(!user) throw new CustomError(ERROR_MESSAGES.USER_NOT_FOUND, StatusCodes.NOT_FOUND);
 
          const paymentIntent = await this._stripeService.createPaymentIntent({
                 amount: Math.round(amount * 100), 

@@ -9,6 +9,7 @@ import { IBuildingRepository } from "../../entities/repositoryInterfaces/buildin
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
 import { IChatSessionRepository } from "../../entities/repositoryInterfaces/chat/chat-session-repository.interface";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class ChatUseCase implements IChatUseCase{
@@ -25,7 +26,7 @@ export class ChatUseCase implements IChatUseCase{
 
     async saveMessage(data:SaveMessageDTO):Promise<IChatMessageEntity>{
        if(!data.senderId || !data.receiverId || !data.senderModel || !data.receiverModel){
-        throw new CustomError("Message credentials missing.",StatusCodes.BAD_REQUEST);
+        throw new CustomError(ERROR_MESSAGES.MISSING_CREDENTIALS,StatusCodes.BAD_REQUEST);
        }
 
        const savedMessage = await this._chatMessageRepo.save({
@@ -91,7 +92,7 @@ export class ChatUseCase implements IChatUseCase{
 
     async deleteMessage(data:{messageId: string, sessionId: string},userId: string){
       if(!userId){
-        throw new CustomError("Cannot delete message without user Id.",StatusCodes.BAD_REQUEST);
+        throw new CustomError(ERROR_MESSAGES.MISSING_CREDENTIALS,StatusCodes.BAD_REQUEST);
       }
 
       await this._chatMessageRepo.update(

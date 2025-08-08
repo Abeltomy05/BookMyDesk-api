@@ -6,6 +6,7 @@ import { IGetAllAmenityUseCase } from "../../entities/usecaseInterfaces/amenity/
 import { ICreateAmenityUseCase } from "../../entities/usecaseInterfaces/amenity/create-amenity-usecase.interface";
 import { IEditAmenityUseCase } from "../../entities/usecaseInterfaces/amenity/edit-amenity-usecase.interface";
 import { IDeleteAmenityUseCase } from "../../entities/usecaseInterfaces/amenity/delete-amenity-usecase.interface";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class AmenityController implements IAmenityController{
@@ -44,13 +45,13 @@ export class AmenityController implements IAmenityController{
             if(!name || typeof name != 'string'){
                 res.status(StatusCodes.BAD_REQUEST).json({
                     success: false,
-                    message: "Amenity name is required and must be a string."
+                    message: ERROR_MESSAGES.AMENITY_NAME_REQUIRED
                 })
             }
             await this._createAmenityUseCase.execute(name);
             res.status(StatusCodes.OK).json({
                 success: true,
-                message: "Amenity created successfully.",
+                message: SUCCESS_MESSAGES.CREATED,
             });
         } catch (error) {
             next(error);
@@ -63,14 +64,14 @@ export class AmenityController implements IAmenityController{
             if(!id || !name){
                 res.status(StatusCodes.BAD_REQUEST).json({
                     success: false,
-                    message: "Credentials missing for updating amenity."
+                    message: ERROR_MESSAGES.MISSING_CREDENTIALS
                 })
             }
 
             await this._editAmenityUseCase.execute(id,name);
             res.status(StatusCodes.OK).json({
                 success: true,
-                message: "Amenity updated successfully."
+                message: SUCCESS_MESSAGES.UPDATED
             })
         } catch (error) {
             next(error)
@@ -83,14 +84,14 @@ export class AmenityController implements IAmenityController{
             if(!id ){
                 res.status(StatusCodes.BAD_REQUEST).json({
                     success: false,
-                    message: "Credentials missing for deleting amenity."
+                    message: ERROR_MESSAGES.MISSING_CREDENTIALS
                 })
             }
 
             await this._deleteAmenityUseCase.execute(id as string);
             res.status(StatusCodes.OK).json({
                 success: true,
-                message: "Amenity Deleted successfully."
+                message: SUCCESS_MESSAGES.DELETED
             })
         } catch (error) {
             next(error)

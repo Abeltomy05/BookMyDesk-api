@@ -4,6 +4,7 @@ import { IVendorModel } from "../../frameworks/database/mongo/models/vendor.mode
 import { IUploadIdProofUseCase } from "../../entities/usecaseInterfaces/vendor/uploadIdProof-usecase.interface";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class UploadIdProofUseCase implements IUploadIdProofUseCase{
@@ -15,12 +16,12 @@ export class UploadIdProofUseCase implements IUploadIdProofUseCase{
     async uploadIdProof(vendorId: string, idProof: string): Promise<IVendorModel> {
         try {
             if (!vendorId || !idProof) {
-                throw new CustomError("Vendor ID and ID proof are required",StatusCodes.BAD_REQUEST);
+                throw new CustomError(ERROR_MESSAGES.MISSING_CREDENTIALS,StatusCodes.BAD_REQUEST);
             }
             console.log("Vendor ID:", vendorId, "ID Proof:", idProof);
             const vendor  = await this._vendorRepository.findOne({ _id: vendorId });
              if (!vendor ) {
-                throw new CustomError("Vendor not found",StatusCodes.NOT_FOUND);
+                throw new CustomError(ERROR_MESSAGES.USER_NOT_FOUND,StatusCodes.NOT_FOUND);
               }
 
              vendor.idProof = idProof;

@@ -3,6 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import { ZodError } from "zod";
 import logger from "../../shared/utils/error-logger";
 import { CustomError } from "../../entities/utils/custom.error";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 export const errorHandler = (
     err: any,
@@ -11,12 +12,12 @@ export const errorHandler = (
     next: NextFunction
 ) => {
     let statusCode: number = StatusCodes.INTERNAL_SERVER_ERROR;
-    let message: string = "An unexpected server error occurred. Please try again later.";
+    let message: string = ERROR_MESSAGES.INTERNAL_SERVER_ERROR;
     let errors: any[] | null = null;
 
     if (err instanceof ZodError) {
         statusCode = StatusCodes.BAD_REQUEST;
-        message = "Validation failed. Please check the submitted data.";
+        message = ERROR_MESSAGES.VALIDATION_FAILED;
         errors = err.errors.map(error => ({
             field: error.path.join("."),
             message: error.message
@@ -28,7 +29,7 @@ export const errorHandler = (
         console.error("Unhandled Error:", err);
         if (err.name === "TokenExpiredError") {
             statusCode = StatusCodes.UNAUTHORIZED
-            message = "Your session has expired. Please log in again."
+            message = ERROR_MESSAGES.SESSION_EXPIRED
         }
     }
     logger.error(`[${req.method}] ${req.url} - ${err.message}`, { stack: err.stack });

@@ -6,6 +6,7 @@ import { IVendorDataResponseDTO } from "../../shared/dtos/vendorInfo.dto";
 import { IGetSingleVendorData } from "../../entities/usecaseInterfaces/vendor/get-single-vendorData-usecase.interface";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class GetSingleVendorData implements IGetSingleVendorData{
@@ -19,7 +20,7 @@ export class GetSingleVendorData implements IGetSingleVendorData{
     ){}
 
     async execute(vendorId:string):Promise<IVendorDataResponseDTO>{
-        if(!vendorId) throw new CustomError("Vendor Id missing, Please try again.",StatusCodes.BAD_REQUEST);
+        if(!vendorId) throw new CustomError(ERROR_MESSAGES.MISSING_CREDENTIALS,StatusCodes.BAD_REQUEST);
 
         const totalBookings = await this._bookingRepo.countDocuments({
             vendorId,

@@ -82,7 +82,7 @@ async sendResetEmail(to: string, subject: string, resetUrl: string): Promise<voi
       from: `BookMyDesk <${config.EMAIL_USER}>`,
       to,
       subject,
-      text: `Click the link to reset your password: ${resetUrl}`, // Plain text fallback
+      text: `Click the link to reset your password: ${resetUrl}`, 
       html: htmlContent
     };
     await this._sendMail(mailOptions);

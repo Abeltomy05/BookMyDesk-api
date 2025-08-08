@@ -11,6 +11,7 @@ import { config } from "../../shared/config";
 import { generateBookingId } from "../../shared/helper/generateBookingId";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class PayWithWalletUseCase implements IPayWithWalletUseCase{
@@ -40,12 +41,12 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
     ):Promise<{ success: boolean; bookingId: string }>{
 
        const space = await this._spaceRepository.findOne({_id:spaceId});
-       if (!space) throw new CustomError("Space not found.",StatusCodes.NOT_FOUND);
+       if (!space) throw new CustomError(ERROR_MESSAGES.SPACE_NOT_FOUND,StatusCodes.NOT_FOUND);
 
-       if (!space.isAvailable) throw new CustomError("Space is no longer available.",StatusCodes.BAD_REQUEST);
+       if (!space.isAvailable) throw new CustomError(ERROR_MESSAGES.SPACE_NOT_AVAILABLE,StatusCodes.BAD_REQUEST);
 
        const building = await this._buildingRepository.findOne({ _id: space.buildingId });
-       if (!building) throw new CustomError("Building not found for this space.", StatusCodes.NOT_FOUND);
+       if (!building) throw new CustomError(ERROR_MESSAGES.BUILDING_NOT_FOUND, StatusCodes.NOT_FOUND);
 
        const vendorId = building.vendorId;
        
@@ -67,7 +68,7 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
 
         const wallet = await this._walletRepository.findOne({ userId }, { balance: 1 });
         if (!wallet || wallet.balance < totalPrice) {
-            throw new CustomError("Insufficient wallet balance.", StatusCodes.BAD_REQUEST);
+            throw new CustomError(ERROR_MESSAGES.INSUFFICIENT_WALLET_BALANCE, StatusCodes.BAD_REQUEST);
         }
 
         const newBalance = wallet.balance - totalPrice;
@@ -101,7 +102,7 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
          });
 
          if (!booking) {
-            throw new CustomError("Failed to create booking.", StatusCodes.INTERNAL_SERVER_ERROR);
+            throw new CustomError(ERROR_MESSAGES.FAILED, StatusCodes.INTERNAL_SERVER_ERROR);
          }
     
 
@@ -120,7 +121,7 @@ export class PayWithWalletUseCase implements IPayWithWalletUseCase{
 
         const adminId = config.ADMIN_ID;
         if (!adminId) {
-            throw new CustomError("Admin ID not configured in environment", StatusCodes.INTERNAL_SERVER_ERROR);
+            throw new CustomError(ERROR_MESSAGES.ADMIN_ID_NOT_FOUND, StatusCodes.INTERNAL_SERVER_ERROR);
         }
 
         const adminWalletResult = await this._walletRepository.updateOrCreateWalletBalance(adminId, 'Admin', platformFee);

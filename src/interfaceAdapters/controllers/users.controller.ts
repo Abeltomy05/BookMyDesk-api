@@ -14,6 +14,7 @@ import { IGetVendorsAndBuildingsUseCase } from "../../entities/usecaseInterfaces
 import { IDeleteEntityUseCase } from "../../entities/usecaseInterfaces/users/delete-entity-usecase.interface";
 import { getErrorMessage } from "../../shared/error/errorHandler";
 import { IMonthlyBookingStats } from "../../entities/usecaseInterfaces/users/get-monthly-booking-stats-usecase.interface";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class UsersController implements IUsersController{
@@ -41,7 +42,7 @@ export class UsersController implements IUsersController{
     async getAllUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
            const { page = 1, limit = 4, search = "", role, status, excludeStatus  } = req.query; 
-           console.log("Fetching all users with params:", { page, limit, search, role, status, excludeStatus });
+
            const pageNumber = Math.max(Number(page), 1);
            const pageSize = Math.max(Number(limit), 1);
            const searchTerm = typeof search === "string" ? search : "";
@@ -64,7 +65,7 @@ export class UsersController implements IUsersController{
             excludeStatusArr
 		   );
 
-           res.status(200).json({
+           res.status(StatusCodes.OK).json({
 			success: true,
 			users,
 			totalPages,
@@ -78,12 +79,12 @@ export class UsersController implements IUsersController{
     async getUserData(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const { userId, role } = (req as CustomRequest).user;
-            console.log("Fetching user data for:", { userId, role });
+
             const userData = await this._getUserDataUseCase.execute(userId, role);
 
             res.status(StatusCodes.OK).json({
                 success: true,
-                message: "User data fetched successfully",
+                message: SUCCESS_MESSAGES.USER_DATA_FETCHED,
                 data: userData,
             });
         } catch (error) {
@@ -94,12 +95,11 @@ export class UsersController implements IUsersController{
     async updateEntityStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const { entityType, entityId, status, reason } = req.body;
-            console.log("Updating user status:", { entityType, entityId, status });
             await this._updateEnitityStatusUseCase.execute(entityType, entityId, status, reason);
 
             res.status(StatusCodes.OK).json({ 
                 success: true,
-                message: `${entityType} status updated successfully`
+                message: SUCCESS_MESSAGES.UPDATED
             });
         } catch (error) {
           next(error)
@@ -109,10 +109,10 @@ export class UsersController implements IUsersController{
    async getUserCount(req: Request, res: Response, next: NextFunction): Promise<void> {
     try{
       const {clients, vendors} = await this._getUserCountUseCase.execute();
-      console.log("Fetched user counts:", { clients, vendors });
+
       res.status(StatusCodes.OK).json({
         success: true,
-        message: "User count fetched successfully",
+        message: SUCCESS_MESSAGES.FETCHED,
         data:{
             clients,
             vendors
@@ -132,18 +132,18 @@ export class UsersController implements IUsersController{
              if (!data.location.name || !data.location.coordinates ||
                 !Array.isArray(data.location.coordinates) || 
                 data.location.coordinates.length !== 2) {
-                res.status(400).json({
+                res.status(StatusCodes.BAD_REQUEST).json({
                     success: false,
-                    message: "Invalid location data format",
+                    message: ERROR_MESSAGES.INVALID_LOCATION_DATA,
                 });
                 return;
             }
 
             const [lng, lat] = data.location.coordinates;
             if (typeof lng !== 'number' || typeof lat !== 'number') {
-                res.status(400).json({
+                res.status(StatusCodes.BAD_REQUEST).json({
                     success: false,
-                    message: "Invalid coordinates format",
+                    message: ERROR_MESSAGES.INVALID_LOCATION_DATA,
                 });
                 return;
             }
@@ -152,7 +152,7 @@ export class UsersController implements IUsersController{
          const updatedData  = await this._updateUserProfileUseCase.execute(userId,role, data);
          res.status(StatusCodes.OK).json({
             success: true,
-            message: "User profile updated successfully",
+            message: SUCCESS_MESSAGES.UPDATED,
             data: updatedData,
          })
      } catch (error) {
@@ -168,7 +168,7 @@ export class UsersController implements IUsersController{
         const response = await this._updateUserPasswordUseCase.execute(userId, role, currentPassword, newPassword);
         res.status(StatusCodes.OK).json({
             success: true,
-            message: "User password updated successfully",
+            message: SUCCESS_MESSAGES.UPDATED,
             data: response,
         })
     } catch (error) {
@@ -179,7 +179,7 @@ export class UsersController implements IUsersController{
   async getVendorsAndBuildings(req: Request, res: Response, next: NextFunction): Promise<void>{
      try {
     const result = await this._getVendorsAndBuildingsUseCase.execute();
-    res.status(200).json({ success: true, data: result });
+    res.status(StatusCodes.OK).json({ success: true, data: result });
    } catch (error) {
    next(error)
    }
@@ -194,13 +194,13 @@ export class UsersController implements IUsersController{
             if(response.success){
                 res.status(StatusCodes.OK).json({
                     success:true,
-                    message: `${entityType} deleted successfully`,
+                    message: SUCCESS_MESSAGES.DELETED,
                 })
                 return;
             }else{
                  res.status(StatusCodes.BAD_REQUEST).json({
                     success:true,
-                    message: `${entityType} deletion not successful. Please try again.`,
+                    message: ERROR_MESSAGES.FAILED,
                 })
                 return;
             }

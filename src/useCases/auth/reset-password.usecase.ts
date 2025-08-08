@@ -10,6 +10,7 @@ import { IClientEntity } from "../../entities/models/client.entity";
 import { IVendorEntity } from "../../entities/models/vendor.entity";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 
 @injectable()
@@ -30,7 +31,7 @@ export class ResetPasswordUseCase implements IResetPasswordUseCase {
     async execute({ password, token}: { password: string; token:string;}): Promise<string> {
          const payload = this._tokenService.verifyResetToken(token);
         if (!payload || !payload.value) {
-            throw new CustomError("Invalid or expired token",StatusCodes.BAD_REQUEST);
+            throw new CustomError(ERROR_MESSAGES.INVALID_TOKEN,StatusCodes.BAD_REQUEST);
         }
 
         const email = payload.value;
@@ -54,12 +55,12 @@ export class ResetPasswordUseCase implements IResetPasswordUseCase {
          }
 
           if (!user) {
-            throw new CustomError("User not found", StatusCodes.NOT_FOUND);
+            throw new CustomError(ERROR_MESSAGES.USER_NOT_FOUND, StatusCodes.NOT_FOUND);
           }
 
         const tokenIsValid = await this._redisTokenRepository.verifyResetToken(token, email);
         if (!tokenIsValid) {
-            throw new CustomError("Invalid or expired token", StatusCodes.BAD_REQUEST);
+            throw new CustomError(ERROR_MESSAGES.INVALID_TOKEN, StatusCodes.BAD_REQUEST);
         }
 
         const hashedPassword = await this._passwordBcrypt.hash(password);

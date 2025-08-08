@@ -4,6 +4,7 @@ import { JwtService } from "../services/jwt.service";
 import { NextFunction,Request, Response } from "express";
 import { redisClient } from "../../frameworks/cache/redis.client";
 import { hasName } from "../../shared/error/errorHandler";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 const tokenService = new JwtService();
 
@@ -30,7 +31,7 @@ export const verifyAuth = async(req:Request,res:Response,next:NextFunction)=>{
           if (!token) {
 			res.status(StatusCodes.UNAUTHORIZED).json({
 				success: false,
-				message: "User is unauthorized",
+				message: ERROR_MESSAGES.USER_UNAUTHORIZED,
 			});
 			return;
 		  }
@@ -38,7 +39,7 @@ export const verifyAuth = async(req:Request,res:Response,next:NextFunction)=>{
           if (await isBlacklisted(token.access_token)) {
 			res.status(StatusCodes.FORBIDDEN).json({
 				success: false,
-				message: "Token is blacklisted",
+				message: ERROR_MESSAGES.TOKEN_BLACKLISTED,
 			});
 			return;
 		   }
@@ -46,7 +47,7 @@ export const verifyAuth = async(req:Request,res:Response,next:NextFunction)=>{
            const user = tokenService.verifyAccessToken(token.access_token) as CustomJwtPayload;
             if (!user || !user.userId) {
                 res.status(StatusCodes.UNAUTHORIZED).json({
-                    message: "Not Authorized",
+                    message: ERROR_MESSAGES.UNAUTHORIZED,
                 });
                 return;
             }
@@ -61,14 +62,14 @@ export const verifyAuth = async(req:Request,res:Response,next:NextFunction)=>{
           if (hasName(error) && error.name === "TokenExpiredError") {
 				console.log(error.name);
 				res.status(StatusCodes.UNAUTHORIZED).json({
-				message: "Not Authorized",
+				message: ERROR_MESSAGES.UNAUTHORIZED,
 				});
 				return;
 			}
 
             console.log("Invalid token response sent");
             res.status(StatusCodes.UNAUTHORIZED).json({
-                message: "Invalid Token",
+                message: ERROR_MESSAGES.INVALID_TOKEN,
             });
        }
 }
@@ -110,13 +111,13 @@ export const decodeToken = async (req: Request,res: Response,next: NextFunction)
 
 		if (!token) {
 			res.status(StatusCodes.UNAUTHORIZED).json({
-				message: "Unauthorized Access",
+				message: ERROR_MESSAGES.UNAUTHORIZED,
 			});
 			return;
 		}
 		if (await isBlacklisted(token.access_token)) {
 			res.status(StatusCodes.FORBIDDEN).json({
-				message: "Token is blacklisted",
+				message: ERROR_MESSAGES.TOKEN_BLACKLISTED,
 			});
 			return;
 		}
@@ -135,10 +136,10 @@ export const decodeToken = async (req: Request,res: Response,next: NextFunction)
 		console.error("Error decoding token:", error);
 
 	    const message =
-           error instanceof Error ? error.message : "An unknown error occurred";
+           error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;
 
 		res.status(StatusCodes.UNAUTHORIZED).json({
-			message: "Invalid or expired token",
+			message: ERROR_MESSAGES.INVALID_TOKEN,
 			error: message,
 		});
 	}
@@ -155,12 +156,11 @@ export const authorizeRole = (allowedRole:string[])=>{
 		if(!user || !allowedRole.includes(user.role)){
 			res.status(StatusCodes.FORBIDDEN).json({
 				success: false,
-				message: `Unauthorized access: this route is restricted to ${user.role} users.`,
+				message: `${ERROR_MESSAGES.UNAUTHORIZED}: this route is restricted to ${user.role} users.`,
 				data: user ? user.role : "none"
 			})
 			return;
 		}
-		// console.log("Authorized Role",user.role)
 		next();
 	};
 };

@@ -4,6 +4,7 @@ import { IVendorRepository } from "../../entities/repositoryInterfaces/users/ven
 import { IGetUserCountUseCase } from "../../entities/usecaseInterfaces/users/get-user-count-usecase.interface";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class GetUserCountUseCase implements IGetUserCountUseCase {
@@ -24,7 +25,7 @@ export class GetUserCountUseCase implements IGetUserCountUseCase {
       };
     } catch (error) {
       console.error("Error fetching user count:", error);
-      throw new CustomError("Failed to fetch user count. Please try again later.",StatusCodes.INTERNAL_SERVER_ERROR);
+      throw new CustomError(ERROR_MESSAGES.FAILED,StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
 }

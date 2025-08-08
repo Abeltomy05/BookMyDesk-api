@@ -16,6 +16,7 @@ import { generateBookingId } from "../../shared/helper/generateBookingId";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
 import { IRedisTokenRepository } from "../../entities/repositoryInterfaces/redis/redis-token-repository.interface";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class ConfirmPaymentUseCase implements IConfirmPaymentUseCase {
@@ -94,7 +95,7 @@ async execute(data: ConfirmPaymentDTO){
     const paymentIntent = await this._stripeService.retrievePaymentIntent(data.paymentIntentId);
 
     if (paymentIntent.status !== 'requires_capture') {
-        throw new CustomError('Payment intent is not in the correct state for confirmation',StatusCodes.BAD_REQUEST);
+        throw new CustomError(ERROR_MESSAGES.PAYMENT_INTENT_STATUS_INCORRECT,StatusCodes.BAD_REQUEST);
     }
 
         const spaceId = paymentIntent.metadata.spaceId;
@@ -123,7 +124,7 @@ async execute(data: ConfirmPaymentDTO){
                         discountAmount,
                         paymentIntentId: data.paymentIntentId,
                     });
-                    throw new CustomError('Space not found', StatusCodes.NOT_FOUND);
+                    throw new CustomError(ERROR_MESSAGES.SPACE_NOT_FOUND, StatusCodes.NOT_FOUND);
             }
 
             if (!space.isAvailable) {
@@ -140,7 +141,7 @@ async execute(data: ConfirmPaymentDTO){
                             discountAmount,
                             paymentIntentId: data.paymentIntentId,
                 });
-                throw new CustomError('Space is no longer available', StatusCodes.BAD_REQUEST);
+                throw new CustomError(ERROR_MESSAGES.SPACE_NOT_AVAILABLE, StatusCodes.BAD_REQUEST);
             }
 
       const ttl = 10000;
@@ -155,7 +156,7 @@ async execute(data: ConfirmPaymentDTO){
                       console.warn(`Failed to release Redis lock for ${lock.lockKey}`, err);
                   });
                }
-              throw new CustomError("This space is temporarily unavailable due to high demand. Please refresh and try booking again.", StatusCodes.TOO_MANY_REQUESTS);
+              throw new CustomError(ERROR_MESSAGES.BOOKING_CONFLICT, StatusCodes.TOO_MANY_REQUESTS);
            }
 
           locks.push({ lockKey, lockId });
@@ -211,7 +212,7 @@ async execute(data: ConfirmPaymentDTO){
                         discountAmount,
                         paymentIntentId: data.paymentIntentId,
                  });   
-            throw new CustomError('Failed to capture payment', StatusCodes.INTERNAL_SERVER_ERROR);
+            throw new CustomError(ERROR_MESSAGES.FAILED, StatusCodes.INTERNAL_SERVER_ERROR);
         }
 
         //processing vendor amount and platform fee
@@ -231,7 +232,7 @@ async execute(data: ConfirmPaymentDTO){
 
         const adminId = config.ADMIN_ID;
         if (!adminId) {
-            throw new CustomError("Admin ID not configured in environment", StatusCodes.INTERNAL_SERVER_ERROR);
+            throw new CustomError(ERROR_MESSAGES.ADMIN_ID_NOT_FOUND, StatusCodes.INTERNAL_SERVER_ERROR);
         }
         const adminWalletResult = await this._walletRepository.updateOrCreateWalletBalance(adminId, 'Admin', platformFee);
 
@@ -253,7 +254,7 @@ async execute(data: ConfirmPaymentDTO){
         });   
 
         if (!existingBooking) {
-            throw new CustomError('Booking not found for update', StatusCodes.NOT_FOUND);
+            throw new CustomError(ERROR_MESSAGES.BOOKING_NOT_FOUND, StatusCodes.NOT_FOUND);
         }
 
         const updatedBooking = await this._bookingRepository.update(
@@ -272,7 +273,7 @@ async execute(data: ConfirmPaymentDTO){
         );
 
         if (!updatedBooking) {
-            throw new CustomError('Failed to update existing booking', StatusCodes.INTERNAL_SERVER_ERROR);
+            throw new CustomError(ERROR_MESSAGES.FAILED, StatusCodes.INTERNAL_SERVER_ERROR);
         }
 
          return {
@@ -306,7 +307,7 @@ async execute(data: ConfirmPaymentDTO){
     const newBooking = await this._bookingRepository.save(bookingData);
 
      if (!newBooking) {
-        throw new CustomError('Failed to create booking', StatusCodes.INTERNAL_SERVER_ERROR);
+        throw new CustomError(ERROR_MESSAGES.FAILED, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 
      await this._notificationService.sendToUser(
@@ -372,7 +373,7 @@ async execute(data: ConfirmPaymentDTO){
         const message = getErrorMessage(error)
          return {
             success: false,
-            message: message || "Something went wrong while confirming payment."
+            message: message || ERROR_MESSAGES.FAILED
         };
    } finally {
        for (const lock of locks) {

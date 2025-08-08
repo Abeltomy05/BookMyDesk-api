@@ -3,6 +3,7 @@ import { IBookingRepository } from "../../entities/repositoryInterfaces/booking/
 import { RevenueChartDataDTO } from "../../shared/dtos/revenue-report.dto";
 import { IRevenueChartDataUseCase } from "../../entities/usecaseInterfaces/booking/revenue-chart-data-usecase.interface";
 import { convertISTDateToUTC } from "../../shared/helper/dateFormatter";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class RevenueChartDataUseCase implements IRevenueChartDataUseCase {
@@ -14,7 +15,7 @@ export class RevenueChartDataUseCase implements IRevenueChartDataUseCase {
     async execute(params:{userId: string;role: string;filterType: 'date' | 'month' | 'year';date?: string;month?: string;year: string;}): Promise<RevenueChartDataDTO[]>{
          const { userId,role, filterType, date, month, year } = params;
             if (!userId || !role || !filterType) {
-                throw new Error("Invalid parameters provided");
+                throw new Error(ERROR_MESSAGES.MISSING_CREDENTIALS);
             }
          const isAdmin = role === 'admin';
 

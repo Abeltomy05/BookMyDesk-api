@@ -7,6 +7,7 @@ import { IBuildingEntity } from "../../entities/models/building.entity";
 import { IGetReApplyBuildingData } from "../../entities/usecaseInterfaces/building/reapply-building-usecase.interface";
 import { ISpaceRepository } from "../../entities/repositoryInterfaces/building/space-repository.interface";
 import { ISpaceEntity } from "../../entities/models/space.entity";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 export type BuildingAndSpaceResult = {
   building: Partial<IBuildingEntity>;
@@ -27,14 +28,14 @@ export class GetReApplyBuildingData implements IGetReApplyBuildingData{
     async execute(token: string):Promise<BuildingAndSpaceResult>{
        const payload = this._tokenService.verifyResetToken(token);
        if (!payload || !payload.value) {
-            throw new CustomError("Invalid or expired token", StatusCodes.BAD_REQUEST);
+            throw new CustomError(ERROR_MESSAGES.INVALID_TOKEN, StatusCodes.BAD_REQUEST);
         }
         const BuildingProjection = [
             "_id", "buildingName", "location", "openingHours", "phone", "email", "images", "amenities", "status", "createdAt"
         ]
         const building = await this._buildingRepo.findOne({_id:payload.value}, BuildingProjection);
         if(!building){
-            throw new CustomError("No building found",StatusCodes.NOT_FOUND);
+            throw new CustomError(ERROR_MESSAGES.BUILDING_NOT_FOUND,StatusCodes.NOT_FOUND);
         }
 
         const SpaceProjection = [

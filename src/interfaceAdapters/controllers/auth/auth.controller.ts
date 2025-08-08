@@ -10,18 +10,17 @@ import { resetPasswordValidationSchema } from "./validations/reset-password.vali
 import { IVerifyOtpUseCase } from "../../../entities/usecaseInterfaces/auth/verify-otp-usecase.interface";
 import { IForgotPasswordUseCase } from "../../../entities/usecaseInterfaces/auth/forgot-pasword-usecase.interface";
 import { IResetPasswordUseCase } from "../../../entities/usecaseInterfaces/auth/reset-password.interface";
-import { GoogleAuthDTO, LoginUserDTO, VendorDTO } from "../../../shared/dtos/user.dto";
+import { GoogleAuthDTO, LoginUserDTO } from "../../../shared/dtos/user.dto";
 import { loginSchema } from "./validations/user-login.validation";
 import { ILoginUserUseCase } from "../../../entities/usecaseInterfaces/auth/login-usecase.interface";
 import { IGenerateTokenUseCase } from "../../../entities/usecaseInterfaces/auth/generate-token.interface";
-import { Schema, Types } from "mongoose";
+import { Schema } from "mongoose";
 import { IGoogleUseCase } from "../../../entities/usecaseInterfaces/auth/google-auth-usecase.interface";
 import { IGetMeUseCase } from "../../../entities/usecaseInterfaces/auth/get-me-usecase.interface";
 import { CustomRequest } from "../../middlewares/auth.middleware";
 import { IBlackListTokenUseCase } from "../../../entities/usecaseInterfaces/auth/blacklist-token-usecase.interface";
 import { IRevokeRefreshTokenUseCase } from "../../../entities/usecaseInterfaces/auth/revoke-refreshtoken-usecase.interface";
 import { StatusCodes } from "http-status-codes";
-import { ZodError } from "zod";
 import { IRefreshTokenUseCase } from "../../../entities/usecaseInterfaces/auth/refresh-token-usecase.interface";
 import { IVendorModel } from "../../../frameworks/database/mongo/models/vendor.model";
 import { ISaveFcmTokenUseCase } from "../../../entities/usecaseInterfaces/auth/save-fcm-token-usecase.interface";
@@ -29,6 +28,7 @@ import { IRemoveFcmTokenUseCase } from "../../../entities/usecaseInterfaces/auth
 import { getErrorMessage } from "../../../shared/error/errorHandler";
 import { config } from "../../../shared/config";
 import { CustomError } from "../../../entities/utils/custom.error";
+import { ERROR_MESSAGES, INFO_MESSAGES, SUCCESS_MESSAGES } from "../../../shared/constants";
 
 
 @injectable()
@@ -69,24 +69,24 @@ export class AuthController implements IAuthController {
             const { role } = req.body as { role: keyof typeof userSchemas };
             const schema = userSchemas[role];
                if (!schema) {
-                    res.status(400).json({ 
+                    res.status(StatusCodes.BAD_REQUEST).json({ 
                          sucess: false,
-                         message: "Invalid role" 
+                         message: ERROR_MESSAGES.INVALID_ROLE,
                     });
                     return;
                }
                const validatedData = schema.parse(req.body);
                await this._registerUserUseCase.execute(validatedData);
                if (role === "vendor") {
-				res.status(200).json({
+				res.status(StatusCodes.OK).json({
 					success: true,
-					message: "Login and complete your profile",
+					message: SUCCESS_MESSAGES.VENDOR_REGISTERED,
 				});
 				return;
 			}
-               res.status(200).json({
+               res.status(StatusCodes.OK).json({
 				success: true,
-				message: "User registered successfully",
+				message: SUCCESS_MESSAGES.USER_REGISTERED,
 			});
           } catch (error) {
              next(error)
@@ -98,20 +98,19 @@ export class AuthController implements IAuthController {
           const data = req.body as LoginUserDTO;
           const validatedData = loginSchema.parse(data);
           if(!validatedData){
-               res.status(400).json({
+               res.status(StatusCodes.BAD_REQUEST).json({
                     success: false,
-                    message: "Invalid email or password",
+                    message: ERROR_MESSAGES.INVALID_CREDENTIALS,
                });
                return;
           }
           const user = await this._loginUserUseCase.execute(validatedData);
 
-          // console.log("User status:", user.status, user._id, user.email, user.role);
 
           if (!user) {
                res.status(401).json({
                     success: false,
-                    message: "Invalid email or password",
+                    message: ERROR_MESSAGES.INVALID_CREDENTIALS,
                });
                return;
           }
@@ -121,9 +120,9 @@ export class AuthController implements IAuthController {
            if( userWithoutPassword.status === "pending" && 
               userWithoutPassword.role === "vendor"
             ){
-               res.status(400).json({
+               res.status(StatusCodes.BAD_REQUEST).json({
                     success:false,
-                    message:"Your vendor account has not yet been approved by the admin."
+                    message:ERROR_MESSAGES.VENDOR_PENDING
                });
                return;
             }
@@ -131,23 +130,23 @@ export class AuthController implements IAuthController {
           if( userWithoutPassword.status === "rejected" && 
               userWithoutPassword.role === "vendor"
             ){
-               res.status(400).json({
+               res.status(StatusCodes.BAD_REQUEST).json({
                     success:false,
-                    message:"Your vendor account has  been rejected by the admin. Check your email for more details."
+                    message:ERROR_MESSAGES.VENDOR_REJECTED
                });
                return;
             }  
 
             if( userWithoutPassword.status === "blocked"){
-               res.status(400).json({
+               res.status(StatusCodes.BAD_REQUEST).json({
                     success:false,
-                    message:"Your account has been blocked by the admin."
+                    message:ERROR_MESSAGES.USER_BLOCKED
                });
                return;
             }
             
             if (!user._id || !user.email || !user.role) {
-               throw new CustomError("User ID, email, or role is missing",StatusCodes.BAD_REQUEST);
+               throw new CustomError(ERROR_MESSAGES.MISSING_TOKEN_DATA,StatusCodes.BAD_REQUEST);
                }
 
           const tokens = await this._generateTokenUseCase.execute(user._id as Schema.Types.ObjectId,user.email!,user.role!);
@@ -169,9 +168,9 @@ export class AuthController implements IAuthController {
                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
                });
 
-            res.status(200).json({
+            res.status(StatusCodes.OK).json({
                success:true,
-               message: "Login Sucess.",
+               message: SUCCESS_MESSAGES.LOGIN_SUCCESS,
                data:{
                     ...userWithoutPassword
                },
@@ -186,7 +185,7 @@ export class AuthController implements IAuthController {
                const profile = req.user as GoogleAuthDTO;
                const user = await this._googleUseCase.execute(profile);
                if (!user._id || !user.email || !user.role) {
-				throw new CustomError("User ID, email, or role is missing", StatusCodes.BAD_REQUEST);
+				throw new CustomError(ERROR_MESSAGES.MISSING_TOKEN_DATA, StatusCodes.BAD_REQUEST);
 			};
 
                if(user.status === "blocked"){
@@ -203,8 +202,8 @@ export class AuthController implements IAuthController {
                if ((status === "pending" || status === "rejected") && idProof) {
                const redirectErrorURL = `${config.FRONTEND_URL}/vendor/login?error=${encodeURIComponent(
                     user.status === "pending"
-                    ? "Your vendor account is pending admin approval."
-                    : "Your vendor account has been rejected.Please check your email for more details."
+                    ? INFO_MESSAGES.REDIRECT_VENDOR_PENDING
+                    : INFO_MESSAGES.REDIRECT_VENDOR_REJECTED
                )}`;
                return res.redirect(redirectErrorURL);
                }
@@ -251,14 +250,14 @@ export class AuthController implements IAuthController {
           try {
           const token = req.cookies?.client_access_token || req.cookies?.vendor_access_token;
           if (!token) {
-               res.status(401).json({ success: false, message: "Unauthorized" });
+               res.status(401).json({ success: false, message: ERROR_MESSAGES.UNAUTHORIZED });
                return;
           }
   
           const user = await this._getMeUseCase.execute(token);
           console.log(user)
            if (!user) {
-               res.status(404).json({ success: false, message: "User not found" });
+               res.status(404).json({ success: false, message: ERROR_MESSAGES.USER_NOT_FOUND });
                return;
            }
 
@@ -273,7 +272,7 @@ export class AuthController implements IAuthController {
          const {fcmToken, userId, role} = req.body;
   
      if (!fcmToken || !userId || !role) {
-        res.status(400).json({ success: false, message: "Missing data" });
+        res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: ERROR_MESSAGES.MISSING_DATA });
         return;
      }
 
@@ -289,9 +288,9 @@ export class AuthController implements IAuthController {
           try {
                const { email } = req.body;
                await this._sendOtpUseCase.execute(email);
-               res.status(200).json({
+               res.status(StatusCodes.OK).json({
                     success: true,
-                    message: "OTP sent successfully",
+                    message: SUCCESS_MESSAGES.OTP_SENT,
                });
           } catch (error) {
                next(error)
@@ -304,9 +303,9 @@ export class AuthController implements IAuthController {
 			const validatedData = otpMailValidationSchema.parse({ email, otp });
 			await this._verifyOtpUseCase.execute(validatedData);
 
-			res.status(200).json({
+			res.status(StatusCodes.OK).json({
 				success: true,
-				message: "OTP verified successfully",
+				message: SUCCESS_MESSAGES.OTP_VERIFIED,
 			});
 		} catch (error) {
              next(error)
@@ -317,17 +316,17 @@ export class AuthController implements IAuthController {
           try {
 			const validatedData = forgotPasswordValidationSchema.parse(req.body);
 			if (!validatedData) {
-				res.status(400).json({
+				res.status(StatusCodes.BAD_REQUEST).json({
 					success: false,
-					message: 'Invalid email format',
+					message: ERROR_MESSAGES.INVALID_EMAIL_FORMAT,
 				});
 				return;
 			}
 			await this._forgotPasswordUseCase.execute(validatedData.email);
 
-			res.status(200).json({
+			res.status(StatusCodes.OK).json({
 				success: true,
-				message: "Password reset link sent to your email",
+				message:SUCCESS_MESSAGES.PASSWORD_RESET_LINK_SENT,
 			});
 		} catch (error) {
             next(error)
@@ -338,16 +337,16 @@ export class AuthController implements IAuthController {
 		try {
 			const validatedData = resetPasswordValidationSchema.parse(req.body);
 			if (!validatedData) {
-				res.status(400).json({
+				res.status(StatusCodes.BAD_REQUEST).json({
 					success: false,
-					message: "Invalid password format",
+					message:ERROR_MESSAGES.INVALID_PASSWORD_FORMAT,
 				});
 			}
 
 			const role = await this._resetPasswordUseCase.execute(validatedData);
-			res.status(200).json({
+			res.status(StatusCodes.OK).json({
 				success: true,
-				message: "Password reset successfully",
+				message: SUCCESS_MESSAGES.PASSWORD_RESET_SUCCESS,
                     data: role,
 			});
 		} catch (error) {
@@ -383,7 +382,7 @@ export class AuthController implements IAuthController {
 
                res.status(StatusCodes.OK).json({
 			success: true,
-			message: "Logout successful",
+			message: SUCCESS_MESSAGES.LOGOUT_SUCCESS,
 		});
           }catch(error){
            next(error)
@@ -393,12 +392,11 @@ export class AuthController implements IAuthController {
      async handleTokenRefresh(req: Request, res: Response): Promise<void> {
 		try {
 			const refreshCookies  = req.cookies;
-               // console.log("Refresh Cookies:", refreshCookies);
                const refreshTokenKey = Object.keys(refreshCookies).find((key) =>
 				key.endsWith("_refresh_token")
 			);
                if (!refreshTokenKey) {
-				throw new CustomError("No refresh token found", StatusCodes.UNAUTHORIZED);
+				throw new CustomError(ERROR_MESSAGES.REFRESH_TOKEN_MISSING, StatusCodes.UNAUTHORIZED);
 			}
                const refreshToken = refreshCookies[refreshTokenKey];
 			const { role, accessToken } = this._refreshTokenUseCase.execute(refreshToken);
@@ -411,7 +409,7 @@ export class AuthController implements IAuthController {
 		     });
 			res.status(StatusCodes.OK).json({
 				success: true,
-				message: "Token refreshed successfully",
+				message: SUCCESS_MESSAGES.TOKEN_REFRESHED,
 			});
 		} catch (error:unknown) {
                 const message = getErrorMessage(error);

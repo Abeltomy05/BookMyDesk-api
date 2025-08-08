@@ -17,6 +17,7 @@ import { IGetReApplyBuildingData } from "../../entities/usecaseInterfaces/buildi
 import { IRetryBuildingRegistrationUseCase } from "../../entities/usecaseInterfaces/building/retry-building-registration-usecase.interface";
 import { retrybuildingRegistrationSchema } from "../../shared/validations/retry-building.validation";
 import { Building } from "../../shared/dtos/building.dto";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class BuildingController implements IBuildingController{
@@ -46,7 +47,7 @@ export class BuildingController implements IBuildingController{
    async getAllBuilding(req:Request, res: Response, next: NextFunction): Promise<void>{
       try {
         const{page=1,limit=5,search='',status} = req.query;
-        console.log("Fetching all buildings with params:", { page, limit, search, status });
+
         const pageNumber = Math.max(Number(page), 1);
         const pageSize = Math.max(Number(limit), 1);
         const vendorId = (req as CustomRequest).user.userId;
@@ -59,7 +60,7 @@ export class BuildingController implements IBuildingController{
 		       searchTerm,
            status as string,
 		   );
-      //  console.log("usecase success",buildings)
+
         res.status(StatusCodes.OK).json({
           success: true,
           buildings,
@@ -77,7 +78,7 @@ export class BuildingController implements IBuildingController{
         if (!data) {
             res.status(StatusCodes.BAD_REQUEST).json({
               success: false,
-              message: "Registration data is required"
+              message: ERROR_MESSAGES.MISSING_DATA
             });
             return;
           }
@@ -91,7 +92,7 @@ export class BuildingController implements IBuildingController{
 
           res.status(StatusCodes.BAD_REQUEST).json({
             success: false,
-            message: "Validation failed",
+            message: ERROR_MESSAGES.VALIDATION_FAILED,
             errors: validationErrors
           });
           return;
@@ -100,11 +101,10 @@ export class BuildingController implements IBuildingController{
         const vendorId = (req as CustomRequest).user.userId; 
 
         const returnData = await this._registerBuildingUseCase.execute(validationResult.data,vendorId);
-        // console.log("usecase success",returnData);
         
         res.status(StatusCodes.OK).json({
           success: true,
-          message:"Building registration success",
+          message:SUCCESS_MESSAGES.BUILDING_REGISTERED,
           data:returnData,
         });
       } catch (error) {
@@ -126,7 +126,7 @@ export class BuildingController implements IBuildingController{
           )
        console.log("usecase success",result.buildings)   
 
-      res.status(200).json({
+      res.status(StatusCodes.OK).json({
       success: true,
       buildings: result.buildings,
       totalPages: result.totalPages,
@@ -151,9 +151,9 @@ export class BuildingController implements IBuildingController{
       const spaceList = Array.isArray(spaces) ? spaces : [];
       
       const result = await this._editBuildingUseCase.execute(buildingDataToUpdate,spaceList);
-        res.status(200).json({
+        res.status(StatusCodes.OK).json({
         success: true,
-        message: "Building updated successfully",
+        message: SUCCESS_MESSAGES.UPDATED,
         data: result,
       });
 
@@ -166,7 +166,7 @@ export class BuildingController implements IBuildingController{
     try {
       const id = req.params.id;
       const buildingWithSpaces  = await this._getSingleBuildingUseCase.execute(id);
-      res.status(200).json({ success: true, data: buildingWithSpaces });
+      res.status(StatusCodes.OK).json({ success: true, data: buildingWithSpaces });
     } catch (error) {
       next(error)
     }
@@ -226,7 +226,7 @@ export class BuildingController implements IBuildingController{
         console.log('Filters applied:', filters);
 
       const result = await this._fetchBuildingUseCase.execute(page, limit, filters);
-       res.status(200).json({
+       res.status(StatusCodes.OK).json({
       success: true,
       data: result.items,
       total: result.total,
@@ -277,7 +277,7 @@ export class BuildingController implements IBuildingController{
       if(!token || typeof token !== 'string'){
         res.status(StatusCodes.BAD_REQUEST).json({
           success: false,
-          message: "Token not found."
+          message: ERROR_MESSAGES.MISSING_CREDENTIALS
         })
         return;
       }
@@ -286,7 +286,7 @@ export class BuildingController implements IBuildingController{
       res.status(StatusCodes.OK).json({
         success: true,
         data: result,
-        message: "Token verified successfully."
+        message: SUCCESS_MESSAGES.Token_VERIFIED
       })
     } catch (error) {
       next(error);
@@ -306,7 +306,7 @@ export class BuildingController implements IBuildingController{
 
           res.status(StatusCodes.BAD_REQUEST).json({
             success: false,
-            message: "Validation failed",
+            message: ERROR_MESSAGES.VALIDATION_FAILED,
             errors: validationErrors
           });
           return;
@@ -320,7 +320,7 @@ export class BuildingController implements IBuildingController{
       
       res.status(StatusCodes.OK).json({
         success: true,
-        message: "Building re-applied successfully. Please wait for admin approval."
+        message: SUCCESS_MESSAGES.BUILDING_RE_REGISTERED
       });
 
     } catch (error) {

@@ -3,7 +3,6 @@ import { AdminRevenueReportDTO, PopulatedBooking } from "../../shared/dtos/reven
 import { IBookingEntity } from "../../entities/models/booking.entity";
 import { inject, injectable } from "tsyringe";
 import { IBookingRepository } from "../../entities/repositoryInterfaces/booking/booking-repository.interface";
-import { admin } from "../../shared/config/firebaseAdmin";
 import { IAdminRevenueReportUseCase } from "../../entities/usecaseInterfaces/booking/admin-revenue-report-usecase.interface";
 
 @injectable()

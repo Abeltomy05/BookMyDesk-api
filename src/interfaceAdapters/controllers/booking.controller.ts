@@ -14,6 +14,7 @@ import { IRevenueReportUseCase } from "../../entities/usecaseInterfaces/booking/
 import { RevenueReportFilters } from "../../shared/dtos/revenue-report.dto";
 import { IRevenueChartDataUseCase } from "../../entities/usecaseInterfaces/booking/revenue-chart-data-usecase.interface";
 import { IAdminRevenueReportUseCase } from "../../entities/usecaseInterfaces/booking/admin-revenue-report-usecase.interface";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class BookingController implements IBookingController{
@@ -44,16 +45,16 @@ export class BookingController implements IBookingController{
         try {
           const spaceId = req.params.spaceId; 
           if(!spaceId){
-            res.status(400).json({
+            res.status(StatusCodes.BAD_REQUEST).json({
                 success:false,
-                message:"Space Id is required for getting booking details."
+                message:ERROR_MESSAGES.SPACE_ID_REQUIRED
             })
             return;
           }
           const { userId } = (req as CustomRequest).user;
           const response = await this._getBookingPageData.execute(spaceId,userId);
 
-          res.status(200).json({
+          res.status(StatusCodes.OK).json({
             success: true,
             data: response,
           });
@@ -67,8 +68,8 @@ export class BookingController implements IBookingController{
         try {
             const { amount, currency = "inr", spaceId, bookingDates, numberOfDesks, discountAmount, bookingId  } = req.body;
             if (!amount || !spaceId || !bookingDates) {
-              res.status(400).json({ 
-                error: 'Missing required fields' 
+              res.status(StatusCodes.BAD_REQUEST).json({ 
+                error: ERROR_MESSAGES.MISSING_CREDENTIALS 
               });
               return;
             }
@@ -87,7 +88,7 @@ export class BookingController implements IBookingController{
             res.status(StatusCodes.OK).json({
                 success: true,
                 data:result,
-                message: "Payment intent created successfully."
+                message: SUCCESS_MESSAGES.PAYMENT_INTENT_CREATED
             });
         } catch (error) {
            next(error)
@@ -98,9 +99,9 @@ export class BookingController implements IBookingController{
       try {
         const { paymentIntentId } = req.body;
         if (!paymentIntentId) {
-          res.status(400).json({ 
+          res.status(StatusCodes.BAD_REQUEST).json({ 
             success: false,
-            message: 'Missing required fields: paymentIntentId' 
+            message: ERROR_MESSAGES.MISSING_CREDENTIALS
           });
           return;
         }
@@ -110,13 +111,13 @@ export class BookingController implements IBookingController{
         }); 
 
         if (result.success) {
-          res.status(200).json({
+          res.status(StatusCodes.OK).json({
             success: true,
             data:result.data,
-            message: "Payment confirmed successfully.",
+            message: SUCCESS_MESSAGES.PAYMENT_CONFIRMED,
           });
         } else {
-          res.status(400).json(result);
+          res.status(StatusCodes.BAD_REQUEST).json(result);
         }
       } catch (error) {
         next(error)
@@ -139,13 +140,13 @@ export class BookingController implements IBookingController{
               toDate: toDate as string
             });
 
-            res.status(200).json({
+            res.status(StatusCodes.OK).json({
                 success: true,
                 data: result.bookings,
                 currentPage: parseInt(page as string, 10),
                 totalPages: result.totalPages,
                 totalItems: result.totalItems,
-                message: "Bookings fetched successfully."
+                message: SUCCESS_MESSAGES.BOOKINGS_FETCHED
             });
         } catch (error) {
           next(error)
@@ -156,9 +157,9 @@ export class BookingController implements IBookingController{
       try {
         const bookingId = req.params.bookingId;
         if (!bookingId) {
-          res.status(400).json({ 
+          res.status(StatusCodes.BAD_REQUEST).json({ 
             success: false,
-            message: 'Booking ID is required to fetch booking details.' 
+            message: ERROR_MESSAGES.BOOKING_ID_REQUIRED 
           });
           return;
         }
@@ -166,15 +167,15 @@ export class BookingController implements IBookingController{
         if (!booking) {
           res.status(404).json({ 
             success: false,
-            message: 'Booking not found.' 
+            message: ERROR_MESSAGES.BOOKING_NOT_FOUND 
           });
           return;
         }
         console.log("Booking details:", booking);
-        res.status(200).json({
+        res.status(StatusCodes.OK).json({
           success: true,
           data: booking,
-          message: 'Booking fetched successfully.'
+          message: SUCCESS_MESSAGES.BOOKINGS_FETCHED
         });
       } catch (error) {
         next(error)
@@ -185,9 +186,9 @@ export class BookingController implements IBookingController{
       try {
         const {bookingId, reason} = req.body;
         if (!bookingId || !reason) {
-          res.status(400).json({ 
+          res.status(StatusCodes.BAD_REQUEST).json({ 
             success: false,
-            message: 'Booking ID and Reason is required to cancel booking.' 
+            message: ERROR_MESSAGES.BOOKING_ID_REASON_REQUIRED 
           });
           return;
         }
@@ -195,14 +196,14 @@ export class BookingController implements IBookingController{
 
         const result = await this._cancelBookingUseCase.execute(bookingId,reason,userId,role);
         if (result.success) {
-          res.status(200).json({
+          res.status(StatusCodes.OK).json({
             success: true,
-            message: "Booking cancelled successfully.",
+            message: SUCCESS_MESSAGES.CANCELLED,
           });
         } else {
-          res.status(400).json({
+          res.status(StatusCodes.BAD_REQUEST).json({
             success: false,
-            message: "Failed to cancel booking.",
+            message: ERROR_MESSAGES.FAILED,
           });
         }
 
@@ -224,7 +225,7 @@ export class BookingController implements IBookingController{
           toDate: toDate as string
         })
 
-         res.status(200).json({
+         res.status(StatusCodes.OK).json({
           success: true,
           data: result,
         });

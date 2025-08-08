@@ -1,4 +1,5 @@
 import { ZodError } from "zod";
+import { ERROR_MESSAGES } from "../constants";
 
 export function getErrorMessage(error: unknown): string {
   if (error instanceof ZodError) {
@@ -13,7 +14,7 @@ export function getErrorMessage(error: unknown): string {
     return error;
   }
 
-  return "An unexpected error occurred";
+  return ERROR_MESSAGES.INTERNAL_SERVER_ERROR;
 }
 
 export function hasName(error: unknown): error is { name: string } {

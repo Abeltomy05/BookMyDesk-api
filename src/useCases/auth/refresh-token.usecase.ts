@@ -4,6 +4,7 @@ import { JwtPayload } from "jsonwebtoken";
 import { IRefreshTokenUseCase } from "../../entities/usecaseInterfaces/auth/refresh-token-usecase.interface";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class RefreshTokenUseCase implements IRefreshTokenUseCase {
@@ -15,7 +16,7 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
     execute(refreshToken: string): { role: string; accessToken: string } {
 		const payload = this._tokenService.verifyRefreshToken(refreshToken);
 		if (!payload) {
-			throw new CustomError('Invalid refresh token',StatusCodes.BAD_REQUEST);
+			throw new CustomError(ERROR_MESSAGES.INVALID_REFRESH_TOKEN,StatusCodes.BAD_REQUEST);
 		}
 		return {
 			role: (payload as JwtPayload).role,

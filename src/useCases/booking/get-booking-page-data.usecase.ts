@@ -9,6 +9,7 @@ import { IOfferRepository } from "../../entities/repositoryInterfaces/offer/offe
 import { off, title } from "process";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 
 @injectable()
@@ -43,7 +44,7 @@ export class GetBookingPageDataUseCase implements IGetBookingPageDataUseCase{
             },}>{
         const spaceModel = await this._spaceRepository.findOne({ _id: spaceId });
         if (!spaceModel) {
-        throw new CustomError("Space not found",StatusCodes.NOT_FOUND);
+        throw new CustomError(ERROR_MESSAGES.SPACE_NOT_FOUND,StatusCodes.NOT_FOUND);
         }
 
         const offer = await this._offerRepository.findOne({spaceId});
@@ -52,7 +53,7 @@ export class GetBookingPageDataUseCase implements IGetBookingPageDataUseCase{
 
        const building = await this._buildingRepository.findOne({ _id: spaceEntity.buildingId });
        if (!building) {
-        throw new CustomError("Building not found for the space", StatusCodes.NOT_FOUND);
+        throw new CustomError(ERROR_MESSAGES.BUILDING_NOT_FOUND, StatusCodes.NOT_FOUND);
         }
 
       const wallet = await this._walletRepository.findOne({userId},{balance:1})  

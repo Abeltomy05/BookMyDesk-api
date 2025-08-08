@@ -5,6 +5,7 @@ import { JwtPayload } from "jsonwebtoken";
 import { IBlackListTokenUseCase } from "../../entities/usecaseInterfaces/auth/blacklist-token-usecase.interface";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class BlackListTokenUseCase implements IBlackListTokenUseCase {
@@ -17,7 +18,7 @@ export class BlackListTokenUseCase implements IBlackListTokenUseCase {
 		const decoded: string | JwtPayload | null = this._tokenService.verifyAccessToken(token);
 
 		if (!decoded || typeof decoded === "string" || !decoded.exp) {
-			throw new CustomError("Invalid Token: Missing expiration time", StatusCodes.BAD_REQUEST);
+			throw new CustomError(ERROR_MESSAGES.INVALID_TOKEN, StatusCodes.BAD_REQUEST);
 		}
 
 		const expiresIn = decoded.exp - Math.floor(Date.now() / 1000);
