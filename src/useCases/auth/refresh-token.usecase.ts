@@ -13,13 +13,13 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
     private _tokenService: IJwtService,
 
   ){}
-    execute(refreshToken: string): { role: string; accessToken: string } {
+    execute(refreshToken: string): {  accessToken: string } {
 		const payload = this._tokenService.verifyRefreshToken(refreshToken);
+		
 		if (!payload) {
 			throw new CustomError(ERROR_MESSAGES.INVALID_REFRESH_TOKEN,StatusCodes.BAD_REQUEST);
 		}
 		return {
-			role: (payload as JwtPayload).role,
 			accessToken: this._tokenService.generateAccessToken({
 				userId: (payload as JwtPayload).userId,
 				email: (payload as JwtPayload).email,

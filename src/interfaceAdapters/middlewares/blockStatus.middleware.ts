@@ -74,8 +74,8 @@ export class BlockStatusMiddleware{
                this._revokeRefreshTokenUseCase.execute(refresh_token)
             ]);
 
-		   const accessTokenName = `${role}_access_token`;
-		   const refreshTokenName = `${role}_refresh_token`;
+		   const accessTokenName = "access_token";
+		   const refreshTokenName = "refresh_token";
 
              res.clearCookie(accessTokenName, {
                httpOnly: true,

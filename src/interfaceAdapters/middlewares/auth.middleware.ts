@@ -79,15 +79,12 @@ export const verifyAuth = async(req:Request,res:Response,next:NextFunction)=>{
                     /* =======================  */
 
 const extractToken = (req: Request): { access_token: string; refresh_token: string } | null => {
-	const userType = req.baseUrl?.split("/")[2];
-	console.log("🔍 Extracting tokens for userType:", userType);
-   
-	if (!userType) return null;
+	const access_token = req.cookies?.["access_token"];
+	const refresh_token = req.cookies?.["refresh_token"];
 
-	return {
-		access_token: req.cookies?.[`${userType}_access_token`] ?? null,
-		refresh_token: req.cookies?.[`${userType}_refresh_token`] ?? null,
-	};
+	if (!access_token || !refresh_token) return null;
+
+	return { access_token, refresh_token };
 };
 
 const isBlacklisted = async (token: string): Promise<boolean> => {
