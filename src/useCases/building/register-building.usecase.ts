@@ -11,6 +11,7 @@ import { INotificationService } from "../../entities/serviceInterfaces/notificat
 import { config } from "../../shared/config";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 
 
@@ -35,7 +36,7 @@ export class RegisterBuildingUsecase implements IRegisterBuildingUsecase{
 
        
         if (existingBuilding) {
-          throw new CustomError("A building with this name and location already exists.",StatusCodes.BAD_REQUEST);
+          throw new CustomError(ERROR_MESSAGES.BUILDING_EXIST,StatusCodes.BAD_REQUEST);
         }
  
         
@@ -123,7 +124,7 @@ export class RegisterBuildingUsecase implements IRegisterBuildingUsecase{
 
     const adminId = config.ADMIN_ID;
     if (!adminId) {
-      throw new CustomError("ADMIN_ID is not defined in environment variables. Please contact support.", StatusCodes.INTERNAL_SERVER_ERROR);
+      throw new CustomError(ERROR_MESSAGES.ADMIN_ID_NOT_FOUND, StatusCodes.INTERNAL_SERVER_ERROR);
     }
     await this._notificationService.sendToUser(
       adminId,

@@ -5,6 +5,7 @@ import { IGetBookingDetailsUseCase } from "../../entities/usecaseInterfaces/book
 import { toEntityBookingWithDetails } from "../../interfaceAdapters/mappers/booking.mapper";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 
 @injectable()
@@ -16,13 +17,13 @@ export class GetBookingDetailsUseCase implements IGetBookingDetailsUseCase {
 
   async execute(bookingId: string): Promise<IBookingEntityWithDetails> {
     if (!bookingId) {
-      throw new CustomError("Booking ID is required to fetch booking details.",StatusCodes.BAD_REQUEST);
+      throw new CustomError(ERROR_MESSAGES.BOOKING_ID_REQUIRED,StatusCodes.BAD_REQUEST);
     }
 
     const bookingDetails = await this._bookingRepository.findOneWithDetails({_id:bookingId});
     
     if (!bookingDetails) {
-      throw new CustomError("Booking not found.", StatusCodes.NOT_FOUND);
+      throw new CustomError(ERROR_MESSAGES.BOOKING_NOT_FOUND, StatusCodes.NOT_FOUND);
     }
 
     return toEntityBookingWithDetails(bookingDetails);

@@ -3,6 +3,7 @@ import { IBuildingRepository } from "../../entities/repositoryInterfaces/buildin
 import { IFetchBuildingsForVendorUseCase } from "../../entities/usecaseInterfaces/vendor/fetch-building-vendor-usecase.interface";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 export interface IBuildingShort {
   _id: string;
@@ -17,7 +18,7 @@ export class FetchBuildingsForVendorUseCase implements IFetchBuildingsForVendorU
     ){}
 
     async execute(vendorId: string):Promise<IBuildingShort[]>{
-       if(!vendorId) throw new CustomError("Vendor Id is neccessary, Please contact support.",StatusCodes.BAD_REQUEST);
+       if(!vendorId) throw new CustomError(ERROR_MESSAGES.MISSING_CREDENTIALS,StatusCodes.BAD_REQUEST);
        
        const buildingDetails = await this._buildingRepo.find(
          {vendorId, status:{$nin:['rejected','pending']}},

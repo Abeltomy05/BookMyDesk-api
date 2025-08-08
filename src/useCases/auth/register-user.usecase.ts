@@ -11,6 +11,7 @@ import { IAdminEntity } from "../../entities/models/admin.entity";
 import { IAdminRepository } from "../../entities/repositoryInterfaces/users/admin-repository.interface";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class RegisterUserUseCase implements IRegisterUserUseCase {
@@ -34,7 +35,7 @@ export class RegisterUserUseCase implements IRegisterUserUseCase {
 
     const isEmailExisting = await this._userExistenceService.emailExists(email);
     if (isEmailExisting) {
-      throw new CustomError("Email already exists",StatusCodes.CONFLICT);
+      throw new CustomError(ERROR_MESSAGES.EMAIL_EXIST,StatusCodes.CONFLICT);
     }
 
     const hashedPassword = password
@@ -49,7 +50,7 @@ export class RegisterUserUseCase implements IRegisterUserUseCase {
     }else if (role === "admin") {
       repository = this._adminRepository
      } else {
-      throw new CustomError("Invalid role", StatusCodes.BAD_REQUEST);
+      throw new CustomError(ERROR_MESSAGES.INVALID_ROLE, StatusCodes.BAD_REQUEST);
     }
 
     const savedUser = await repository.save({

@@ -6,6 +6,8 @@ import { IVendorRepository } from "../../entities/repositoryInterfaces/users/ven
 import { IGoogleUseCase } from "../../entities/usecaseInterfaces/auth/google-auth-usecase.interface";
 import { GoogleAuthDTO } from "../../shared/dtos/user.dto";
 import { CustomError } from "../../entities/utils/custom.error";
+import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 
 @injectable()
@@ -24,7 +26,7 @@ export class GoogleUseCase implements IGoogleUseCase{
          const existingVendor = await this._vendorRepository.findOne({ email });
 
          if (existingClient && role === 'vendor' || existingVendor && role === 'client') {
-                throw new CustomError('This email is already registered.', 400);
+                throw new CustomError(ERROR_MESSAGES.EMAIL_EXIST, StatusCodes.BAD_REQUEST);
             }
 
          const isClient = role === 'client';

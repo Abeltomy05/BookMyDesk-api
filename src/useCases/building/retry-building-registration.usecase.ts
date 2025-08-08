@@ -7,6 +7,7 @@ import { IRetryBuildingRegistrationUseCase } from "../../entities/usecaseInterfa
 import { ISpaceRepository } from "../../entities/repositoryInterfaces/building/space-repository.interface";
 import { Types } from "mongoose";
 import { isValidObjectId } from "../../shared/helper/isValidObjectId";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class RetryBuildingRegistrationUseCase implements IRetryBuildingRegistrationUseCase{
@@ -19,13 +20,13 @@ export class RetryBuildingRegistrationUseCase implements IRetryBuildingRegistrat
 
  async execute(building: Partial<Building>): Promise<void> {
         if (!building._id) {
-            throw new CustomError("Building ID is required", StatusCodes.BAD_REQUEST);
+            throw new CustomError(ERROR_MESSAGES.BUILDING_ID_REQUIRED, StatusCodes.BAD_REQUEST);
         }
        
         const existingBuilding = await this._buildingRepo.findOne({_id: building._id});
 
         if (!existingBuilding) {
-            throw new CustomError("Building not found.", StatusCodes.NOT_FOUND);
+            throw new CustomError(ERROR_MESSAGES.BUILDING_NOT_FOUND, StatusCodes.NOT_FOUND);
         }
 
         const { spaces, createdAt, ...buildingData } = building;
@@ -39,7 +40,7 @@ export class RetryBuildingRegistrationUseCase implements IRetryBuildingRegistrat
         );
 
         if (!updatedBuilding) {
-            throw new CustomError("Failed to reapply building.", StatusCodes.INTERNAL_SERVER_ERROR);
+            throw new CustomError(ERROR_MESSAGES.FAILED, StatusCodes.INTERNAL_SERVER_ERROR);
         }
 
         if (spaces && spaces.length > 0) {

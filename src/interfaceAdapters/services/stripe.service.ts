@@ -4,6 +4,7 @@ import { IStripeService } from '../../entities/serviceInterfaces/stripe-service.
 import { config } from '../../shared/config';
 import { CustomError } from '../../entities/utils/custom.error';
 import { StatusCodes } from 'http-status-codes';
+import { ERROR_MESSAGES } from '../../shared/constants';
 
 @injectable()
 export class StripeService implements IStripeService {
@@ -11,7 +12,7 @@ export class StripeService implements IStripeService {
 
   constructor() {
     if (!config.STRIPE_SECRET_KEY) {
-      throw new CustomError('STRIPE_SECRET_KEY is not configured',StatusCodes.INTERNAL_SERVER_ERROR);
+      throw new CustomError(ERROR_MESSAGES.STRIPE_SECRET_KEY_ERROR,StatusCodes.INTERNAL_SERVER_ERROR);
     }
     
     this.stripe = new Stripe(config.STRIPE_SECRET_KEY, {

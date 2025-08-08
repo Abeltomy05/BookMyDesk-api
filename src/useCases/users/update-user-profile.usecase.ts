@@ -4,6 +4,7 @@ import { IVendorRepository } from "../../entities/repositoryInterfaces/users/ven
 import { IUpdateUserProfileUseCase } from "../../entities/usecaseInterfaces/users/update-user-profile.interface"
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 interface UpdateProfileData {
     username?: string;
@@ -32,17 +33,17 @@ export class UpdateUserProfileUseCase implements IUpdateUserProfileUseCase{
     async execute(userId: string, role: string, data: UpdateProfileData): Promise<any> {
         if (role === 'client') {
          const updatedUser = await this._clientRepository.update({ _id: userId }, data);
-        if (!updatedUser) throw new CustomError("User not found",StatusCodes.NOT_FOUND);
+        if (!updatedUser) throw new CustomError(ERROR_MESSAGES.USER_NOT_FOUND,StatusCodes.NOT_FOUND);
         return updatedUser;
         }
 
         if (role === 'vendor') {
          const updatedVendor = await this._vendorRepository.update({ _id: userId }, data);
-         if (!updatedVendor) throw new CustomError("Vendor not found",StatusCodes.NOT_FOUND);
+         if (!updatedVendor) throw new CustomError(ERROR_MESSAGES.USER_NOT_FOUND,StatusCodes.NOT_FOUND);
          return updatedVendor;
         } 
 
-        throw new CustomError("Invalid role for profile update.",StatusCodes.BAD_REQUEST);
+        throw new CustomError(ERROR_MESSAGES.INVALID_ROLE,StatusCodes.BAD_REQUEST);
 
     }
 }

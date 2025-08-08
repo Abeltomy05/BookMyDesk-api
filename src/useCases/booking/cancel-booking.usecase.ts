@@ -2,13 +2,14 @@ import { inject, injectable } from "tsyringe";
 import { IBookingRepository } from "../../entities/repositoryInterfaces/booking/booking-repository.interface";
 import { IWalletRepository } from "../../entities/repositoryInterfaces/wallet/wallet-repository.interface";
 import { IWalletTransactionRepository } from "../../entities/repositoryInterfaces/wallet/walletTrasaction-repository.interface";
-import mongoose, { Types } from 'mongoose';
+import  { Types } from 'mongoose';
 import { ICancelBookingUseCase } from "../../entities/usecaseInterfaces/booking/cancel-booking-usecase.interface";
 import { ISpaceRepository } from "../../entities/repositoryInterfaces/building/space-repository.interface";
 import { IBuildingRepository } from "../../entities/repositoryInterfaces/building/building-repository.interface";
 import { INotificationService } from "../../entities/serviceInterfaces/notification-service.interface";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class CancelBookingUseCase implements ICancelBookingUseCase {
@@ -30,19 +31,19 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
     async execute(bookingId: string, reason:string, userId:string, role:'client' | 'vendor'): Promise<{ success: boolean}> {
          const booking = await this._bookingRepository.findOne({_id:bookingId});
         if(!booking || !booking.totalPrice) {
-            throw new CustomError("Booking not found",StatusCodes.NOT_FOUND);
+            throw new CustomError(ERROR_MESSAGES.BOOKING_NOT_FOUND,StatusCodes.NOT_FOUND);
         }
 
         if(booking.status === "cancelled") {
-            throw new CustomError("Booking is already cancelled", StatusCodes.BAD_REQUEST);
+            throw new CustomError(ERROR_MESSAGES.BOOKING_ALREADY_CANCELLED, StatusCodes.BAD_REQUEST);
         }
 
         if (role === 'client' && booking.clientId.toString() !== userId) {
-          throw new CustomError("You are not allowed to cancel this booking.", StatusCodes.FORBIDDEN);
+          throw new CustomError(ERROR_MESSAGES.NOT_ALLOWED, StatusCodes.FORBIDDEN);
         }
 
         if (role === 'vendor' && booking.vendorId.toString() !== userId) {
-          throw new CustomError("You are not allowed to cancel this booking.", StatusCodes.FORBIDDEN);
+          throw new CustomError(ERROR_MESSAGES.NOT_ALLOWED, StatusCodes.FORBIDDEN);
         }
 
         //refund
@@ -96,7 +97,7 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
         });
 
         const space = await this._spaceRepository.findOne({_id:booking.spaceId});
-        if(!space) throw new CustomError("No space found for cancelling.", StatusCodes.NOT_FOUND);
+        if(!space) throw new CustomError(ERROR_MESSAGES.SPACE_NOT_FOUND, StatusCodes.NOT_FOUND);
 
         if (role === 'vendor') {
         await this._notificationService.sendToUser(

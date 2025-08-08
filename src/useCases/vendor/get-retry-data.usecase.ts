@@ -4,6 +4,7 @@ import { IVendorRepository } from "../../entities/repositoryInterfaces/users/ven
 import { IGetRetryDataUseCase } from "../../entities/usecaseInterfaces/vendor/get-retry-data.interface";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class GetRetryDataUseCase implements IGetRetryDataUseCase{
@@ -23,13 +24,13 @@ export class GetRetryDataUseCase implements IGetRetryDataUseCase{
     }>{
         const payload = this._tokenService.verifyResetToken(token);
         if (!payload || !payload.value) {
-            throw new CustomError("Invalid or expired token", StatusCodes.BAD_REQUEST);
+            throw new CustomError(ERROR_MESSAGES.INVALID_TOKEN, StatusCodes.BAD_REQUEST);
         }
 
         const vendor = await this._vendorRepository.findOne({email:payload.value});
 
          if (!vendor) {
-          throw new CustomError("Vendor not found",StatusCodes.NOT_FOUND);
+          throw new CustomError(ERROR_MESSAGES.USER_NOT_FOUND,StatusCodes.NOT_FOUND);
         }
 
          return {

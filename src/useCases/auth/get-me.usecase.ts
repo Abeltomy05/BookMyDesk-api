@@ -9,6 +9,7 @@ import { IAdminRepository } from "../../entities/repositoryInterfaces/users/admi
 import { IGetMeUseCase } from "../../entities/usecaseInterfaces/auth/get-me-usecase.interface";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class GetMe implements IGetMeUseCase{
@@ -26,7 +27,7 @@ export class GetMe implements IGetMeUseCase{
     async execute(token: string):Promise<Partial<IVendorModel | IClientModel | IAdminModel> | null>{
          const payload = this._tokenService.verifyAccessToken(token);
           if (!payload) {
-               throw new CustomError("Invalid Token", 400);
+               throw new CustomError(ERROR_MESSAGES.INVALID_TOKEN, StatusCodes.BAD_REQUEST);
           }
 
           let repository;
@@ -37,7 +38,7 @@ export class GetMe implements IGetMeUseCase{
           }else if(payload.role === 'admin'){
             repository = this._adminRepository;
           }else{
-            throw new CustomError("Invalid Role",StatusCodes.BAD_REQUEST)
+            throw new CustomError(ERROR_MESSAGES.INVALID_ROLE,StatusCodes.BAD_REQUEST)
           }
        
           const user = await repository.findOne({email:payload.email});

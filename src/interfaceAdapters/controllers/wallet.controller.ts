@@ -8,6 +8,7 @@ import { StatusCodes } from "http-status-codes";
 import { ICreateTopUpPaymentIntentUseCase } from "../../entities/usecaseInterfaces/wallet/create-topup-payment-intent-usecase.interface";
 import { IConfirmTopupPaymentUseCase } from "../../entities/usecaseInterfaces/wallet/confirm-topup-payment-usecase.interface";
 import { getErrorMessage } from "../../shared/error/errorHandler";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class WalletController implements IWalletController {
@@ -29,13 +30,12 @@ export class WalletController implements IWalletController {
 
             const { userId, role } = (req as CustomRequest).user; 
             const roleToSend = role === "vendor" ? "Vendor" : role === "client" ? "Client" : "Admin";
-            console.log("Wallet fetch → userId:", userId, "role:", roleToSend);
 
             const walletDetails = await this._getWalletDetailsUseCase.execute(userId, roleToSend, page, limit);
             console.log(walletDetails)
             res.status(StatusCodes.OK).json({
                 success: true,
-                message: "Wallet details retrieved successfully",
+                message: SUCCESS_MESSAGES.WALLET_DETAILS_RETRIEVED,
                 data: walletDetails,
             });
         } catch (error) {
@@ -50,7 +50,7 @@ export class WalletController implements IWalletController {
             if(!spaceId || !bookingDates || !numberOfDesks || !totalPrice){
                 res.status(StatusCodes.BAD_REQUEST).json({
                     success:false,
-                    message:"There are missing fields, Please try again."
+                    message:ERROR_MESSAGES.MISSING_DATA
                 })
                 return;
             }
@@ -60,13 +60,13 @@ export class WalletController implements IWalletController {
             if(response.success && response.bookingId){
                 res.status(StatusCodes.OK).json({
                     success: true,
-                    message: "Booking confirmed using wallet",
+                    message: SUCCESS_MESSAGES.BOOKING_CONFIRMED,
                     data: response.bookingId
                 });
             }else{
                  res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                     success: false,
-                    message: "Booking Unsuccessfull, Please try again.",
+                    message: ERROR_MESSAGES.FAILED,
                 });
             }
         } catch (error) {
@@ -80,15 +80,15 @@ export class WalletController implements IWalletController {
             if(!amount || !currency){
                res.status(StatusCodes.BAD_REQUEST).json({
                 success: false,
-                message: "Credentials missing for creating topup intent."
+                message: ERROR_MESSAGES.MISSING_CREDENTIALS
             }); 
             }
             const {userId,role} = (req as CustomRequest).user;
             const response = await this._createTopupPaymentIntentUseCase.execute(amount,currency,userId,role);
-            res.status(200).json({
+            res.status(StatusCodes.OK).json({
                 success: true,
                 data: response,
-                message: "Payment intent created successfully."
+                message: SUCCESS_MESSAGES.CREATED
             });
         } catch (error) {
           next(error)
@@ -99,9 +99,9 @@ export class WalletController implements IWalletController {
         try {
             const { paymentIntentId } = req.body;
             if (!paymentIntentId) {
-            res.status(400).json({ 
+            res.status(StatusCodes.BAD_REQUEST).json({ 
                 success: false,
-                message: 'Missing required fields: paymentIntentId' 
+                message: ERROR_MESSAGES.MISSING_CREDENTIALS 
             });
             return;
             }
@@ -109,13 +109,13 @@ export class WalletController implements IWalletController {
             const result = await this._confirmTopupPaymentUseCase.execute(paymentIntentId); 
 
             if (result.success) {
-            res.status(200).json({
+            res.status(StatusCodes.OK).json({
                 success: true,
                 data:result.data,
-                message: "Payment confirmed successfully.",
+                message: SUCCESS_MESSAGES.PAYMENT_CONFIRMED,
             });
             } else {
-            res.status(400).json(result);
+            res.status(StatusCodes.BAD_REQUEST).json(result);
             }
         } catch (error) {
            next(error)

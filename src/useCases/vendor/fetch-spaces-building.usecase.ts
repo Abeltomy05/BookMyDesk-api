@@ -3,6 +3,7 @@ import { ISpaceRepository } from "../../entities/repositoryInterfaces/building/s
 import { IFetchSpacesForBuilding } from "../../entities/usecaseInterfaces/vendor/fetch-space-building-usecase.interface";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 export interface ISpaceShort {
   _id: string;
@@ -16,7 +17,7 @@ export class FetchSpacesForBuilding implements IFetchSpacesForBuilding{
     ){}
 
     async execute(buildingId: string):Promise<ISpaceShort[]>{
-        if(!buildingId) throw new CustomError("Building Id is missing, Please contact support.",StatusCodes.BAD_REQUEST);
+        if(!buildingId) throw new CustomError(ERROR_MESSAGES.MISSING_CREDENTIALS,StatusCodes.BAD_REQUEST);
 
         const spaceDetails = await this._spaceRepo.find(
             {buildingId},

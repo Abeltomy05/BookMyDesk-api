@@ -5,9 +5,8 @@ import { IOfferController } from "../../entities/controllerInterfaces/others/off
 import { inject, injectable } from "tsyringe";
 import { IFetchAllOffersUseCase } from "../../entities/usecaseInterfaces/offer/fetch-all-offers-usecase.interface";
 import { CreateOfferSchema } from "../../shared/validations/create-offer.validation";
-import { z } from "zod";
 import { ICreateOfferUseCase } from "../../entities/usecaseInterfaces/offer/create-offer-usecase.interface";
-import { getErrorMessage } from "../../shared/error/errorHandler";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class OfferController implements IOfferController{
@@ -42,13 +41,13 @@ export class OfferController implements IOfferController{
             if(response.success){
                res.status(StatusCodes.OK).json({
                 success:true,
-                message: "Offer created successfully."
+                message: SUCCESS_MESSAGES.CREATED
                })
                return;
             }else{
                res.status(StatusCodes.BAD_REQUEST).json({
                 success:false,
-                message: "Offer creation Unsuccessfull."
+                message: ERROR_MESSAGES.FAILED
                })
                return;
             }

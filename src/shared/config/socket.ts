@@ -4,6 +4,7 @@ import { IChatUseCase } from "../../entities/usecaseInterfaces/chat/chat-usecase
 import { SaveMessageDTO } from "../dtos/chat.dto";
 import http from 'http';
 import { config } from "../config";
+import { ERROR_MESSAGES } from "../constants";
 
 export class ChatSocketHandler {
   private io: IOServer;
@@ -28,7 +29,7 @@ export class ChatSocketHandler {
     try {
       const { userId, userType } = socket.handshake.auth;
       if (!userId || !userType || !['client', 'building'].includes(userType)) {
-        return next(new Error("Invalid authentication data"));
+        return next(new Error(ERROR_MESSAGES.INVALID_AUTHENTICATION_DATA));
       }
 
       (socket as CustomSocket).userId = userId;
@@ -36,7 +37,7 @@ export class ChatSocketHandler {
 
       next();
     } catch {
-      next(new Error("Authentication failed"));
+      next(new Error(ERROR_MESSAGES.AUTHENTICATION_FAILED));
     }
   };
 

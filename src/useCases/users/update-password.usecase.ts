@@ -5,6 +5,7 @@ import { IBcrypt } from "../../frameworks/security/bcrypt.interface";
 import { IUpdateUserPasswordUseCase } from "../../entities/usecaseInterfaces/users/update-password.interface";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 
 @injectable()
@@ -22,7 +23,7 @@ export class UpdateUserPasswordUseCase implements IUpdateUserPasswordUseCase{
   async execute(userId: string, role:string, currentPassword: string, newPassword: string): Promise<{email: string}> {
     try {
      if (!userId || !currentPassword || !newPassword) {
-      throw new CustomError("Missing required fields.",StatusCodes.BAD_REQUEST);
+      throw new CustomError(ERROR_MESSAGES.MISSING_DATA,StatusCodes.BAD_REQUEST);
     }
 
     let userData: any;
@@ -36,17 +37,17 @@ export class UpdateUserPasswordUseCase implements IUpdateUserPasswordUseCase{
         repository = this._clientRepository;
         break;
       default:
-        throw new CustomError("Invalid user role.", StatusCodes.BAD_REQUEST);
+        throw new CustomError(ERROR_MESSAGES.INVALID_ROLE, StatusCodes.BAD_REQUEST);
     }
 
     userData = await repository.findOne({ _id: userId });
     if (!userData) {
-      throw new CustomError("User not found.", StatusCodes.NOT_FOUND);
+      throw new CustomError(ERROR_MESSAGES.USER_NOT_FOUND, StatusCodes.NOT_FOUND);
     }
 
      const isPasswordValid = await this._bcrypt.compare(currentPassword, userData.password);
     if (!isPasswordValid) {
-      throw new CustomError("Current password is incorrect.", StatusCodes.BAD_REQUEST);
+      throw new CustomError(ERROR_MESSAGES.INVALID_PASSWORD, StatusCodes.BAD_REQUEST);
     }
 
     const hashedPassword = await this._bcrypt.hash(newPassword);
@@ -57,7 +58,7 @@ export class UpdateUserPasswordUseCase implements IUpdateUserPasswordUseCase{
     );
 
      if (!updatedUser) {
-    throw new CustomError("Failed to update user password.", StatusCodes.INTERNAL_SERVER_ERROR);
+    throw new CustomError(ERROR_MESSAGES.FAILED, StatusCodes.INTERNAL_SERVER_ERROR);
      } 
 
     return {

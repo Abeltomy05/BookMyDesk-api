@@ -5,6 +5,7 @@ import { IGetNotificationsUseCase } from "../../entities/usecaseInterfaces/notif
 import { GetNotificationsResponseDTO } from "../../shared/dtos/notification.dto";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class GetNotificationsUseCase implements IGetNotificationsUseCase{
@@ -14,7 +15,7 @@ export class GetNotificationsUseCase implements IGetNotificationsUseCase{
     ){}
 
     async execute(page:number,limit:number,filter: "unread" | "all",userId:string): Promise<GetNotificationsResponseDTO>{
-      if(!userId) throw new CustomError("UserId missing, Please contact support.",StatusCodes.BAD_REQUEST);
+      if(!userId) throw new CustomError(ERROR_MESSAGES.MISSING_CREDENTIALS,StatusCodes.BAD_REQUEST);
 
       const skip = page * limit;
       const baseFilter: any = { userId }; 

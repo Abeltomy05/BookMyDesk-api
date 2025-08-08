@@ -4,6 +4,7 @@ import { injectable } from "tsyringe";
 import { config } from "../../shared/config";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 export interface ResetTokenPayload extends JwtPayload {
 	value: string;
@@ -15,7 +16,7 @@ export class JwtService implements IJwtService {
 
     constructor(){
         if (!config.RESET_TOKEN_SECRET) {
-            throw new CustomError("RESET_TOKEN_SECRET is not defined in environment variables",StatusCodes.INTERNAL_SERVER_ERROR);
+            throw new CustomError(ERROR_MESSAGES.RESET_TOKEN_SECRET_ERROR,StatusCodes.INTERNAL_SERVER_ERROR);
         }
         this._resetTokenSecret = config.RESET_TOKEN_SECRET
     }
@@ -65,7 +66,6 @@ export class JwtService implements IJwtService {
     verifyRefreshToken(token: string): JwtPayload | null {
         try {
             const payload = jwt.verify(token, config.REFRESH_TOKEN_SECRET!) as JwtPayload;
-            // console.log("Refresh Token Payload:", payload);
             return payload;
         } catch (error) {
             console.error("Refresh token verification failed:", error);

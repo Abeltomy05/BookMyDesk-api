@@ -3,6 +3,7 @@ import { INotificationRepository } from "../../entities/repositoryInterfaces/not
 import { IMarkAsReadUseCase } from "../../entities/usecaseInterfaces/notification/mark-as-read-usecase.interface";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class MarkAsReadUseCase implements IMarkAsReadUseCase{
@@ -19,7 +20,7 @@ export class MarkAsReadUseCase implements IMarkAsReadUseCase{
         await this._notificationRepo.updateAll({ userId }, { isRead: true });
         
         } else {
-        throw new CustomError("Either notification ID or user ID must be provided", StatusCodes.BAD_REQUEST);
+        throw new CustomError(ERROR_MESSAGES.MISSING_CREDENTIALS, StatusCodes.BAD_REQUEST);
         }
     }
 }

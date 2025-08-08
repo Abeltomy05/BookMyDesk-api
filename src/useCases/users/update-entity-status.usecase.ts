@@ -12,6 +12,7 @@ import { config } from "../../shared/config";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
 import { IAmenityRepository } from "../../entities/repositoryInterfaces/building/amenity-repository.interface";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 
 
@@ -35,7 +36,7 @@ export class UpdateEntityStatusUseCase  implements IUpdateEntityStatusUseCase {
 	) {}
 	async execute(entityType: string, entityId: string, status: string, reason?: string): Promise<void> {
 		if (!entityType || !entityId || !status) {
-			throw new CustomError("Missing required fields: entityType, entityId, or status",StatusCodes.BAD_REQUEST);
+			throw new CustomError(ERROR_MESSAGES.MISSING_CREDENTIALS,StatusCodes.BAD_REQUEST);
 			}
 		let repo;
 
@@ -57,19 +58,19 @@ export class UpdateEntityStatusUseCase  implements IUpdateEntityStatusUseCase {
 			break;
 
 			default:
-			throw new CustomError("Unsupported entity type", StatusCodes.BAD_REQUEST);
+			throw new CustomError(ERROR_MESSAGES.INVALID_ENTITY_TYPE, StatusCodes.BAD_REQUEST);
 		}
 		const entity  = await repo.findOne({ _id: entityId  });
 
 		if (!entity) {
-			throw new CustomError(`${entityType} not found`, StatusCodes.NOT_FOUND);
+			throw new CustomError(`${entityType} ${ERROR_MESSAGES.ENTITY_NOT_FOUND}`, StatusCodes.NOT_FOUND);
 		}
 
 		let updateData: Record<string, string | boolean>;
 
 		if (entityType === "amenity") {
 			if (status !== "active" && status !== "non-active") {
-				throw new CustomError("Invalid status for amenity. Use 'active' or 'non-active'", StatusCodes.BAD_REQUEST);
+				throw new CustomError(`${ERROR_MESSAGES.INVALID_STATUS}. Use 'active' or 'non-active'`, StatusCodes.BAD_REQUEST);
 			}
 			updateData = { isActive: status === "active" };
 			} else {

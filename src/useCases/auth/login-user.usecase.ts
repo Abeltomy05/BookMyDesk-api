@@ -10,6 +10,7 @@ import { IAdminModel } from "../../frameworks/database/mongo/models/admin.model"
 import { IClientModel } from "../../frameworks/database/mongo/models/client.model";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class LoginUserUseCase implements ILoginUserUseCase{
@@ -38,13 +39,13 @@ export class LoginUserUseCase implements ILoginUserUseCase{
 
        const userData = await repository.findOne({email: user.email});
        if(!userData){
-            throw new CustomError("Invalid email. Please try again with another email",StatusCodes.BAD_REQUEST);
+            throw new CustomError(ERROR_MESSAGES.INVALID_EMAIL,StatusCodes.BAD_REQUEST);
         }
 
         if(user.password){
             const isPasswordValid = await this._passwordBcrypt.compare(user.password, userData.password);
             if(!isPasswordValid){
-                throw new CustomError("Invalid password", StatusCodes.BAD_REQUEST);
+                throw new CustomError(ERROR_MESSAGES.INVALID_PASSWORD, StatusCodes.BAD_REQUEST);
             }
         }
 

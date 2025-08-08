@@ -10,6 +10,7 @@ import { IOfferRepository } from "../../entities/repositoryInterfaces/offer/offe
 import { IOfferEntity } from "../../entities/models/offer.entity";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class GetSingleBuilding implements IGetSingleBuilding{
@@ -25,7 +26,7 @@ export class GetSingleBuilding implements IGetSingleBuilding{
  async execute(id:string): Promise<IBuildingEntity & { spaces: (ISpaceEntity & { offer?: Partial<IOfferEntity> })[] }>{
      const buildingModel = await this.buildingRepository.findOne({ _id: id });
       if (!buildingModel) {
-        throw new CustomError("Building not found",StatusCodes.NOT_FOUND);
+        throw new CustomError(ERROR_MESSAGES.BUILDING_NOT_FOUND,StatusCodes.NOT_FOUND);
       }
  
     const buildingEntity = toEntityBuilding(buildingModel);

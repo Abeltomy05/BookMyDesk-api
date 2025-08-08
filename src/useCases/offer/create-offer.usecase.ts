@@ -6,6 +6,7 @@ import { Types } from "mongoose";
 import { ICreateOfferUseCase } from "../../entities/usecaseInterfaces/offer/create-offer-usecase.interface";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 export interface createOfferParams{
     title:string;
@@ -32,12 +33,12 @@ export class CreateOfferUseCase implements ICreateOfferUseCase{
     async execute({title,description,percentage,startDate,endDate,spaceId,buildingId,vendorId}:createOfferParams):Promise<{success:boolean}>{
         const building = await this._buildingRepo.findOne({ _id: buildingId, vendorId });
         if (!building) {
-        throw new CustomError("Invalid building. Please select a valid building you own.",StatusCodes.NOT_FOUND);
+        throw new CustomError(ERROR_MESSAGES.BUILDING_NOT_FOUND,StatusCodes.NOT_FOUND);
         }
 
         const space = await this._spaceRepo.findOne({ _id: spaceId, buildingId });
         if (!space) {
-        throw new CustomError("Invalid space. Please select a valid space under the selected building.",StatusCodes.NOT_FOUND);
+        throw new CustomError(ERROR_MESSAGES.SPACE_NOT_FOUND,StatusCodes.NOT_FOUND);
         }
 
          const start = new Date(startDate);
@@ -54,7 +55,7 @@ export class CreateOfferUseCase implements ICreateOfferUseCase{
             ]
          });
          if (overlappingOffer) {
-            throw new CustomError("An overlapping offer already exists for the selected space and time range.", StatusCodes.CONFLICT);
+            throw new CustomError(ERROR_MESSAGES.OFFER_EXIST, StatusCodes.CONFLICT);
          }
 
         await this._offerRepo.save({

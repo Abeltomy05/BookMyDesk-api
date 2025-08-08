@@ -12,6 +12,7 @@ import { IFetchBuildingsForVendorUseCase } from "../../entities/usecaseInterface
 import { IFetchSpacesForBuilding } from "../../entities/usecaseInterfaces/vendor/fetch-space-building-usecase.interface";
 import { getErrorMessage } from "../../shared/error/errorHandler";
 import { config } from "../../shared/config";
+import { ERROR_MESSAGES, INFO_MESSAGES, SUCCESS_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class VendorController implements IVendorController{
@@ -36,7 +37,7 @@ export class VendorController implements IVendorController{
       try {
         const { idProof } = req.body;
         if (!idProof) {
-          res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "ID proof is required" });
+          res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: ERROR_MESSAGES.ID_PROOF_REQUIRED });
           return;
         }
         const vendorId = (req as CustomRequest).user.userId; 
@@ -62,7 +63,7 @@ export class VendorController implements IVendorController{
 
         res.status(StatusCodes.OK).json({
         success: true,
-        message: "ID proof uploaded successfully",
+        message: SUCCESS_MESSAGES.ID_PROOF_UPLOADED,
         data: vendor,
         });
       } catch (error) {
@@ -74,7 +75,7 @@ export class VendorController implements IVendorController{
       try {
          const {token} = req.query;
           if (!token || typeof token !== 'string') {
-            res.status(400).json({ success: false, message: "Token is required" })
+            res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "Token is required" })
             return
           }
 
@@ -93,14 +94,14 @@ export class VendorController implements IVendorController{
       try {
         const {email,phone,companyName,companyAddress,idProof} = req.body;
         if(!phone || !companyName || !companyAddress || !idProof){
-            res.status(400).json({ success: false, message: "All credentials required" })
+            res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: "All credentials required" })
             return
         }
 
         await this._retryRegistration.execute({email,phone,companyName,companyAddress,idProof});
         res.status(StatusCodes.OK).json({
           success: true,
-          message: "Your application has been retried with the updated details. Please wait while the admin reviews and approves it.",
+          message: INFO_MESSAGES.APPLICATION_RETRIED,
         });
       } catch (error) {
          next(error)
@@ -112,7 +113,7 @@ export class VendorController implements IVendorController{
         const vendorId = (req as CustomRequest).user.userId;
 
         const response = await this._getVendorHomeDataUseCase.execute(vendorId);
-         res.status(200).json({
+         res.status(StatusCodes.OK).json({
           success: true,
           data: response,
         });
@@ -124,9 +125,9 @@ export class VendorController implements IVendorController{
     async singleVendorData(req: Request, res: Response, next: NextFunction): Promise<void>{
       try {
         const vendorId = req.params.vendorId;
-        console.log("VendorId is:",vendorId)
+
         const result = await this._getsingleVendorDataUseCase.execute(vendorId);
-        console.log("vendor Data",result);
+
         res.status(StatusCodes.OK).json({
           success:true,
           data:result,

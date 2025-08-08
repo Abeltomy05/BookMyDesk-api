@@ -8,6 +8,7 @@ import { IGetChatsUseCase } from "../../entities/usecaseInterfaces/chat/get-chat
 import { IGetMessagesUseCase } from "../../entities/usecaseInterfaces/chat/get-messages-usecase.interface";
 import { IClearChatUseCase } from "../../entities/usecaseInterfaces/chat/clear-chat-usecase.interface";
 import { getErrorMessage } from "../../shared/error/errorHandler";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class ChatController implements IChatController{
@@ -30,7 +31,7 @@ export class ChatController implements IChatController{
       if(!buildingId){
         res.status(StatusCodes.BAD_REQUEST).json({
             success: false,
-            message:"Credentials missing for creating session."
+            message:ERROR_MESSAGES.MISSING_CREDENTIALS
         })
         return;
       } 
@@ -38,7 +39,7 @@ export class ChatController implements IChatController{
       const result =  await this._createSessionUseCase.execute(buildingId,userId);
       res.status(StatusCodes.OK).json({
         success: true,
-        message: "Session created successfully.",
+        message: SUCCESS_MESSAGES.CREATED,
         data: result,
       })
     } catch (error) {
@@ -72,7 +73,7 @@ export class ChatController implements IChatController{
       if(!sessionId){
         res.status(StatusCodes.BAD_REQUEST).json({
           success:false,
-          message:"Failed to get messages."
+          message:ERROR_MESSAGES.FAILED
         })
         return;
       }
@@ -93,7 +94,7 @@ export class ChatController implements IChatController{
       if(!sessionId){
         res.status(StatusCodes.BAD_REQUEST).json({
           success: false,
-          message: "SessionId missing."
+          message:ERROR_MESSAGES.MISSING_CREDENTIALS
         })
         return;
       }
@@ -102,7 +103,7 @@ export class ChatController implements IChatController{
       await this._clearChatUseCase.execute(sessionId,userId);
       res.status(StatusCodes.OK).json({
         success: true,
-        message: "Chat cleared successfully."
+        message: SUCCESS_MESSAGES.CHAT_CLEARED
       })
     } catch (error) {
        next(error)

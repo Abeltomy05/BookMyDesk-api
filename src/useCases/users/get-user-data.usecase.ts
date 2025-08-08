@@ -6,6 +6,7 @@ import { IClientModel } from "../../frameworks/database/mongo/models/client.mode
 import { IGetUserDataUseCase } from "../../entities/usecaseInterfaces/users/get-user-data-usecase.interface";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class GetUserDataUseCase implements IGetUserDataUseCase {
@@ -24,12 +25,12 @@ export class GetUserDataUseCase implements IGetUserDataUseCase {
            }else if(role === "vendor") {
                 repo = this._vendorRepository;
            }else{
-                throw new CustomError(`Invalid user role :${role}`,StatusCodes.BAD_REQUEST);
+                throw new CustomError(ERROR_MESSAGES.INVALID_ROLE,StatusCodes.BAD_REQUEST);
            }
 
            const user = await repo.findOne({_id:userId});
               if (!user) {
-                 throw new CustomError("User not found", StatusCodes.NOT_FOUND);
+                 throw new CustomError(ERROR_MESSAGES.USER_NOT_FOUND, StatusCodes.NOT_FOUND);
               }
 
               const { password, ...userData } = user;

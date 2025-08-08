@@ -6,6 +6,7 @@ import { IBcrypt } from "../../frameworks/security/bcrypt.interface";
 import { IEmailService } from "../../entities/serviceInterfaces/email-service.interface";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class SendOtpUseCase implements ISendOtpUseCase {
@@ -24,7 +25,7 @@ export class SendOtpUseCase implements ISendOtpUseCase {
           const isEmailExisting = await this._userExistenceService.emailExists(email);
           if (isEmailExisting) {
                console.log("Email already exists:", email);
-               const error = new CustomError("Email already exists",StatusCodes.CONFLICT);
+               const error = new CustomError(ERROR_MESSAGES.EMAIL_EXIST,StatusCodes.CONFLICT);
                error.name = "EmailExistsError";
                throw error;
           }

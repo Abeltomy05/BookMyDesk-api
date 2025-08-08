@@ -5,6 +5,7 @@ import { IFetchAllOffersUseCase } from "../../entities/usecaseInterfaces/offer/f
 import { OfferStatus } from "../../shared/dtos/types/user.types";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 
 @injectable()
@@ -15,7 +16,7 @@ export class FetchAllOffersUseCase implements IFetchAllOffersUseCase{
     ){}
 
     async execute(vendorId:string,page:number,limit:number):Promise<FetchOffersResultDTO>{
-       if(!vendorId) throw new CustomError("VendorId missing, Please contact for support.",StatusCodes.BAD_REQUEST);
+       if(!vendorId) throw new CustomError(ERROR_MESSAGES.MISSING_CREDENTIALS,StatusCodes.BAD_REQUEST);
 
        const skip = (page - 1) * limit;
 

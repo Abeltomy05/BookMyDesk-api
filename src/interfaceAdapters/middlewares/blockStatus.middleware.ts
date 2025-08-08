@@ -8,6 +8,7 @@ import { IBlackListTokenUseCase } from "../../entities/usecaseInterfaces/auth/bl
 import { IRevokeRefreshTokenUseCase } from "../../entities/usecaseInterfaces/auth/revoke-refreshtoken-usecase.interface";
 import { config } from "../../shared/config";
 import { CustomError } from "../../entities/utils/custom.error";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class BlockStatusMiddleware{
@@ -29,7 +30,7 @@ export class BlockStatusMiddleware{
        }else if(role === "vendor"){
         repo = this._vendorRepository;
        }else{
-        throw new CustomError("Invalid Role", StatusCodes.BAD_REQUEST);
+        throw new CustomError(ERROR_MESSAGES.INVALID_ROLE, StatusCodes.BAD_REQUEST);
        }
 
        const user = await repo.findOne({_id:userId});
@@ -41,7 +42,7 @@ export class BlockStatusMiddleware{
         if(!req.user){
             res.status(StatusCodes.UNAUTHORIZED) .json({
                 success:false,
-                message:"Unauthorized: No user found"
+                message:ERROR_MESSAGES.USER_UNAUTHORIZED
             })
             return;
         }
@@ -51,18 +52,17 @@ export class BlockStatusMiddleware{
         if(!["client","vendor"].includes(role)){
             res.status(StatusCodes.BAD_REQUEST).json({
               success:false,
-              message:"Invalid Role"
+              message:ERROR_MESSAGES.INVALID_ROLE
             })
             return;
         }
 
-        // console.log("Checking if status is blocked")
 
         const status = await this.getUserStatus(userId,role);
         if(!status){
             res.status(StatusCodes.NOT_FOUND).json({
                 success:false,
-                message:"User not found"
+                message:ERROR_MESSAGES.USER_NOT_FOUND
             })
             return;
         }
@@ -93,7 +93,7 @@ export class BlockStatusMiddleware{
 
                res.status(StatusCodes.FORBIDDEN).json({
                 success:false,
-                message:"Access denied: Your account has been blocked",
+                message:ERROR_MESSAGES.BLOCKED_USER,
                })
 
                return;
@@ -104,7 +104,7 @@ export class BlockStatusMiddleware{
         console.error(" Error In Block Status Middleware:", error);
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
 				success: false,
-				message: "Internal server error while checking blocked status",
+				message: `${ERROR_MESSAGES.INTERNAL_SERVER_ERROR} while checking blocked status`,
 			});
        }
     }

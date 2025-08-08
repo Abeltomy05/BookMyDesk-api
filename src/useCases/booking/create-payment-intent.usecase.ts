@@ -10,6 +10,7 @@ import { getErrorMessage } from "../../shared/error/errorHandler";
 import { config } from "../../shared/config";
 import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
+import { ERROR_MESSAGES } from "../../shared/constants";
 
 @injectable()
 export class CreatePaymentIntentUseCase implements ICreatePaymentIntentUseCase{
@@ -28,12 +29,12 @@ export class CreatePaymentIntentUseCase implements ICreatePaymentIntentUseCase{
          try {
         const space = await this._spaceRepository.findOne({_id:data.spaceId});
         if (!space) {
-            throw new CustomError('Space not found',StatusCodes.NOT_FOUND);
+            throw new CustomError(ERROR_MESSAGES.SPACE_NOT_FOUND,StatusCodes.NOT_FOUND);
         }
 
         const building = await this._buildingRepository.findOne({ _id: space.buildingId });
         if (!building) {
-         throw new CustomError('Building not found for the space', StatusCodes.NOT_FOUND);
+         throw new CustomError(ERROR_MESSAGES.BUILDING_NOT_FOUND, StatusCodes.NOT_FOUND);
         }
 
       if (data.bookingId) {
@@ -44,7 +45,7 @@ export class CreatePaymentIntentUseCase implements ICreatePaymentIntentUseCase{
         });
 
          if (!existingBooking) {
-          throw new CustomError('Invalid booking ID or booking cannot be retried', StatusCodes.BAD_REQUEST);
+          throw new CustomError(ERROR_MESSAGES.INVALID_BOOKING_ID, StatusCodes.BAD_REQUEST);
         }
       }
       const paymentIntent = await this._stripeService.createPaymentIntent({
@@ -74,7 +75,7 @@ export class CreatePaymentIntentUseCase implements ICreatePaymentIntentUseCase{
        } catch (error: unknown) {
         const message = getErrorMessage(error)
       console.error('Error in CreatePaymentIntentUseCase:', error);
-      throw new CustomError(message || 'Failed to create payment intent', StatusCodes.INTERNAL_SERVER_ERROR);
+      throw new CustomError(message || ERROR_MESSAGES.FAILED, StatusCodes.INTERNAL_SERVER_ERROR);
     }
     }
 }
