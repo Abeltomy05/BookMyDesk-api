@@ -248,7 +248,7 @@ export class AuthController implements IAuthController {
 
     async getMe(req: Request, res: Response, next: NextFunction): Promise<void> {
           try {
-          const token = req.cookies?.client_access_token || req.cookies?.vendor_access_token;
+          const token = req.cookies?.access_token;
           if (!token) {
                res.status(401).json({ success: false, message: ERROR_MESSAGES.UNAUTHORIZED });
                return;
