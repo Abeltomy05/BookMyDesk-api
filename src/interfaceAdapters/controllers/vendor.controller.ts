@@ -43,8 +43,8 @@ export class VendorController implements IVendorController{
         const vendorId = (req as CustomRequest).user.userId; 
         const vendor = await this._uploadIdProofUseCase.uploadIdProof(vendorId, idProof);
 
-        let accessTokenName = 'vendor_access_token';
-        let refreshTokenName = 'vendor_refresh_token';
+        let accessTokenName = 'access_token';
+        let refreshTokenName = 'refresh_token';
         
         res.clearCookie(accessTokenName, {
         httpOnly: true,
