@@ -91,6 +91,7 @@ export const ERROR_MESSAGES = {
 	NOTIFICATION_HANDLER_ERROR: "NotificationSocketHandler not initialized.",
 	INVALID_AUTHENTICATION_DATA: "Invalid authentication data",
 	AUTHENTICATION_FAILED: "Authentication failed",
+	AMENITY_NAME_DESCRIPTION_REQUIRED: "Amenity name and description is required when requesting a new amenity.",
 } as const;
 
 export const INFO_MESSAGES = {

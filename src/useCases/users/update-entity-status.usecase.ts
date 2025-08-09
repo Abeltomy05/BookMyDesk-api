@@ -68,14 +68,14 @@ export class UpdateEntityStatusUseCase  implements IUpdateEntityStatusUseCase {
 
 		let updateData: Record<string, string | boolean>;
 
-		if (entityType === "amenity") {
+		  if (entityType === "amenity") {
 			if (status !== "active" && status !== "non-active") {
 				throw new CustomError(`${ERROR_MESSAGES.INVALID_STATUS}. Use 'active' or 'non-active'`, StatusCodes.BAD_REQUEST);
 			}
-			updateData = { isActive: status === "active" };
-			} else {
 			updateData = { status };
-		}
+		  } else {
+			updateData = { status };
+		  }
 
 		await repo.update({ _id: entityId },updateData);
 

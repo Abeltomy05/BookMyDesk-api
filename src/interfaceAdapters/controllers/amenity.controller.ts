@@ -7,6 +7,8 @@ import { ICreateAmenityUseCase } from "../../entities/usecaseInterfaces/amenity/
 import { IEditAmenityUseCase } from "../../entities/usecaseInterfaces/amenity/edit-amenity-usecase.interface";
 import { IDeleteAmenityUseCase } from "../../entities/usecaseInterfaces/amenity/delete-amenity-usecase.interface";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../../shared/constants";
+import { IRequestAmenityUseCase } from "../../entities/usecaseInterfaces/amenity/request-amenity-usecase.interface";
+import { CustomRequest } from "../middlewares/auth.middleware";
 
 @injectable()
 export class AmenityController implements IAmenityController{
@@ -19,16 +21,18 @@ export class AmenityController implements IAmenityController{
       private _editAmenityUseCase: IEditAmenityUseCase,
       @inject("IDeleteAmenityUseCase")
       private _deleteAmenityUseCase: IDeleteAmenityUseCase,
+      @inject("IRequestAmenityUseCase")
+      private _requestAmenityUseCase: IRequestAmenityUseCase,
     ){}
 
     async getAllAmenity(req:Request, res: Response, next: NextFunction): Promise<void>{
         try {
-            const { page = '1', limit = '10', search = '', isActive } = req.query;
+            const { page = '1', limit = '10', search = '', status } = req.query;
             const result = await this._getAllAmenityUseCase.execute(
                 parseInt(page as string),
                 parseInt(limit as string),
                 search as string,
-                isActive === 'true' ? true : isActive === 'false' ? false : undefined,
+                status ? String(status) : undefined
             );
             res.status(StatusCodes.OK).json({
                 success: true,
@@ -96,5 +100,37 @@ export class AmenityController implements IAmenityController{
         } catch (error) {
             next(error)
         }
+    }
+
+    async requestAmenity(req:Request, res: Response, next: NextFunction): Promise<void>{
+        try {
+            const { name, description } = req.body;
+            const userId = (req as CustomRequest).user.userId;
+             if(!name || !description || !name.trim() || !description.trim() ){
+                res.status(StatusCodes.BAD_REQUEST).json({
+                    success: false,
+                    message: ERROR_MESSAGES.AMENITY_NAME_DESCRIPTION_REQUIRED,
+                })
+             }
+
+             await this._requestAmenityUseCase.execute(name,description,userId);
+             res.status(StatusCodes.OK).json({
+                success: true,
+             })
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    async getPendingAmenities(req:Request, res: Response, next: NextFunction): Promise<void>{
+        // try{
+        //   const result = await this._pendingAmenityUseCase.execute()
+        //   res.status(StatusCodes.OK).json({
+        //     success: true,
+        //     data: result,
+        //   })
+        // }catch(error){
+        //     next(error)
+        // }
     }
 }

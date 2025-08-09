@@ -14,9 +14,9 @@ export class GetAllAmenityUseCase implements IGetAllAmenityUseCase{
          page: number,
          limit: number,
          search?: string,
-         isActive?: boolean
+         status?: string
         ):Promise<{
-            data: {_id:string,name:string,isActive:boolean}[];
+            data: {_id:string,name:string,status?: string}[];
             currentPage: number;
             totalItems: number;
             totalPages: number;
@@ -25,19 +25,25 @@ export class GetAllAmenityUseCase implements IGetAllAmenityUseCase{
 
          const filter: {
            name?: { $regex: string; $options: string },
-           isActive?: boolean; 
+           status?: string | { $nin: string[] };
          } = {};
 
          if (search) filter.name = { $regex: search, $options: 'i' };
-         if (typeof isActive === 'boolean') filter.isActive = isActive;
+         
+          if (status && (status === "active" || status === "non-active")){
+            filter.status = status;
+          } else {
+            filter.status = { $nin: ["pending", "rejected"] };
+          }
 
          const { items, total } = await this._amenityRepo.findAll(filter, skip, limit, { createdAt: -1 });
-         
+         console.log(items)
          const mapped: IAmenityEntity[] = items.map((doc) => ({
                 _id: doc._id.toString(),
                 name: doc.name,
-                isActive: doc.isActive,
+                status: doc.status,
             }));
+            console.log(mapped)
 
          return {
             data: mapped,
