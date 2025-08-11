@@ -2,7 +2,6 @@ import { inject, injectable } from "tsyringe";
 import { IClientRepository } from "../../entities/repositoryInterfaces/users/client-repository.interface";
 import { IVendorRepository } from "../../entities/repositoryInterfaces/users/vendor-repository.interface";
 import { IUpdateEntityStatusUseCase } from "../../entities/usecaseInterfaces/users/update-user-status-usecase.interface";
-import { Types } from "mongoose";
 import { IEmailService } from "../../entities/serviceInterfaces/email-service.interface";
 import { IJwtService } from "../../entities/serviceInterfaces/jwt-service.interface";
 import { IBuildingRepository } from "../../entities/repositoryInterfaces/building/building-repository.interface";
@@ -34,7 +33,7 @@ export class UpdateEntityStatusUseCase  implements IUpdateEntityStatusUseCase {
 		@inject("IJwtService")
 	    private _tokenService: IJwtService, 
 	) {}
-	async execute(entityType: string, entityId: string, status: string, reason?: string): Promise<void> {
+	async execute(entityType: string, entityId: string, status: string, reason?: string, email?:string): Promise<void> {
 		if (!entityType || !entityId || !status) {
 			throw new CustomError(ERROR_MESSAGES.MISSING_CREDENTIALS,StatusCodes.BAD_REQUEST);
 			}
@@ -66,22 +65,15 @@ export class UpdateEntityStatusUseCase  implements IUpdateEntityStatusUseCase {
 			throw new CustomError(`${entityType} ${ERROR_MESSAGES.ENTITY_NOT_FOUND}`, StatusCodes.NOT_FOUND);
 		}
 
-		let updateData: Record<string, string | boolean>;
-
-		  if (entityType === "amenity") {
-			if (status !== "active" && status !== "non-active") {
-				throw new CustomError(`${ERROR_MESSAGES.INVALID_STATUS}. Use 'active' or 'non-active'`, StatusCodes.BAD_REQUEST);
-			}
-			updateData = { status };
-		  } else {
-			updateData = { status };
-		  }
-
-		await repo.update({ _id: entityId },updateData);
+		await repo.update({ _id: entityId },{status:status});
 
 		  if (entityType === "vendor" && status === "rejected" && reason && hasEmail(entity)) {
             await this._handleVendorRejection(entity.email, reason);
         }
+
+		  if (entityType === "amenity" && status === "rejected" && reason && email) {
+            await this._handleAmenityRejection(email,reason);
+           }
 
 
 		 if (entityType === "building" && status === "rejected" && reason && hasEmail(entity)) {
@@ -90,16 +82,18 @@ export class UpdateEntityStatusUseCase  implements IUpdateEntityStatusUseCase {
 	}
 
 	 private async _handleVendorRejection(email: string, reason: string): Promise<void> {
-        console.log(`Sending rejection email to vendor: ${email}`);
         const retryToken = this._tokenService.generateResetToken(email);
         const retryUrl = new URL(`/vendor/retry/${retryToken}`, config.CORS_ORIGIN).toString();
-        await this._emailService.sendVendorRejectionEmail(email, reason, retryUrl);
+        await this._emailService.sendRejectionEmail(email, reason, retryUrl, "Vendor Application");
     }
 
 	  private async _handleBuildingRejection(email: string, reason: string,entityId:string): Promise<void> {
-		 console.log(`Sending rejection email to Building: ${email}`);
 		const retryToken = this._tokenService.generateResetToken(entityId);
         const retryUrl = new URL(`/vendor/retry-building/${retryToken}`, config.CORS_ORIGIN).toString();
-        await this._emailService.sendBuildingRejectionEmail(email, reason, retryUrl);
+        await this._emailService.sendRejectionEmail(email, reason, retryUrl,"Building Registration");
+    }
+
+	private async _handleAmenityRejection(email: string, reason: string): Promise<void> {
+        await this._emailService.sendRejectionEmail(email, reason, null, "Amenity Request");
     }
 }

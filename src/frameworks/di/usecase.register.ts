@@ -84,6 +84,7 @@ import { DeleteAmenityUseCase } from "../../useCases/amenity/delete-amenity.usec
 import { GetReApplyBuildingData } from "../../useCases/building/get-reapply-building.usecase";
 import { RetryBuildingRegistrationUseCase } from "../../useCases/building/retry-building-registration.usecase";
 import { RequestAmenityUseCase } from "../../useCases/amenity/request-amenity.usecase";
+import { PendingAmenityUseCase } from "../../useCases/amenity/pending-amenity.usecase";
 
 
 
@@ -296,6 +297,9 @@ export class UseCaseRegistry{
       })
       container.register("IRequestAmenityUseCase",{
         useClass: RequestAmenityUseCase
+      })
+      container.register("IPendingAmenityUseCase",{
+        useClass: PendingAmenityUseCase
       })
 
         //* ====== Register Bcrypts ====== *//

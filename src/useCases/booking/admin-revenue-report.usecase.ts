@@ -60,7 +60,7 @@ export class AdminRevenueReportUseCase implements IAdminRevenueReportUseCase {
         { path: "clientId", select: "username" },
         { path: "spaceId", select: "name" },
         { path: "buildingId", select: "buildingName" },
-      ]
+      ],
      ) as unknown as PopulatedBooking[];
 
    const reportData = populatedBookings.map((booking) => {

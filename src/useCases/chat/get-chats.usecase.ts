@@ -15,7 +15,7 @@ export class GetChatsUseCase implements IGetChatsUseCase{
          if(params.buildingId){
              const sessions = await this._chatSessionRepo.findWithPopulate(
                 { buildingId: params.buildingId },
-                [{ path: 'clientId', select: 'username avatar' }]
+                [{ path: 'clientId', select: 'username avatar' }],
              )
 
          return sessions.map((s: any) => ({
@@ -35,7 +35,7 @@ export class GetChatsUseCase implements IGetChatsUseCase{
          if (params.userId) {
            const sessions = await this._chatSessionRepo.findWithPopulate(
                 { clientId: params.userId },
-                [{ path: 'buildingId', select: 'buildingName' }]
+                [{ path: 'buildingId', select: 'buildingName' }],
             );
 
             return sessions.map((s: any) => ({

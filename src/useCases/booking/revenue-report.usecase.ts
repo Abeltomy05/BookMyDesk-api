@@ -68,7 +68,7 @@ if (filterType === 'year' && year) {
       { path: "clientId", select: "username" },
       { path: "spaceId", select: "name" },
       { path: "buildingId", select: "buildingName" },
-    ]
+    ],
   ) as unknown as PopulatedBooking[];
 
   return populatedBookings.map((booking) => ({

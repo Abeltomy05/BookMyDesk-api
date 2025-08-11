@@ -9,6 +9,7 @@ import { IDeleteAmenityUseCase } from "../../entities/usecaseInterfaces/amenity/
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../../shared/constants";
 import { IRequestAmenityUseCase } from "../../entities/usecaseInterfaces/amenity/request-amenity-usecase.interface";
 import { CustomRequest } from "../middlewares/auth.middleware";
+import { IPendingAmenityUseCase } from "../../entities/usecaseInterfaces/amenity/pending-amenity-usecase.interface";
 
 @injectable()
 export class AmenityController implements IAmenityController{
@@ -23,11 +24,13 @@ export class AmenityController implements IAmenityController{
       private _deleteAmenityUseCase: IDeleteAmenityUseCase,
       @inject("IRequestAmenityUseCase")
       private _requestAmenityUseCase: IRequestAmenityUseCase,
+      @inject("IPendingAmenityUseCase")
+      private _pendingAmenityUseCase: IPendingAmenityUseCase,
     ){}
 
     async getAllAmenity(req:Request, res: Response, next: NextFunction): Promise<void>{
         try {
-            const { page = '1', limit = '10', search = '', status } = req.query;
+            const { page = '1', limit = '5', search = '', status } = req.query;
             const result = await this._getAllAmenityUseCase.execute(
                 parseInt(page as string),
                 parseInt(limit as string),
@@ -123,14 +126,21 @@ export class AmenityController implements IAmenityController{
     }
 
     async getPendingAmenities(req:Request, res: Response, next: NextFunction): Promise<void>{
-        // try{
-        //   const result = await this._pendingAmenityUseCase.execute()
-        //   res.status(StatusCodes.OK).json({
-        //     success: true,
-        //     data: result,
-        //   })
-        // }catch(error){
-        //     next(error)
-        // }
+        try{
+          const { page='1',limit='4' } = req.query;
+          const result = await this._pendingAmenityUseCase.execute(
+            parseInt(page as string),
+            parseInt(limit as string)
+          )
+          res.status(StatusCodes.OK).json({
+            success: true,
+            data: result.data,
+            currentPage: result.currentPage,
+            totalPages: result.totalPages,
+            totalItems: result.totalItems,
+          })
+        }catch(error){
+            next(error)
+        }
     }
 }

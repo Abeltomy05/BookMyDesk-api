@@ -34,7 +34,7 @@ export class GetEveryBuildingUseCase implements IGetEveryBuildingUseCase{
                 path: "vendorId", 
                 select: "_id username companyName avatar"
             }
-            ]
+            ],
         ); 
 
       const total = allBuildings.length;
