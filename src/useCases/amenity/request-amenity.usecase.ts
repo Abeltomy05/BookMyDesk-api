@@ -43,5 +43,13 @@ export class RequestAmenityUseCase implements IRequestAmenityUseCase{
             vendorId: userId,
             }
         );
+
+        await this._notificationService.saveNotification(
+				adminId,
+				"Admin",
+				'New Amenity Request',
+				`New amenity request is given by ${vendor?.username}`,
+				{ vendorId: userId, }
+		 );
     }
 }

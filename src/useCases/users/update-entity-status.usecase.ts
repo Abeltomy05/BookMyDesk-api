@@ -12,6 +12,7 @@ import { CustomError } from "../../entities/utils/custom.error";
 import { StatusCodes } from "http-status-codes";
 import { IAmenityRepository } from "../../entities/repositoryInterfaces/building/amenity-repository.interface";
 import { ERROR_MESSAGES } from "../../shared/constants";
+import { INotificationService } from "../../entities/serviceInterfaces/notification-service.interface";
 
 
 
@@ -32,6 +33,8 @@ export class UpdateEntityStatusUseCase  implements IUpdateEntityStatusUseCase {
 	    private _emailService: IEmailService, 
 		@inject("IJwtService")
 	    private _tokenService: IJwtService, 
+		@inject("INotificationService")
+	    private _notificationService: INotificationService,
 	) {}
 	async execute(entityType: string, entityId: string, status: string, reason?: string, email?:string): Promise<void> {
 		if (!entityType || !entityId || !status) {
@@ -65,7 +68,38 @@ export class UpdateEntityStatusUseCase  implements IUpdateEntityStatusUseCase {
 			throw new CustomError(`${entityType} ${ERROR_MESSAGES.ENTITY_NOT_FOUND}`, StatusCodes.NOT_FOUND);
 		}
 
+		const previousStatus = entity.status;
 		await repo.update({ _id: entityId },{status:status});
+
+		if(
+			 entityType === "amenity" &&
+			 previousStatus === "pending" &&
+			 (status === "active" || status === "rejected") &&
+			 "requestedBy" in entity && 
+			 entity.requestedBy 
+		){
+			 const vendorId = entity.requestedBy.toString();
+
+			 const title = `Amenity Request ${status === "active" ? "Approved" : "Rejected"}`;
+             const body = `Your amenity request "${entity.name}" has been ${status}. ${status === "rejected" ? 'Please check your mail.' : ''}`;
+
+			 await this._notificationService.sendToUser(
+				vendorId,
+				"vendor",
+				title,
+				body,
+				{ entityId, entityType, status }
+			 );
+
+			  await this._notificationService.saveNotification(
+				vendorId,
+				"Vendor",
+				title,
+				body,
+				{ entityId, entityType, status }
+			  );
+
+		}
 
 		  if (entityType === "vendor" && status === "rejected" && reason && hasEmail(entity)) {
             await this._handleVendorRejection(entity.email, reason);
