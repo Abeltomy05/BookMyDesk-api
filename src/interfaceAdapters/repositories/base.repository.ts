@@ -60,13 +60,13 @@ export class BaseRepository<T> implements IBaseRepository<T> {
     return this.model.findOne(filter).select(projection).lean() as Promise<Pick<T, K> | undefined>;
   }
 
-  async findWithPopulate(filter: FilterQuery<T>,populateFields: { path: string; select?: string }[]): Promise<T[]> {
+  async findWithPopulate<TReturn = T>(filter: FilterQuery<T>,populateFields: { path: string; select?: string }[]): Promise<TReturn[]> {
     let query = this.model.find(filter);
 
     for (const { path, select } of populateFields) {
       query = query.populate(path, select);
     }
 
-    return query.lean() as Promise<T[]>;
+    return query.lean() as Promise<TReturn[]>;
   }
 }

@@ -125,5 +125,8 @@ export class VendorRoutes extends BaseRoute{
        this.router.post("/retry-building",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
          buildingController.retryBuildingRegistration(req, res, next);
        });
+       this.router.post("/request-amenity",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
+         amenityController.requestAmenity(req, res, next);
+       });
     }
 }

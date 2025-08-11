@@ -80,5 +80,8 @@ export class AdminRoutes extends BaseRoute{
         this.router.delete("/delete-amenity",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
             amenityController.deleteAmenity(req, res, next);
         });
+        this.router.get("/pending-amenity",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
+            amenityController.getPendingAmenities(req, res, next);
+        });
     }
 }

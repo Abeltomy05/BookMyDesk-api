@@ -13,6 +13,7 @@ export type PaymentStatus = "unpaid" | "pending" | "succeeded" | "failed" | "ref
 export type OfferStatus = "ongoing" | "upcoming" | "expired";
 export type PaymentMethod = "stripe" | "wallet";
 export type WalletTransactionTypes = "topup" | "payment" | "refund" | "withdrawal" | 'platform-fee' | 'booking-income' | "booking-refund";
+export type AmenityStatus = 'active' | 'non-active' | 'pending' | 'rejected'
 
 export interface User {
   id: string;
