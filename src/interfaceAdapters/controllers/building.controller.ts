@@ -224,7 +224,6 @@ export class BuildingController implements IBuildingController{
           amenityMatchMode,
         };
 
-        console.log('Filters applied:', filters);
 
       const result = await this._fetchBuildingUseCase.execute(page, limit, filters);
        res.status(StatusCodes.OK).json({

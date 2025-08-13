@@ -140,7 +140,7 @@ async fetchFilters(): Promise<{ spaceNames: string[]; prices: number[] }> {
       }
     }
    ])
-
+   console.log(result)
    return result[0] || { spaceNames: [], prices: [] };
 }
 }
