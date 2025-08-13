@@ -9,30 +9,25 @@ export class AdminRoutes extends BaseRoute{
     }
 
     protected initializeRoutes(): void {
-          this.router.post('/logout',verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
+        this.router.post('/logout',verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
             authController.logout(req, res, next);
-         })
-
-         this.router.post("/refresh-token",(req: Request, res: Response) => {
+        })
+        this.router.post("/refresh-token",(req: Request, res: Response) => {
             authController.handleTokenRefresh(req, res);
         });
-
         this.router.get("/users",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
             usersController.getAllUsers(req, res, next);
         });
-
          this.router.patch("/status",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
             usersController.updateEntityStatus(req, res, next);
         });
         this.router.get("/users/count",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
             usersController.getUserCount(req, res, next);
         });
-
          this.router.get("/buildings/verification/pending",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
             buildingController.getBuildingsForVerification(req, res, next);
         });
-
-          this.router.get("/wallet",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
+         this.router.get("/wallet",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
             walletController.getWalletDetails(req, res, next);
         });
          this.router.get("/bookings",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
@@ -43,15 +38,6 @@ export class AdminRoutes extends BaseRoute{
         });
         this.router.get("/vendors/:vendorId",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
             vendorController.singleVendorData(req, res, next);
-        });
-        this.router.get("/notifications",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
-            notifiactionController.getNotifications(req, res, next);
-        });
-        this.router.patch("/notifications/:id/read",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
-            notifiactionController.markAsRead(req, res, next);
-        });
-         this.router.patch("/notifications/read",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
-            notifiactionController.markAsRead(req, res, next);
         });
         this.router.get("/stats/monthly",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
             usersController.getMonthlyBookingStats(req, res, next);
@@ -65,21 +51,42 @@ export class AdminRoutes extends BaseRoute{
         this.router.get("/reports/revenue",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
             bookingController.adminRevenueReport(req, res, next);
         });
-        this.router.delete("/notifications",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
-            notifiactionController.clearNotification(req, res, next);
+
+
+        this.router.route("/notifications")
+            .get(verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
+                notifiactionController.getNotifications(req, res, next);
+             })
+            .patch(verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
+                notifiactionController.markAsRead(req, res, next);
+             }) 
+            .delete(verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
+                notifiactionController.clearNotification(req, res, next);
+             }) 
+
+        this.router.patch("/notifications/:id/read",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
+            notifiactionController.markAsRead(req, res, next);
         });
-        this.router.get("/amenities",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
-            amenityController.getAllAmenity(req, res, next);
-        });
-        this.router.post("/amenities",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
-            amenityController.createAmenity(req, res, next);
-        });
-        this.router.patch("/amenities/:id",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
-            amenityController.editAmenity(req, res, next);
-        });
-        this.router.delete("/amenities/:id",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
-            amenityController.deleteAmenity(req, res, next);
-        });
+
+
+        this.router.route("/amenities")
+            .get(verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
+                amenityController.getAllAmenity(req, res, next);
+             })
+            .post(verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
+                amenityController.createAmenity(req, res, next);
+             })
+
+
+        this.router.route("/amenities/:id")
+            .patch(verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
+                amenityController.editAmenity(req, res, next);
+             })
+            .delete(verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
+                amenityController.deleteAmenity(req, res, next);
+             });
+
+
         this.router.get("/amenities/pending",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
             amenityController.getPendingAmenities(req, res, next);
         });
