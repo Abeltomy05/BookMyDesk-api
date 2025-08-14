@@ -10,7 +10,9 @@ export class ClientRoutes extends BaseRoute{
 
     protected initializeRoutes(): void {
 
-        //* ====== Authentication ====== *//
+        //*========================================================
+        //*               🗡️ AUTH & SESSION 🗡️
+        //*========================================================
 
         this.router.post('/logout',verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => {
             authController.logout(req, res, next);
@@ -20,7 +22,9 @@ export class ClientRoutes extends BaseRoute{
             authController.handleTokenRefresh(req, res);
          });
 
-         //* ====== User Profile ====== *//
+         //*========================================================
+         //*               🗡️ CLIENT 🗡️
+         //*========================================================
 
         this.router.route("/users/me")
              .get(verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => {
@@ -34,7 +38,9 @@ export class ClientRoutes extends BaseRoute{
             usersController.updateUserPassword(req, res, next);
         });
 
-        //* ====== Buildings ====== *//
+        //*========================================================
+        //*               🗡️ BUILDINGS 🗡️
+        //*========================================================
 
          this.router.get("/buildings", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => {
             buildingController.fetchBuildings(req, res, next);
@@ -52,7 +58,9 @@ export class ClientRoutes extends BaseRoute{
             amenityController.getAllAmenity(req, res, next);
         });
 
-        //* ====== Bookings ====== *//
+        //*========================================================
+        //*               🗡️ BOOKINGS 🗡️
+        //*========================================================
 
         this.router.get("/bookings/page-data/:spaceId", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => {
             bookingController.getBookingPageData(req, res, next);
@@ -73,7 +81,9 @@ export class ClientRoutes extends BaseRoute{
             bookingController.cancelBooking(req, res, next);
         });
 
-        //* ====== Wallet ====== *//
+        //*========================================================
+        //*               🗡️ WALLET 🗡️
+        //*========================================================
 
         this.router.get("/wallet", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => {
             walletController.getWalletDetails(req, res, next);
@@ -89,7 +99,9 @@ export class ClientRoutes extends BaseRoute{
         });
 
 
-         //* ====== Notifications ====== *//
+         //*========================================================
+         //*               🗡️ NOTIFICATIONS 🗡️
+         //*========================================================
 
         this.router.route("/notifications")
             .get(verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => {
@@ -107,7 +119,9 @@ export class ClientRoutes extends BaseRoute{
         });
 
 
-         //* ====== Chat ====== *//
+         //*========================================================
+         //*               🗡️ CHAT 🗡️
+         //*========================================================
 
         this.router.post("/chats/sessions", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => {
             chatController.createSession(req, res, next);

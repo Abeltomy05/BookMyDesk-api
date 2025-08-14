@@ -9,12 +9,22 @@ export class AdminRoutes extends BaseRoute{
     }
 
     protected initializeRoutes(): void {
+        
+        //*========================================================
+        //*               🗡️ AUTH & SESSION 🗡️
+        //*========================================================
+
         this.router.post('/logout',verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
             authController.logout(req, res, next);
         })
         this.router.post("/refresh-token",(req: Request, res: Response) => {
             authController.handleTokenRefresh(req, res);
         });
+
+        //*========================================================
+        //*        🗡️ USERS,BUILDING,BOOKING MANAGEMENT 🗡️
+        //*========================================================
+
         this.router.get("/users",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
             usersController.getAllUsers(req, res, next);
         });
@@ -39,11 +49,17 @@ export class AdminRoutes extends BaseRoute{
         this.router.get("/vendors/:vendorId",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
             vendorController.singleVendorData(req, res, next);
         });
-        this.router.get("/stats/monthly",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
-            usersController.getMonthlyBookingStats(req, res, next);
-        });
         this.router.get("/buildings",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
             buildingController.getEveryBuilding(req, res, next);
+        });
+
+
+        //*========================================================
+        //*               🗡️ REVENUE 🗡️
+        //*========================================================
+
+        this.router.get("/stats/monthly",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
+            usersController.getMonthlyBookingStats(req, res, next);
         });
         this.router.get("/reports/revenue-chart",verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
             bookingController.getRevenueChartData(req, res, next);
@@ -52,6 +68,10 @@ export class AdminRoutes extends BaseRoute{
             bookingController.adminRevenueReport(req, res, next);
         });
 
+
+        //*========================================================
+        //*               🗡️ NOTIFICATION 🗡️
+        //*========================================================
 
         this.router.route("/notifications")
             .get(verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {
@@ -68,6 +88,10 @@ export class AdminRoutes extends BaseRoute{
             notifiactionController.markAsRead(req, res, next);
         });
 
+
+        //*========================================================
+        //*               🗡️ AMENITIES MANAGEMENT 🗡️
+        //*========================================================
 
         this.router.route("/amenities")
             .get(verifyAuth, authorizeRole(["admin"]), (req: Request, res: Response, next: NextFunction) => {

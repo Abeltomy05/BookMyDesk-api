@@ -10,7 +10,9 @@ export class VendorRoutes extends BaseRoute{
 
     protected initializeRoutes(): void {
 
-       //* ====== Auth & Session ====== *//
+        //*========================================================
+        //*               🗡️ AUTH & SESSION 🗡️
+        //*========================================================
 
     this.router.post('/logout',verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
         authController.logout(req, res, next);
@@ -19,7 +21,9 @@ export class VendorRoutes extends BaseRoute{
           authController.handleTokenRefresh(req, res);
     }); 
 
-       //* ====== Vendor ====== *//
+       //*========================================================
+        //*               🗡️ VENDOR 🗡️
+        //*========================================================
 
     this.router.post("/users/id-proof",verifyAuth, authorizeRole(["vendor"]), (req: Request, res: Response, next: NextFunction) => {
        vendorController.uploadIdProof(req, res, next);
@@ -53,7 +57,9 @@ export class VendorRoutes extends BaseRoute{
       vendorController.vendorHomeData(req, res, next);
     });   
 
-     //* ====== Buildings ====== *//
+     //*========================================================
+     //*               🗡️ BUILDINGS 🗡️
+     //*========================================================
 
     this.router.route("/buildings")
         .get(verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => {
@@ -90,7 +96,9 @@ export class VendorRoutes extends BaseRoute{
         });
 
 
-     //* ====== Bookings ====== *//
+     //*========================================================
+     //*               🗡️ BOOKINGS 🗡️
+     //*========================================================
      
     this.router.get("/bookings",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
       bookingController.getBookings(req, res, next);
@@ -108,13 +116,17 @@ export class VendorRoutes extends BaseRoute{
       bookingController.getRevenueChartData(req, res, next);
     });
     
-    //* ====== Wallet ====== *//
+    //*========================================================
+    //*               🗡️ WALLET 🗡️
+    //*========================================================
     
     this.router.get("/wallet",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
       walletController.getWalletDetails(req, res, next);
     });
 
-    //* ====== Offers ====== *//
+    //*========================================================
+    //*               🗡️ OFFERS 🗡️
+    //*========================================================
     
     this.router.route("/offers")
         .get(verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
@@ -128,7 +140,9 @@ export class VendorRoutes extends BaseRoute{
         }); 
 
 
-    //* ====== Notifications ====== *//
+    //*========================================================
+    //*               🗡️ NOTIFICATIONS 🗡️
+    //*========================================================
 
     this.router.route("/notifications")
         .get(verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
@@ -146,7 +160,9 @@ export class VendorRoutes extends BaseRoute{
     });
 
 
-    //* ====== Chat ====== *//
+        //*========================================================
+        //*               🗡️ CHAT 🗡️
+        //*========================================================
 
     this.router.get("/chats",verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
       chatController.getChats(req, res, next);
@@ -159,7 +175,9 @@ export class VendorRoutes extends BaseRoute{
     }); 
 
 
-    //* ====== Amenity ====== *//
+        //*========================================================
+        //*               🗡️ AMENITIES 🗡️
+        //*========================================================
 
     this.router.route("/amenities")
         .get(verifyAuth, authorizeRole(["vendor"]), blockStatusMiddleware.checkStatus as RequestHandler,(req: Request, res: Response, next: NextFunction) => {
