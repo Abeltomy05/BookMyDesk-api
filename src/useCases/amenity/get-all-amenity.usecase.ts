@@ -37,13 +37,13 @@ export class GetAllAmenityUseCase implements IGetAllAmenityUseCase{
           }
 
          const { items, total } = await this._amenityRepo.findAll(filter, skip, limit, { createdAt: -1 });
-         console.log(items)
+
          const mapped: IAmenityEntity[] = items.map((doc) => ({
                 _id: doc._id.toString(),
                 name: doc.name,
                 status: doc.status,
             }));
-            console.log(mapped)
+          
 
          return {
             data: mapped,

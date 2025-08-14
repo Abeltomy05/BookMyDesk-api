@@ -171,7 +171,7 @@ export class BookingController implements IBookingController{
           });
           return;
         }
-        console.log("Booking details:", booking);
+ 
         res.status(StatusCodes.OK).json({
           success: true,
           data: booking,
@@ -184,7 +184,8 @@ export class BookingController implements IBookingController{
 
     async cancelBooking(req: Request, res: Response, next: NextFunction): Promise<void> {
       try {
-        const {bookingId, reason} = req.body;
+        const bookingId = req.params.bookingId;
+        const { reason } = req.body;
         if (!bookingId || !reason) {
           res.status(StatusCodes.BAD_REQUEST).json({ 
             success: false,

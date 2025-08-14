@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import { ParsedQs } from "qs";
 import { BaseRoute } from "./base.route";
 import { authController } from "../di/resolver";
 import passport from "passport";
@@ -24,7 +23,7 @@ export class AuthRoutes extends BaseRoute{
          this.router.post("/login", (req: Request, res: Response, next: NextFunction) => {
             authController.login(req, res, next);
          });
-         this.router.post("/save-fcm-token", (req: Request, res: Response, next: NextFunction) => {
+         this.router.post("/fcm-token", (req: Request, res: Response, next: NextFunction) => {
             authController.saveFcmToken(req, res, next);
          });
 
@@ -75,11 +74,11 @@ export class AuthRoutes extends BaseRoute{
         //*               🗡️ OTP ENDPOINTS 🗡️
         //*========================================================
 
-        this.router.post("/send-otp", (req: Request, res: Response, next: NextFunction) => {
+        this.router.post("/otp/send", (req: Request, res: Response, next: NextFunction) => {
             authController.sendOtp(req, res, next);
          });
 
-        this.router.post("/verify-otp", (req: Request, res: Response, next: NextFunction) => {
+        this.router.post("/otp/verify", (req: Request, res: Response, next: NextFunction) => {
             authController.verifyOtp(req, res, next);
          }); 
 
@@ -87,11 +86,11 @@ export class AuthRoutes extends BaseRoute{
         //*               🗡️ Password ENDPOINTS 🗡️
         //*========================================================
        
-        this.router.post("/forgot-password", (req: Request, res: Response, next: NextFunction) => {
+        this.router.post("/password/forgot", (req: Request, res: Response, next: NextFunction) => {
             authController.forgotPassword(req, res, next);
          });
 
-        this.router.post("/reset-password", (req: Request, res: Response, next: NextFunction) => {
+        this.router.post("/password/reset", (req: Request, res: Response, next: NextFunction) => {
          authController.resetPassword(req, res, next);
     });
      }

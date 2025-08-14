@@ -152,7 +152,7 @@ export class VendorController implements IVendorController{
 
     async fetchSpaceForBuilding(req: Request, res: Response, next: NextFunction): Promise<void>{
       try {
-        const buildingId = req.params.buildingId;
+        const buildingId = req.params.id;
         const response = await this._fetchSpacesForBuildingUseCase.execute(buildingId);
         res.status(StatusCodes.OK).json({
           success: true,

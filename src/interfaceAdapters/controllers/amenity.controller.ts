@@ -67,7 +67,8 @@ export class AmenityController implements IAmenityController{
 
     async editAmenity(req:Request, res: Response, next: NextFunction): Promise<void>{
         try {
-            const { id, name } = req.body;
+            const id = req.params.id;
+            const { name } = req.body;
             if(!id || !name){
                 res.status(StatusCodes.BAD_REQUEST).json({
                     success: false,
@@ -87,7 +88,7 @@ export class AmenityController implements IAmenityController{
 
     async deleteAmenity(req:Request, res: Response, next: NextFunction): Promise<void>{
         try {
-            const { id } = req.query;
+            const { id } = req.params;
             if(!id ){
                 res.status(StatusCodes.BAD_REQUEST).json({
                     success: false,

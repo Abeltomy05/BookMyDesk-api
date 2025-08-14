@@ -111,6 +111,7 @@ export class BuildingController implements IBuildingController{
          next(error)
       }
     }
+    
 //get buildings with pending status for admin side
    async getBuildingsForVerification(req:Request, res: Response, next: NextFunction): Promise<void>{
     try {
@@ -223,7 +224,6 @@ export class BuildingController implements IBuildingController{
           amenityMatchMode,
         };
 
-        console.log('Filters applied:', filters);
 
       const result = await this._fetchBuildingUseCase.execute(page, limit, filters);
        res.status(StatusCodes.OK).json({

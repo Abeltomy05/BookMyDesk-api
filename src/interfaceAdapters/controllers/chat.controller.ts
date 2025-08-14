@@ -69,7 +69,7 @@ export class ChatController implements IChatController{
 
   async getMessages(req:Request, res: Response, next: NextFunction): Promise<void>{
     try {
-      const sessionId = req.query.sessionId as string;
+      const sessionId = req.params.chatId as string;
       if(!sessionId){
         res.status(StatusCodes.BAD_REQUEST).json({
           success:false,
@@ -90,7 +90,7 @@ export class ChatController implements IChatController{
 
   async clearChat(req:Request, res: Response, next: NextFunction): Promise<void>{
     try {
-      const {sessionId} = req.body;
+      const sessionId = req.params.chatId;
       if(!sessionId){
         res.status(StatusCodes.BAD_REQUEST).json({
           success: false,
