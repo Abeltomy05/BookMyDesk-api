@@ -139,10 +139,10 @@ export class ChatSocketHandler {
     }
   }
 
-  public emitNotification(userId: string) {
+  public emitNotification(userId: string, payload?: Record<string, string>) {
   const user = this.onlineUsers.get(userId);
   if (user?.socketId) {
-    this.io.to(user.socketId).emit("newNotification");
+    this.io.to(user.socketId).emit("newNotification", payload || {});
     console.log(`🔔 Emitted 'newNotification' to user ${userId}`);
   } else {
     console.warn(`⚠️ Cannot emit notification: user ${userId} not connected`);

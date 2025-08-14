@@ -32,10 +32,10 @@ export class NotificationSocketHandler{
     });
   }
 
-   public emitNotification(userId: string) {
+   public emitNotification(userId: string, payload?: Record<string, string>) {
     const socketId = this.connectedUsers.get(userId);
     if (socketId) {
-      this.io.to(socketId).emit("newNotification");
+      this.io.to(socketId).emit("newNotification", payload || {});
     }
   }
 
