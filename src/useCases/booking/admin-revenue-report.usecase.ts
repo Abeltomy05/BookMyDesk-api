@@ -21,7 +21,7 @@ export class AdminRevenueReportUseCase implements IAdminRevenueReportUseCase {
       const { filterType, date, month, year } = params;
 
       const filter: FilterQuery<IBookingEntity> = {
-          status: "completed",
+          status: ["completed","confirmed"],
       };
 
   if (filterType === 'date' && date) {

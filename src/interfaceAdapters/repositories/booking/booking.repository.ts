@@ -255,7 +255,7 @@ async getRevenueByHour(userId: string, date: string, isAdmin: boolean) {
     {
       $match: {
         bookingDates: { $gte: start, $lt: end },
-        status: "completed",
+        status: { $in: ["completed", "confirmed"] },
         ...(isAdmin ? {} : { vendorId: new Types.ObjectId(userId) })
       }
     },
@@ -290,7 +290,7 @@ async getRevenueByDay(userId: string, month: string, year: string, isAdmin: bool
     {
       $match: {
         bookingDates: { $gte: start, $lt: end },
-        status: "completed",
+        status: { $in: ["completed", "confirmed"] },
         ...(isAdmin ? {} : { vendorId: new Types.ObjectId(userId) })
       }
     },
@@ -334,7 +334,7 @@ async getRevenueByMonth(userId: string, year: string, isAdmin: boolean) {
       {
         $match: {
           bookingDates: { $gte: start, $lt: end },
-          status: "completed",
+          status: { $in: ["completed", "confirmed"] },
           ...(isAdmin ? {} : { vendorId: new Types.ObjectId(userId) })
         }
       },
