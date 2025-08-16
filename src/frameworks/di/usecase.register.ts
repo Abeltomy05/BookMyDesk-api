@@ -85,6 +85,7 @@ import { GetReApplyBuildingData } from "../../useCases/building/get-reapply-buil
 import { RetryBuildingRegistrationUseCase } from "../../useCases/building/retry-building-registration.usecase";
 import { RequestAmenityUseCase } from "../../useCases/amenity/request-amenity.usecase";
 import { PendingAmenityUseCase } from "../../useCases/amenity/pending-amenity.usecase";
+import { BuildingsForClientUseCase } from "../../useCases/building/buildings-for-client.usecase";
 
 
 
@@ -300,6 +301,9 @@ export class UseCaseRegistry{
       })
       container.register("IPendingAmenityUseCase",{
         useClass: PendingAmenityUseCase
+      })
+      container.register("IBuildingsForClientUseCase",{
+        useClass: BuildingsForClientUseCase
       })
 
         //* ====== Register Bcrypts ====== *//

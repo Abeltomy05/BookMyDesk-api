@@ -18,6 +18,7 @@ import { IRetryBuildingRegistrationUseCase } from "../../entities/usecaseInterfa
 import { retrybuildingRegistrationSchema } from "../../shared/validations/retry-building.validation";
 import { Building } from "../../shared/dtos/building.dto";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../../shared/constants";
+import { IBuildingsForClientUseCase } from "../../entities/usecaseInterfaces/building/buildings-for-client-usecase.interface";
 
 @injectable()
 export class BuildingController implements IBuildingController{
@@ -42,6 +43,8 @@ export class BuildingController implements IBuildingController{
         private _reapplyBuildingDataUseCase: IGetReApplyBuildingData,
         @inject("IRetryBuildingRegistrationUseCase")
         private retryBuildingRegistrationUseCase: IRetryBuildingRegistrationUseCase,
+        @inject("IBuildingsForClientUseCase")
+        private _buildingsForClientUseCase: IBuildingsForClientUseCase,
     ){}
 //get buildings of a vendor
    async getAllBuilding(req:Request, res: Response, next: NextFunction): Promise<void>{
@@ -321,6 +324,21 @@ export class BuildingController implements IBuildingController{
       res.status(StatusCodes.OK).json({
         success: true,
         message: SUCCESS_MESSAGES.BUILDING_RE_REGISTERED
+      });
+
+    } catch (error) {
+      next(error)
+    }
+   }
+
+   async buildingsForClient(req: Request, res: Response, next: NextFunction): Promise<void>{
+    try {
+      const clientId = (req as CustomRequest).user.userId;
+      const result = await this._buildingsForClientUseCase.execute(clientId);
+      
+      res.status(StatusCodes.OK).json({
+        success: true,
+        data: result,
       });
 
     } catch (error) {

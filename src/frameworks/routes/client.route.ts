@@ -50,6 +50,10 @@ export class ClientRoutes extends BaseRoute{
             buildingController.fetchFilters(req, res, next);
         });
 
+        this.router.get("/buildings/client", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => {
+            buildingController.buildingsForClient(req, res, next);
+        });
+
          this.router.get("/buildings/:id", verifyAuth, authorizeRole(["client"]), blockStatusMiddleware.checkStatus as RequestHandler, (req: Request, res: Response, next: NextFunction) => {
             buildingController.getSingleBuilding(req, res, next);
         });
