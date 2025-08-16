@@ -25,7 +25,7 @@ async execute(data: RevenueReportFilters): Promise<RevenueReportBooking[]> {
 
   const filter: FilterQuery<IBookingEntity> = {
     vendorId,
-    status: "completed",
+    status: ["completed","confirmed"],
   };
 
   if (buildingId !== "all") {
