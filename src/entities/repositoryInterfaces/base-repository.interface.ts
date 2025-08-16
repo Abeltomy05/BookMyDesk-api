@@ -16,5 +16,5 @@ export interface IBaseRepository<T> {
   deleteAll(filter: any): Promise<void>;
   countDocuments(filter?: any): Promise<number>;
   findFields<K extends keyof T>(filter: FilterQuery<T>,fields: K[]): Promise<Pick<T, K> | undefined>
-  findWithPopulate<TReturn = T>(filter: FilterQuery<T>,populateFields: { path: string; select?: string }[]): Promise<TReturn[]>
+  findWithPopulate<TReturn = T>(filter: FilterQuery<T>,populateFields: { path: string; select?: string, match?: any }[]): Promise<TReturn[]>
 }
