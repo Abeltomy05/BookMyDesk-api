@@ -29,6 +29,7 @@ import { getErrorMessage } from "../../../shared/error/errorHandler";
 import { config } from "../../../shared/config";
 import { CustomError } from "../../../entities/utils/custom.error";
 import { ERROR_MESSAGES, INFO_MESSAGES, SUCCESS_MESSAGES } from "../../../shared/constants";
+import { IRedisTokenRepository } from "../../../entities/repositoryInterfaces/redis/redis-token-repository.interface";
 
 
 @injectable()
@@ -62,11 +63,23 @@ export class AuthController implements IAuthController {
           private _saveFcmTokenUseCase: ISaveFcmTokenUseCase,
           @inject("IRemoveFcmTokenUseCase")
           private _removeFcmTokenUseCase: IRemoveFcmTokenUseCase,
+          @inject("IRedisTokenRepository")
+          private _redisRepo: IRedisTokenRepository, 
      ){}
 
    async register(req: Request, res: Response, next: NextFunction): Promise<void> {
           try {
-            const { role } = req.body as { role: keyof typeof userSchemas };
+            const { role,email } = req.body as { role: keyof typeof userSchemas; email:string };
+
+            const isVerified = await this._redisRepo.isEmailVerified(email);
+            if (!isVerified) {
+               res.status(StatusCodes.BAD_REQUEST).json({
+               success: false,
+               message: ERROR_MESSAGES.OTP_NOT_VERIFIED,
+               });
+               return;
+            }
+
             const schema = userSchemas[role];
                if (!schema) {
                     res.status(StatusCodes.BAD_REQUEST).json({ 
@@ -75,6 +88,7 @@ export class AuthController implements IAuthController {
                     });
                     return;
                }
+               
                const validatedData = schema.parse(req.body);
                await this._registerUserUseCase.execute(validatedData);
                if (role === "vendor") {

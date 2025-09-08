@@ -56,4 +56,15 @@ export class RedisTokenRepository implements IRedisTokenRepository {
         arguments: [lockId],
         });
     }
+
+    //mark email verified
+
+    async  markEmailAsVerified(email: string): Promise<void>{
+        await redisClient.set(`verified:${email}`, "true", { EX: 600 });
+    }
+
+    async isEmailVerified(email: string): Promise<boolean> {
+      const flag = await redisClient.get(`verified:${email}`);
+      return flag === "true";
+    }
 }

@@ -92,6 +92,7 @@ export const ERROR_MESSAGES = {
 	INVALID_AUTHENTICATION_DATA: "Invalid authentication data",
 	AUTHENTICATION_FAILED: "Authentication failed",
 	AMENITY_NAME_DESCRIPTION_REQUIRED: "Amenity name and description is required when requesting a new amenity.",
+	OTP_NOT_VERIFIED:"OTP is not verified, Please complete the verification process.",
 } as const;
 
 export const INFO_MESSAGES = {
