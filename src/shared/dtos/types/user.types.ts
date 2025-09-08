@@ -1,3 +1,4 @@
+import { ALLOWED_ROLES } from "../../constants";
 
 
 export type VendorStatus = "pending" | "approved" | "rejected" | "blocked";
@@ -14,6 +15,7 @@ export type OfferStatus = "ongoing" | "upcoming" | "expired";
 export type PaymentMethod = "stripe" | "wallet";
 export type WalletTransactionTypes = "topup" | "payment" | "refund" | "withdrawal" | 'platform-fee' | 'booking-income' | "booking-refund";
 export type AmenityStatus = 'active' | 'non-active' | 'pending' | 'rejected'
+export type AllowedRole = (typeof ALLOWED_ROLES)[number];
 
 export interface User {
   id: string;
@@ -40,5 +42,7 @@ export interface GetUsersResponse {
   limit: number;
   totalPages: number;
 }
+
+
 
 // export type PopulateOption = PopulateOptions | string;

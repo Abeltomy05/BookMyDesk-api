@@ -101,3 +101,5 @@ export const INFO_MESSAGES = {
 	APPLICATION_RETRIED: "Your application has been retried with the updated details. Please wait while the admin reviews and approves it.",
 } as const;
 
+export const ALLOWED_ROLES = ['client','vendor'] as const;
+

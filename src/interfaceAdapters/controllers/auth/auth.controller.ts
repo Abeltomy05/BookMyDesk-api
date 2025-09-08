@@ -28,8 +28,9 @@ import { IRemoveFcmTokenUseCase } from "../../../entities/usecaseInterfaces/auth
 import { getErrorMessage } from "../../../shared/error/errorHandler";
 import { config } from "../../../shared/config";
 import { CustomError } from "../../../entities/utils/custom.error";
-import { ERROR_MESSAGES, INFO_MESSAGES, SUCCESS_MESSAGES } from "../../../shared/constants";
+import { ERROR_MESSAGES, INFO_MESSAGES, SUCCESS_MESSAGES, ALLOWED_ROLES } from "../../../shared/constants";
 import { IRedisTokenRepository } from "../../../entities/repositoryInterfaces/redis/redis-token-repository.interface";
+import { AllowedRole } from "../../../shared/dtos/types/user.types";
 
 
 @injectable()
@@ -70,7 +71,13 @@ export class AuthController implements IAuthController {
    async register(req: Request, res: Response, next: NextFunction): Promise<void> {
           try {
             const { role,email } = req.body as { role: keyof typeof userSchemas; email:string };
-
+            if (!ALLOWED_ROLES.includes(role as AllowedRole)) {
+               res.status(StatusCodes.BAD_REQUEST).json({
+               success: false,
+               message: "Invalid role",
+               });
+               return
+            }
             const isVerified = await this._redisRepo.isEmailVerified(email);
             if (!isVerified) {
                res.status(StatusCodes.BAD_REQUEST).json({
