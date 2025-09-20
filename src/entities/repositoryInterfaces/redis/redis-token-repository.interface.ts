@@ -5,5 +5,7 @@ export interface IRedisTokenRepository {
     isTokenBlackListed(token: string): Promise<boolean>; 
     blackListToken(token: string, expiresIn: number): Promise<void>; 
     acquireLock(key: string, ttlMs: number): Promise<string | null>;
-    releaseLock(key: string, lockId: string): Promise<void>
+    releaseLock(key: string, lockId: string): Promise<void>;
+    markEmailAsVerified(email: string): Promise<void>;
+    isEmailVerified(email: string): Promise<boolean> 
 }

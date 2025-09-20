@@ -92,6 +92,7 @@ export const ERROR_MESSAGES = {
 	INVALID_AUTHENTICATION_DATA: "Invalid authentication data",
 	AUTHENTICATION_FAILED: "Authentication failed",
 	AMENITY_NAME_DESCRIPTION_REQUIRED: "Amenity name and description is required when requesting a new amenity.",
+	OTP_NOT_VERIFIED:"OTP is not verified, Please complete the verification process.",
 } as const;
 
 export const INFO_MESSAGES = {
@@ -99,4 +100,6 @@ export const INFO_MESSAGES = {
 	REDIRECT_VENDOR_REJECTED: "Your vendor account has been rejected. Please check your email for more details.",
 	APPLICATION_RETRIED: "Your application has been retried with the updated details. Please wait while the admin reviews and approves it.",
 } as const;
+
+export const ALLOWED_ROLES = ['client','vendor'] as const;
 
